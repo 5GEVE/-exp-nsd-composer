@@ -50,6 +50,9 @@
                   <args>
                     <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
                   </args>
+                  <buildOptions>
+                    <target>dev</target>
+                  </buildOptions>
                 </build>
               </image>
             </images>
@@ -60,6 +63,31 @@
     </profile>
     <profile>
       <id>prod</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <configuration>
+              <images>
+                <image>
+                  <alias>${project.artifactId}</alias>
+                  <name>${project.name}:${project.version}</name>
+                  <build>
+                    <dockerFileDir>${project.basedir}</dockerFileDir>
+                    <args>
+                      <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                    </args>
+                    <buildOptions>
+                      <target>prod</target>
+                    </buildOptions>
+                  </build>
+                </image>
+              </images>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 
