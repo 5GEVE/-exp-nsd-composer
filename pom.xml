@@ -8,6 +8,7 @@
   <groupId>it.cnit.nfvmano</groupId>
   <artifactId>5g-context-composer</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <packaging>docker-build</packaging>
 
   <name>5g-context-composer</name>
   <!-- FIXME change it to the project's website -->
@@ -85,28 +86,7 @@
           <groupId>io.fabric8</groupId>
           <artifactId>docker-maven-plugin</artifactId>
           <version>0.28.0</version>
-          <!-- Connect start/stop to pre- and post-integration-test phase,
-          respectively if you want to start your docker containers during
-          integration tests -->
-          <executions>
-            <execution>
-              <id>start</id>
-              <phase>pre-integration-test</phase>
-              <goals>
-                <!-- "build" should be used to create the images with the
-                     artifact -->
-                <goal>build</goal>
-                <goal>start</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>stop</id>
-              <phase>post-integration-test</phase>
-              <goals>
-                <goal>stop</goal>
-              </goals>
-            </execution>
-          </executions>
+          <extensions>true</extensions>
         </plugin>
 
       </plugins>
