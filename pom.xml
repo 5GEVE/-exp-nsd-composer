@@ -18,8 +18,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-    <!-- docker plugin buildArgs -->
-    <docker.buildArg.JAR_FILE>${project.build.finalName}.jar</docker.buildArg.JAR_FILE>
   </properties>
 
   <dependencies>
@@ -47,6 +45,9 @@
               <name>${project.name}:${project.version}</name>
               <build>
                 <dockerFileDir>${project.basedir}</dockerFileDir>
+                <args>
+                  <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                </args>
               </build>
             </image>
           </images>
