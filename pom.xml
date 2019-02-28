@@ -10,7 +10,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>docker-build</packaging>
 
-  <name>5g-context-composer</name>
+  <name>mpergolesi/5g-context-composer</name>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 
@@ -18,6 +18,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
+    <!-- docker plugin buildArgs -->
+    <docker.buildArg.JAR_FILE>${project.build.finalName}.jar</docker.buildArg.JAR_FILE>
   </properties>
 
   <dependencies>
@@ -30,6 +32,27 @@
   </dependencies>
 
   <build>
+    <plugins>
+      <!-- maven-docker-plugin,
+      see https://github.com/fabric8io/docker-maven-plugin -->
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>0.28.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <images>
+            <image>
+              <alias>${project.artifactId}</alias>
+              <name>${project.name}:${project.version}</name>
+              <build>
+                <dockerFileDir>${project.basedir}</dockerFileDir>
+              </build>
+            </image>
+          </images>
+        </configuration>
+      </plugin>
+    </plugins>
     <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
     <pluginManagement>
       <plugins>
@@ -80,15 +103,6 @@
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>
-        <!-- maven-docker-plugin,
-        see https://github.com/fabric8io/docker-maven-plugin -->
-        <plugin>
-          <groupId>io.fabric8</groupId>
-          <artifactId>docker-maven-plugin</artifactId>
-          <version>0.28.0</version>
-          <extensions>true</extensions>
-        </plugin>
-
       </plugins>
     </pluginManagement>
   </build>
