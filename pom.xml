@@ -11,8 +11,9 @@
   <packaging>docker-build</packaging>
 
   <name>mpergolesi/5g-context-composer</name>
+  <description>A REST API module to compose VSD and CDs.</description>
   <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <url>https://github.com/TheWall89/5g-context-composer</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -77,6 +78,14 @@
                     <dockerFileDir>${project.basedir}</dockerFileDir>
                     <args>
                       <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                      <!-- Labels -->
+                      <BUILD_DATE>${maven.build.timestamp}</BUILD_DATE>
+                      <REPOSITORY>${project.name}</REPOSITORY>
+                      <DESCRIPTION>${project.description}</DESCRIPTION>
+                      <VERSION>${project.version}</VERSION>
+                      <VCS_URL>${project.url}</VCS_URL>
+                      <VCS_REF>commit-id</VCS_REF>
+                      <COMMAND>java</COMMAND>
                     </args>
                     <buildOptions>
                       <target>prod</target>

@@ -1,7 +1,6 @@
 FROM azul/zulu-openjdk-alpine:11.0.2 as dev
 LABEL maintainer="Matteo Pergolesi"
 
-LABEL org.label-schema.schema-version="1.0"
 
 LABEL target=DEV
 
@@ -22,18 +21,20 @@ CMD java -cp ${JAR_FILE} it.cnit.nfvmano.App
 
 FROM azul/zulu-openjdk-alpine:11.0.2 as prod
 
-#ARG BUILD_DATE
-#ARG REPOSITORY
-#ARG DESCRIPTION
-##ARG VCS_REF
-#ARG VERSION
-#ARG COMMAND
-#LABEL org.label-schema.build-date=$BUILD_DATE
-#LABEL org.label-schema.name=$REPOSITORY
-#LABEL org.label-schema.description=$DESCRIPTION
-##LABEL org.label-schema.vcs-ref=$VCS_REF
-#LABEL org.label-schema.version=$VERSION
-#LABEL org.label-schema.docker.cmd=$COMMAND
-LABEL target=PROD
+LABEL org.label-schema.schema-version="1.0"
+ARG BUILD_DATE
+LABEL org.label-schema.build-date=$BUILD_DATE
+ARG REPOSITORY
+LABEL org.label-schema.name=$REPOSITORY
+ARG DESCRIPTION
+LABEL org.label-schema.description=$DESCRIPTION
+ARG VERSION
+LABEL org.label-schema.version=$VERSION
+ARG VCS_URL
+LABEL org.label-schema.vcs-url=$VCS_URL
+ARG VCS_REF
+LABEL org.label-schema.vcs-ref=$VCS_REF
+ARG COMMAND
+LABEL org.label-schema.docker.cmd=$COMMAND
 
 CMD java -cp ${JAR_FILE} it.cnit.nfvmano.App
