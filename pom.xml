@@ -70,8 +70,8 @@
             <configuration>
               <images>
                 <image>
-                  <alias>${project.artifactId}</alias>
-                  <name>${project.name}:${project.version}</name>
+                  <alias>context-composer-prod</alias>
+                  <name>${docker.repository}/%a:%v</name>
                   <build>
                     <dockerFileDir>${project.basedir}</dockerFileDir>
                     <args>
@@ -83,7 +83,7 @@
                       <VERSION>${project.version}</VERSION>
                       <VCS_URL>${project.url}</VCS_URL>
                       <VCS_REF>commit-id</VCS_REF>
-                      <COMMAND>java</COMMAND>
+                      <COMMAND>java -jar ${project.build.finalName}.jar</COMMAND>
                     </args>
                     <buildOptions>
                       <target>prod</target>
@@ -125,6 +125,14 @@
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.0.2</version>
+          <configuration>
+            <archive>
+              <manifest>
+                <addClasspath>true</addClasspath>
+                <mainClass>${project.groupId}.App</mainClass>
+              </manifest>
+            </archive>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-install-plugin</artifactId>
