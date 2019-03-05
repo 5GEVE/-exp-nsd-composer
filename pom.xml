@@ -43,7 +43,7 @@
               <images>
                 <image>
                   <alias>context-composer-dev</alias>
-                  <name>${docker.repository}/%a:%v</name>
+                  <name>${docker.repository}/${project.name}:${project.version}</name>
                   <build>
                     <dockerFileDir>${project.basedir}</dockerFileDir>
                     <args>
@@ -71,7 +71,7 @@
               <images>
                 <image>
                   <alias>context-composer-prod</alias>
-                  <name>${docker.repository}/%a:%v</name>
+                  <name>${docker.repository}/${project.name}:${project.version}</name>
                   <build>
                     <dockerFileDir>${project.basedir}</dockerFileDir>
                     <args>
