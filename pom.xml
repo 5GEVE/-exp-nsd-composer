@@ -35,29 +35,29 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <build>
-      <plugins>
-        <plugin>
-          <groupId>io.fabric8</groupId>
-          <artifactId>docker-maven-plugin</artifactId>
-          <configuration>
-            <images>
-              <image>
-                <alias>context-composer-dev</alias>
-                <name>${docker.repository}/%a:%v</name>
-                <build>
-                  <dockerFileDir>${project.basedir}</dockerFileDir>
-                  <args>
-                    <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
-                  </args>
-                  <buildOptions>
-                    <target>dev</target>
-                  </buildOptions>
-                </build>
-              </image>
-            </images>
-          </configuration>
-        </plugin>
-      </plugins>
+        <plugins>
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <configuration>
+              <images>
+                <image>
+                  <alias>context-composer-dev</alias>
+                  <name>${docker.repository}/%a:%v</name>
+                  <build>
+                    <dockerFileDir>${project.basedir}</dockerFileDir>
+                    <args>
+                      <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                    </args>
+                    <buildOptions>
+                      <target>dev</target>
+                    </buildOptions>
+                  </build>
+                </image>
+              </images>
+            </configuration>
+          </plugin>
+        </plugins>
       </build>
     </profile>
     <profile>
@@ -81,8 +81,10 @@
                       <REPOSITORY>${project.name}</REPOSITORY>
                       <DESCRIPTION>${project.description}</DESCRIPTION>
                       <VERSION>${project.version}</VERSION>
-                      <VCS_URL>${project.url}</VCS_URL>
-                      <VCS_REF>commit-id</VCS_REF>
+                      <!--suppress UnresolvedMavenProperty -->
+                      <VCS_URL>${git.remote.origin.url}</VCS_URL>
+                      <!--suppress UnresolvedMavenProperty -->
+                      <VCS_REF>${git.commit.id}</VCS_REF>
                       <COMMAND>java -jar ${project.build.finalName}.jar</COMMAND>
                     </args>
                     <buildOptions>
@@ -91,6 +93,13 @@
                   </build>
                 </image>
               </images>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>pl.project13.maven</groupId>
+            <artifactId>git-commit-id-plugin</artifactId>
+            <configuration>
+              <injectAllReactorProjects>true</injectAllReactorProjects>
             </configuration>
           </plugin>
         </plugins>
@@ -164,6 +173,21 @@
           <artifactId>docker-maven-plugin</artifactId>
           <version>0.28.0</version>
           <extensions>true</extensions>
+        </plugin>
+        <plugin>
+          <groupId>pl.project13.maven</groupId>
+          <artifactId>git-commit-id-plugin</artifactId>
+          <version>2.2.5</version>
+          <executions>
+            <execution>
+              <id>get-the-git-infos</id>
+              <goals>
+                <goal>revision</goal>
+              </goals>
+              <!-- *NOTE*: The default phase of revision is initialize, but in case you want to change it, you can do so by adding the phase here -->
+              <phase>initialize</phase>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
