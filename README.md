@@ -1,28 +1,20 @@
 # 5g-eve-context-composer
 A REST API module to compose VSD and CDs.
-
-## Setup and run
-
 The project is designed to be deployed with Docker.
 Check the pom.xml for details about plugins to ease docker image build.
 
-### Build image with Maven
+## Developer guide
 
-Use the following for a dev image (with Java remote debugger).
+After cloning the repository you can create Docker images to debug the software.
 
-```
-mvn clean package docker:build -P prod
-```
-
-Use the following for a production ready iamge (with labels).
+To build a developer image with Maven, use the following (provides Java remote debugger).
 
 ```
-mvn clean package docker:build -P prod
+mvn clean package docker:build -P dev
 ```
 
-### Build image with plain docker
-
-Use the following for a dev image (with Java remote debugger).
+To build a developer image with Dockerfile, use the following (provides Java remote debugger).
+JAR file must be compiled manually and passed as an argument.
 
 ```
 docker build \
@@ -31,9 +23,25 @@ docker build \
     --build-arg JAR_FILE=5g-context-composer-<version>.jar 
 ```
 
+To run the Docker container use the following (substitute the image tag with your version):
 
-Use the following for a production ready iamge (apart from JAR_FILE, 
-it is not neccessary to specify all build-args).
+```
+docker run -it --rm -p 5005:5005 mpergolesi/5g-context-composer:0.0.1-SNAPSHOT
+```
+
+To debug the app, create a running configuration in IDEA or Eclipse to connect your Java debugger
+to `localhost:5005` .
+
+## User guide (release)
+
+To build a production image with Maven, use the following (provides labels for the Docker image).
+
+```
+mvn clean package docker:build -P prod
+```
+
+To build a production image with Dockerfile, use the following (you can optionally setup labels as build-args).
+JAR file must be compiled manually and passed as an argument.
 
 ```
 docker build \
