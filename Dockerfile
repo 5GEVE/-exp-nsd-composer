@@ -1,4 +1,4 @@
-FROM azul/zulu-openjdk-alpine:11.0.2 as copy
+FROM azul/zulu-openjdk-alpine:8 as copy
 
 # Copy files
 #COPY target/lib /usr/share/myservice/lib
@@ -15,7 +15,7 @@ LABEL target=DEV
 
 # Enable remote debugger
 EXPOSE 5005
-ENV JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+ENV JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
 
 CMD java -jar ${JAR_FILE}
 
