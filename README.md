@@ -1,5 +1,5 @@
 # 5g-eve-context-composer
-A REST API module to compose VSD and CDs.
+A REST API module to compose VSB and CBs.
 The project is designed to be deployed with Docker.
 Check the pom.xml for details about plugins to ease docker image build.
 
