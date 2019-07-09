@@ -23,14 +23,22 @@ docker build \
     --build-arg JAR_FILE=5g-context-composer-<version>.jar 
 ```
 
-To run the Docker container use the following (substitute the image tag with your version):
+To debug the app, create a running configuration in IDEA or Eclipse to connect your Java debugger
+to `localhost:5005` .
+
+To run the Docker container with Maven, use the following (this will automatically run the debugger
+in IDEA):
+
+```
+mvn docker:run -P dev
+```
+
+To run the Docker container with plain Docker, use the following (substitute the image tag with your version):
 
 ```
 docker run -it --rm -p 5005:5005 mpergolesi/5g-context-composer:0.0.1-SNAPSHOT
 ```
 
-To debug the app, create a running configuration in IDEA or Eclipse to connect your Java debugger
-to `localhost:5005` .
 
 ## User guide (release)
 
