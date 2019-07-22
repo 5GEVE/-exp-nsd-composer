@@ -1,7 +1,12 @@
 # Idea
-/.idea
-/*.iml
-/.directory
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+.idea/**/libraries
+.idea/**/modules.xml
+*.iml
 
 # Maven
 target/
@@ -17,3 +22,6 @@ buildNumber.properties
 
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar
+
+# hibernate-validator
+/.attach_pid*
