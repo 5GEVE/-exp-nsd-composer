@@ -31,6 +31,16 @@
       <artifactId>5geve-blueprint-libs</artifactId>
       <version>0.0.11-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>it.nextworks.nfvmano</groupId>
+      <artifactId>NfvManoLibsCommon</artifactId>
+      <version>0.0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>it.nextworks.nfvmano</groupId>
+      <artifactId>NfvManoLibsDescriptors</artifactId>
+      <version>0.0.2-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <profiles>
