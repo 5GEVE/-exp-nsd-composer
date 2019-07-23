@@ -28,8 +28,6 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Logging -->
-
     <dependency>
       <groupId>eu._5geve.blueprint</groupId>
       <artifactId>5geve-blueprint-libs</artifactId>
@@ -39,6 +37,7 @@
       <groupId>it.nextworks.nfvmano</groupId>
       <artifactId>NfvManoLibsDescriptors</artifactId>
       <version>0.0.2-SNAPSHOT</version>
+      <!-- The exclusion avoids logback warnings -->
       <exclusions>
         <exclusion>
           <groupId>ch.qos.logback</groupId>
