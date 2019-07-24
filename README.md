@@ -1,4 +1,4 @@
-# 5g-eve-context-composer
+# 5geve-experiment-builder
 A REST API module to compose VSB and CBs.
 The project is designed to be deployed with Docker.
 Check the pom.xml for details about plugins to ease docker image build.
@@ -18,9 +18,9 @@ JAR file must be compiled manually and passed as an argument.
 
 ```
 docker build \
-    --tag mpergolesi/context-composer:<version> \
+    --tag mpergolesi/5geve-experiment-builder:<version> \
     --target dev \
-    --build-arg JAR_FILE=5g-context-composer-<version>.jar 
+    --build-arg JAR_FILE=5geve-experiment-builder-<version>.jar 
 ```
 
 To debug the app, create a running configuration in IDEA or Eclipse to connect your Java debugger
@@ -36,7 +36,7 @@ mvn docker:run -P dev
 To run the Docker container with plain Docker, use the following (substitute the image tag with your version):
 
 ```
-docker run -it --rm -p 5005:5005 mpergolesi/5g-context-composer:0.0.1-SNAPSHOT
+docker run -it --rm -p 5005:5005 mpergolesi/5geve-experiment-builder:0.0.1-SNAPSHOT
 ```
 
 
@@ -53,9 +53,9 @@ JAR file must be compiled manually and passed as an argument.
 
 ```
 docker build \
-    --tag mpergolesi/context-composer:<version> \
+    --tag mpergolesi/5geve-experiment-builder:<version> \
     --target prod \
-    --build-arg JAR_FILE=5g-context-composer-<version>.jar \
+    --build-arg JAR_FILE=5geve-experiment-builder-<version>.jar \
     --build-arg BUILD_DATE=<date> \
     --build-arg REPOSITORY=mpergolesi \
     --build-arg DESCRIPTION="A REST API module to compose VSD and CDs." \

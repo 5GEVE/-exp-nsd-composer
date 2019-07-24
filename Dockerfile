@@ -2,11 +2,11 @@ FROM azul/zulu-openjdk-alpine:8 as copy
 
 # Copy files
 #COPY target/lib /usr/share/myservice/lib
-RUN mkdir /context-composer
+RUN mkdir /5geve-experiment-builder
 ARG JAR_FILE
 ENV JAR_FILE=${JAR_FILE}
-COPY target/${JAR_FILE} /context-composer
-WORKDIR /context-composer
+COPY target/${JAR_FILE} /5geve-experiment-builder
+WORKDIR /5geve-experiment-builder
 
 
 FROM copy as dev
