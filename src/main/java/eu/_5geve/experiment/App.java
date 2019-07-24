@@ -1,4 +1,4 @@
-package it.cnit.nfvmano;
+package eu._5geve.experiment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;

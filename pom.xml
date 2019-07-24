@@ -5,11 +5,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>it.cnit.nfvmano</groupId>
-  <artifactId>5g-context-composer</artifactId>
+  <groupId>eu._5geve.experiment</groupId>
+  <artifactId>5geve-experiment-builder</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <description>A REST API module to compose VSD and CDs.</description>
-  <url>https://github.com/TheWall89/5g-context-composer</url>
+  <url>https://github.com/TheWall89/5geve-experiment-builder</url>
   <packaging>docker-build</packaging>
 
   <properties>
@@ -61,7 +61,7 @@
             <configuration>
               <images>
                 <image>
-                  <alias>context-composer-dev</alias>
+                  <alias>experiment-builder-dev</alias>
                   <name>${docker.repository}/${project.name}:${project.version}</name>
                   <build>
                     <dockerFileDir>${project.basedir}</dockerFileDir>
@@ -89,7 +89,7 @@
             <configuration>
               <images>
                 <image>
-                  <alias>context-composer-prod</alias>
+                  <alias>experiment-builder-prod</alias>
                   <name>${docker.repository}/${project.name}:${project.version}</name>
                   <build>
                     <dockerFileDir>${project.basedir}</dockerFileDir>
