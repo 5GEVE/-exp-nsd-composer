@@ -32,7 +32,7 @@
     <dependency>
       <groupId>eu._5geve.blueprint</groupId>
       <artifactId>5geve-blueprint-libs</artifactId>
-      <version>0.0.11-SNAPSHOT</version>
+      <version>0.0.11</version>
     </dependency>
     <!-- https://github.com/nextworks-it/nfv-ifa-libs -->
     <dependency>
