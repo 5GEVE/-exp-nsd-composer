@@ -17,11 +17,11 @@ public class App {
       .getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 
   public static void main(String[] args) throws IOException {
-    InputStream is = App.class.getResourceAsStream("/nsd_stub.yaml");
+    InputStream is = App.class.getResourceAsStream("/nsd-examples/nsd_vCDN_pnf_gui.yaml");
     Nsd nsd_stub = OBJECT_MAPPER.readValue(is, Nsd.class);
     LOG.info("Dump:\n{}", OBJECT_MAPPER.writeValueAsString(nsd_stub));
 
-    InputStream isVsb = App.class.getResourceAsStream("/blueprint-examples/vsb_asti_agv.yaml");
+    InputStream isVsb = App.class.getResourceAsStream("/nsd-examples/vsb_vCDN_gui.yaml");
     VsBlueprint vsb = OBJECT_MAPPER.readValue(isVsb, VsBlueprint.class);
     LOG.info("Dump:\n{}", OBJECT_MAPPER.writeValueAsString(vsb));
 
