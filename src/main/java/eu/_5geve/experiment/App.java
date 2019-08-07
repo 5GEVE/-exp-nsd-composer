@@ -3,10 +3,14 @@ package eu._5geve.experiment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import eu._5geve.blueprint.vsb.VsBlueprint;
+import it.nextworks.nfvmano.libs.descriptors.common.elements.VirtualLinkProfile;
 import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
+import it.nextworks.nfvmano.libs.descriptors.nsd.PnfProfile;
+import it.nextworks.nfvmano.libs.descriptors.nsd.VnfProfile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 import javax.swing.JFrame;
 import org.jgrapht.Graph;
 import org.jgrapht.ListenableGraph;
@@ -25,18 +29,31 @@ public class App {
 
   public static void main(String[] args) throws IOException {
     InputStream is = App.class.getResourceAsStream("/nsd-examples/nsd_vCDN_pnf_gui.yaml");
-    Nsd nsd_stub = OBJECT_MAPPER.readValue(is, Nsd.class);
-    LOG.info("Dump:\n{}", OBJECT_MAPPER.writeValueAsString(nsd_stub));
+    Nsd nsd = OBJECT_MAPPER.readValue(is, Nsd.class);
+    LOG.info("Dump:\n{}", OBJECT_MAPPER.writeValueAsString(nsd));
 
     InputStream isVsb = App.class.getResourceAsStream("/nsd-examples/vsb_vCDN_gui.yaml");
     VsBlueprint vsb = OBJECT_MAPPER.readValue(isVsb, VsBlueprint.class);
     LOG.info("Dump:\n{}", OBJECT_MAPPER.writeValueAsString(vsb));
 
-    createNSDGraph();
+    createNSDGraph(nsd);
 
   }
 
-  private static void createNSDGraph() throws IOException {
+  private static void createNSDGraph(Nsd nsd){
+    Graph<String, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
+
+    // get all vertex from nsd
+    List<VnfProfile> v1 = nsd.getNsDf().get(0).getVnfProfile();
+    List<PnfProfile> v2 = nsd.getNsDf().get(0).getPnfProfile();
+    List<VirtualLinkProfile> v3 = nsd.getNsDf().get(0).getVirtualLinkProfile();
+
+    // get all edges from nsd
+
+
+  }
+
+  private static void jgraphtVizTest() throws IOException {
 
     // create a JGraphT graph
     ListenableGraph<String, DefaultEdge> g = new DefaultListenableGraph<>(
