@@ -52,19 +52,7 @@ public class App {
 
   }
 
-  private static void createNSDGraph(Nsd nsd){
-    Graph<String, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-
-    // get all vertex from nsd
-    List<VnfProfile> v1 = nsd.getNsDf().get(0).getVnfProfile();
-    List<PnfProfile> v2 = nsd.getNsDf().get(0).getPnfProfile();
-    List<VirtualLinkProfile> v3 = nsd.getNsDf().get(0).getVirtualLinkProfile();
-
-    // get all edges from nsd
-
-
-  }
-
+  // Useful as reference.
   private static void jgraphtVizTest() throws IOException {
 
     // create a JGraphT graph
