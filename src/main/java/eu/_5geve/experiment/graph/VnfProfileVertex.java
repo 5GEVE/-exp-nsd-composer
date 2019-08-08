@@ -13,7 +13,7 @@ public class VnfProfileVertex implements ProfileVertex {
   }
 
   public String toString() {
-    return this.type + "-" + this.vnfProfile.getVnfProfileId();
+    return this.type + "_" + this.vnfProfile.getVnfProfileId();
   }
 
   public int hashCode() {

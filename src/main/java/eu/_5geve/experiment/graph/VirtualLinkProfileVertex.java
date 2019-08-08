@@ -13,7 +13,7 @@ public class VirtualLinkProfileVertex implements ProfileVertex {
   }
 
   public String toString() {
-    return this.type + "-" + this.vlProfile.getVirtualLinkProfileId();
+    return this.type + "_" + this.vlProfile.getVirtualLinkProfileId();
   }
 
   public int hashCode() {

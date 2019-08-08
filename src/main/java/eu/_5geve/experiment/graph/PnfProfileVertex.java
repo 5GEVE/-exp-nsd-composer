@@ -13,7 +13,7 @@ public class PnfProfileVertex implements ProfileVertex {
   }
 
   public String toString() {
-    return this.type + "-" + this.pnfProfile.getPnfProfileId();
+    return this.type + "_" + this.pnfProfile.getPnfProfileId();
   }
 
   public int hashCode() {

@@ -39,5 +39,14 @@ public class NsdGraph {
       }
     }
 
+
+  }
+
+  public Nsd getNsd() {
+    return nsd;
+  }
+
+  public Graph<ProfileVertex, String> getG() {
+    return g;
   }
 }
