@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import eu._5geve.blueprint.vsb.VsBlueprint;
 import eu._5geve.experiment.graph.NsdGraph;
+import eu._5geve.experiment.graph.ProfileVertex;
 import it.nextworks.nfvmano.libs.descriptors.common.elements.VirtualLinkProfile;
 import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.descriptors.nsd.PnfProfile;
@@ -11,6 +12,7 @@ import it.nextworks.nfvmano.libs.descriptors.nsd.VnfProfile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.JFrame;
 import org.jgrapht.Graph;
@@ -19,6 +21,7 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultListenableGraph;
 import org.jgrapht.graph.DefaultUndirectedGraph;
+import org.jgrapht.traverse.DepthFirstIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +41,14 @@ public class App {
     LOG.info("Dump:\n{}", OBJECT_MAPPER.writeValueAsString(vsb));
 
     NsdGraph nsdGraph = new NsdGraph(nsd);
+    ProfileVertex start = nsdGraph.getG().vertexSet().stream()
+        .filter(v -> v.getProfileId().equals("vCacheMid_profile")).findAny().get();
 
-    LOG.info("graph: {}", nsdGraph.toString());
+    Iterator<ProfileVertex> iterator = new DepthFirstIterator<>(nsdGraph.getG(), start);
+    while (iterator.hasNext()) {
+      ProfileVertex v = iterator.next();
+      LOG.info("vertex: {}", v);
+    }
 
   }
 
