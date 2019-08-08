@@ -3,6 +3,7 @@ package eu._5geve.experiment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import eu._5geve.blueprint.vsb.VsBlueprint;
+import eu._5geve.experiment.graph.NsdGraph;
 import it.nextworks.nfvmano.libs.descriptors.common.elements.VirtualLinkProfile;
 import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.descriptors.nsd.PnfProfile;
@@ -36,7 +37,9 @@ public class App {
     VsBlueprint vsb = OBJECT_MAPPER.readValue(isVsb, VsBlueprint.class);
     LOG.info("Dump:\n{}", OBJECT_MAPPER.writeValueAsString(vsb));
 
-    createNSDGraph(nsd);
+    NsdGraph nsdGraph = new NsdGraph(nsd);
+
+    LOG.info("graph: {}", nsdGraph.toString());
 
   }
 
