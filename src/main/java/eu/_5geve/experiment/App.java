@@ -21,6 +21,7 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultListenableGraph;
 import org.jgrapht.graph.DefaultUndirectedGraph;
+import org.jgrapht.io.ExportException;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,17 @@ public class App {
     while (iterator.hasNext()) {
       ProfileVertex v = iterator.next();
       LOG.info("vertex: {}", v);
+    }
+
+    // TODO move this information
+    // Export to graphviz.
+    // Copy the output to a text file called 'example.txt'
+    // Create a PNG with:
+    // sfdp -Tpng example.txt -o example.png
+    try {
+      LOG.info("GraphViz export:\n{}", nsdGraph.exportGraphViz());
+    } catch (ExportException e) {
+      e.printStackTrace();
     }
 
   }

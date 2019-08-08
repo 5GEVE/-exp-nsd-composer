@@ -5,8 +5,14 @@ import it.nextworks.nfvmano.libs.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.descriptors.nsd.PnfProfile;
 import it.nextworks.nfvmano.libs.descriptors.nsd.VnfProfile;
+import java.io.StringWriter;
+import java.io.Writer;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.SimpleGraph;
+import org.jgrapht.io.ComponentNameProvider;
+import org.jgrapht.io.DOTExporter;
+import org.jgrapht.io.ExportException;
+import org.jgrapht.io.GraphExporter;
 
 public class NsdGraph {
 
@@ -38,8 +44,16 @@ public class NsdGraph {
         g.addEdge(v1, v2, vlc.getCpdId().get(0));
       }
     }
+  }
 
-
+  public String exportGraphViz() throws ExportException {
+    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getProfileId;
+    ComponentNameProvider<ProfileVertex> vertexLabelProvider = ProfileVertex::toString;
+    GraphExporter<ProfileVertex, String> exporter =
+        new DOTExporter<>(vertexIdProvider, vertexLabelProvider, null);
+    Writer writer = new StringWriter();
+    exporter.exportGraph(g, writer);
+    return writer.toString();
   }
 
   public Nsd getNsd() {
