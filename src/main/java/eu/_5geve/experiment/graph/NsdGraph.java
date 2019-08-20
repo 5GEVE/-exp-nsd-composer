@@ -44,6 +44,15 @@ public class NsdGraph {
         g.addEdge(v1, v2, vlc.getCpdId().get(0));
       }
     }
+    for (PnfProfile pnfp : nsd.getNsDf().get(0).getPnfProfile()) {
+      for (NsVirtualLinkConnectivity vlc : pnfp.getNsVirtualLinkConnectivity()) {
+        ProfileVertex v1 = g.vertexSet().stream()
+            .filter(v -> v.getProfileId().equals(pnfp.getPnfProfileId())).findAny().get();
+        ProfileVertex v2 = g.vertexSet().stream()
+            .filter(v -> v.getProfileId().equals(vlc.getVirtualLinkProfileId())).findAny().get();
+        g.addEdge(v1, v2, vlc.getCpdId().get(0));
+      }
+    }
   }
 
   public String exportGraphViz() throws ExportException {
