@@ -62,6 +62,12 @@ public class App {
       e.printStackTrace();
     }
 
+    try {
+      LOG.info("GraphML export:\n{}", nsdGraph.exportGraphML());
+    } catch (ExportException e) {
+      e.printStackTrace();
+    }
+
   }
 
   // Useful as reference.
