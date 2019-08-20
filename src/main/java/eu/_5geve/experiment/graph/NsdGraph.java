@@ -7,12 +7,16 @@ import it.nextworks.nfvmano.libs.descriptors.nsd.PnfProfile;
 import it.nextworks.nfvmano.libs.descriptors.nsd.VnfProfile;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.SimpleGraph;
+import org.jgrapht.io.Attribute;
+import org.jgrapht.io.ComponentAttributeProvider;
 import org.jgrapht.io.ComponentNameProvider;
 import org.jgrapht.io.DOTExporter;
+import org.jgrapht.io.DefaultAttribute;
 import org.jgrapht.io.ExportException;
-import org.jgrapht.io.GraphExporter;
 
 public class NsdGraph {
 
@@ -58,8 +62,23 @@ public class NsdGraph {
   public String exportGraphViz() throws ExportException {
     ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getProfileId;
     ComponentNameProvider<ProfileVertex> vertexLabelProvider = ProfileVertex::toString;
-    GraphExporter<ProfileVertex, String> exporter =
-        new DOTExporter<>(vertexIdProvider, vertexLabelProvider, null);
+    ComponentAttributeProvider<ProfileVertex> vertexAttributeProvider = v -> {
+      Map<String, Attribute> map = new LinkedHashMap<>();
+      if (v.getType().equals("vlProfile")) {
+        map.put("shape", DefaultAttribute.createAttribute("oval"));
+        map.put("style", DefaultAttribute.createAttribute("filled"));
+        map.put("fillcolor", DefaultAttribute.createAttribute("dodgerblue"));
+      } else if (v.getType().equals("vnfProfile") || v.getType().equals("pnfProfile")) {
+        map.put("shape", DefaultAttribute.createAttribute("box"));
+        map.put("style", DefaultAttribute.createAttribute("filled"));
+        map.put("fillcolor", DefaultAttribute.createAttribute("yellow"));
+      } else {
+        map = null;
+      }
+      return map;
+    };
+    DOTExporter<ProfileVertex, String> exporter = new DOTExporter<>(vertexIdProvider,
+        vertexLabelProvider, null, vertexAttributeProvider, null);
     Writer writer = new StringWriter();
     exporter.exportGraph(g, writer);
     return writer.toString();
