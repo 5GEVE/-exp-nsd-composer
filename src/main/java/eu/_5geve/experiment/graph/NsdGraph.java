@@ -20,6 +20,7 @@ import org.jgrapht.io.DefaultAttribute;
 import org.jgrapht.io.ExportException;
 import org.jgrapht.io.GraphMLExporter;
 import org.jgrapht.io.IntegerComponentNameProvider;
+import org.jgrapht.io.StringComponentNameProvider;
 
 public class NsdGraph {
 
@@ -81,7 +82,7 @@ public class NsdGraph {
       return map;
     };
     DOTExporter<ProfileVertex, String> exporter = new DOTExporter<>(vertexIdProvider,
-        vertexLabelProvider, null, vertexAttributeProvider, null);
+        vertexLabelProvider, new StringComponentNameProvider<>(), vertexAttributeProvider, null);
     Writer writer = new StringWriter();
     exporter.exportGraph(g, writer);
     return writer.toString();
@@ -102,8 +103,8 @@ public class NsdGraph {
       return map;
     };
     GraphMLExporter<ProfileVertex, String> exporter = new GraphMLExporter<>(vertexIdProvider,
-        vertexLabelProvider, vertexAttributeProvider, new IntegerComponentNameProvider<>(), null,
-        null);
+        vertexLabelProvider, vertexAttributeProvider, new IntegerComponentNameProvider<>(),
+        new StringComponentNameProvider<>(), null);
     exporter
         .registerAttribute("color", GraphMLExporter.AttributeCategory.NODE, AttributeType.STRING,
             "yellow");
