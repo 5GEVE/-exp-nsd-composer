@@ -75,7 +75,7 @@ public class NsdGraph {
       } else if (v.getType().equals("vnfProfile") || v.getType().equals("pnfProfile")) {
         map.put("shape", DefaultAttribute.createAttribute("box"));
         map.put("style", DefaultAttribute.createAttribute("filled"));
-        map.put("fillcolor", DefaultAttribute.createAttribute("yellow"));
+        map.put("fillcolor", DefaultAttribute.createAttribute("yellowgreen"));
       } else {
         map = null;
       }
