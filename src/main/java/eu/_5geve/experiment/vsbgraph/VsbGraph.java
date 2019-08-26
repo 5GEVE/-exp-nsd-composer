@@ -3,13 +3,11 @@ package eu._5geve.experiment.vsbgraph;
 import eu._5geve.blueprint.vsb.VsBlueprint;
 import eu._5geve.blueprint.vsb.VsComponent;
 import eu._5geve.blueprint.vsb.VsbLink;
-import eu._5geve.experiment.nsdgraph.ProfileVertex;
-import it.nextworks.nfvmano.libs.descriptors.nsd.NsVirtualLinkConnectivity;
-import it.nextworks.nfvmano.libs.descriptors.nsd.PnfProfile;
-import it.nextworks.nfvmano.libs.descriptors.nsd.VnfProfile;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.SimpleGraph;
@@ -34,23 +32,25 @@ public class VsbGraph {
     this.g = new SimpleGraph<>(String.class);
 
     // vertices
+    List<AtomicComponentVertex> aCVertices = new ArrayList<>();
     for (VsComponent vsc : vsB.getAtomicComponents()) {
-      g.addVertex(new AtomicComponentVertex(vsc));
+      AtomicComponentVertex v = new AtomicComponentVertex(vsc);
+      aCVertices.add(v);
+      g.addVertex(v);
     }
+    List<VsbLinkVertex> vLVertices = new ArrayList<>();
     for (VsbLink vsl : vsB.getConnectivityServices()) {
-      g.addVertex(new VsbLinkVertex(vsl));
+      VsbLinkVertex v = new VsbLinkVertex(vsl);
+      vLVertices.add(v);
+      g.addVertex(v);
     }
 
     // edges
-    for (VsbLink vsl : vsB.getConnectivityServices()) {
-      for (String vslEp : vsl.getEndPointIds()) {
-        for (VsComponent vsc : vsB.getAtomicComponents()) {
-          for (String vscEp : vsc.getEndPointsIds()) {
-            if (vslEp.equals(vscEp)) {
-              VsbVertex v1 = g.vertexSet().stream()
-                  .filter(v -> v.getId().equals(vsl.toString())).findAny().get();
-              VsbVertex v2 = g.vertexSet().stream()
-                  .filter(v -> v.getId().equals(vsc.getComponentId())).findAny().get();
+    for (AtomicComponentVertex v1 : aCVertices) {
+      for (String vscEp : v1.getVsComponent().getEndPointsIds()) {
+        for (VsbLinkVertex v2 : vLVertices) {
+          for (String vslEp : v2.getVsbLink().getEndPointIds()) {
+            if (vscEp.equals(vslEp)) {
               g.addEdge(v1, v2, vslEp);
             }
           }
