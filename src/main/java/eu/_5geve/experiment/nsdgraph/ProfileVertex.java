@@ -1,4 +1,4 @@
-package eu._5geve.experiment.graph;
+package eu._5geve.experiment.nsdgraph;
 
 public interface ProfileVertex {
 

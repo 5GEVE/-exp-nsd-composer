@@ -101,8 +101,8 @@ connectivityServices:
   - "origin_caches"
   external: true
 - endPointIds:
-  - "vCacheEdge_1_caches_ext"
-  - "vCacheMid_caches_ext"
+  - "vCacheEdge_1_cache_ext"
+  - "vCacheMid_cache_ext"
   external: false
 - endPointIds:
   - "vCacheMid_origin_ext"

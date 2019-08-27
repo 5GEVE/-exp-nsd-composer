@@ -1,4 +1,4 @@
-package eu._5geve.experiment.graph;
+package eu._5geve.experiment.nsdgraph;
 
 import it.nextworks.nfvmano.libs.descriptors.common.elements.VirtualLinkProfile;
 import it.nextworks.nfvmano.libs.descriptors.nsd.NsVirtualLinkConnectivity;
