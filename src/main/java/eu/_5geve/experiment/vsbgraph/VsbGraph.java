@@ -57,7 +57,6 @@ public class VsbGraph {
         }
       }
     }
-
   }
 
   public String exportGraphViz() throws ExportException {
