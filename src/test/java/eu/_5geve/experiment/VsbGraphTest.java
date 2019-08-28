@@ -28,22 +28,22 @@ public class VsbGraphTest {
           + NL +
           "  pOrigin_v01 [ label=\"atomicComponent_pOrigin_v01\" shape=\"box\" style=\"filled\" fillcolor=\"yellowgreen\" ];"
           + NL +
-          "  1089418272 [ label=\"vsbLink_vCacheEdge_1_users_ext\" shape=\"oval\" style=\"filled\" fillcolor=\"dodgerblue\" ];"
+          "  0 [ label=\"vsbLink_vCacheEdge_1_users_ext\" shape=\"oval\" style=\"filled\" fillcolor=\"dodgerblue\" ];"
           + NL +
-          "  1233990028 [ label=\"vsbLink_vCacheEdge_1_mgmt_ext_dns_users_vCacheMid_mgmt_ext_origin_caches\" shape=\"oval\" style=\"filled\" fillcolor=\"dodgerblue\" ];"
+          "  1 [ label=\"vsbLink_vCacheEdge_1_mgmt_ext_dns_users_vCacheMid_mgmt_ext_origin_caches\" shape=\"oval\" style=\"filled\" fillcolor=\"dodgerblue\" ];"
           + NL +
-          "  1847008471 [ label=\"vsbLink_vCacheEdge_1_cache_ext_vCacheMid_cache_ext\" shape=\"oval\" style=\"filled\" fillcolor=\"dodgerblue\" ];"
+          "  2 [ label=\"vsbLink_vCacheEdge_1_cache_ext_vCacheMid_cache_ext\" shape=\"oval\" style=\"filled\" fillcolor=\"dodgerblue\" ];"
           + NL +
-          "  1076607567 [ label=\"vsbLink_vCacheMid_origin_ext\" shape=\"oval\" style=\"filled\" fillcolor=\"dodgerblue\" ];"
+          "  3 [ label=\"vsbLink_vCacheMid_origin_ext\" shape=\"oval\" style=\"filled\" fillcolor=\"dodgerblue\" ];"
           + NL +
-          "  vCacheMid_01 -- 1233990028 [ label=\"vCacheMid_mgmt_ext\" ];" + NL +
-          "  vCacheMid_01 -- 1847008471 [ label=\"vCacheMid_cache_ext\" ];" + NL +
-          "  vCacheMid_01 -- 1076607567 [ label=\"vCacheMid_origin_ext\" ];" + NL +
-          "  pDNS_v01 -- 1233990028 [ label=\"dns_users\" ];" + NL +
-          "  vCacheEdge_1_01 -- 1233990028 [ label=\"vCacheEdge_1_mgmt_ext\" ];" + NL +
-          "  vCacheEdge_1_01 -- 1847008471 [ label=\"vCacheEdge_1_cache_ext\" ];" + NL +
-          "  vCacheEdge_1_01 -- 1089418272 [ label=\"vCacheEdge_1_users_ext\" ];" + NL +
-          "  pOrigin_v01 -- 1233990028 [ label=\"origin_caches\" ];" + NL +
+          "  vCacheMid_01 -- 1 [ label=\"vCacheMid_mgmt_ext\" ];" + NL +
+          "  vCacheMid_01 -- 2 [ label=\"vCacheMid_cache_ext\" ];" + NL +
+          "  vCacheMid_01 -- 3 [ label=\"vCacheMid_origin_ext\" ];" + NL +
+          "  pDNS_v01 -- 1 [ label=\"dns_users\" ];" + NL +
+          "  vCacheEdge_1_01 -- 1 [ label=\"vCacheEdge_1_mgmt_ext\" ];" + NL +
+          "  vCacheEdge_1_01 -- 2 [ label=\"vCacheEdge_1_cache_ext\" ];" + NL +
+          "  vCacheEdge_1_01 -- 0 [ label=\"vCacheEdge_1_users_ext\" ];" + NL +
+          "  pOrigin_v01 -- 1 [ label=\"origin_caches\" ];" + NL +
           "}" + NL;
   private static Logger LOG = LoggerFactory
       .getLogger(MethodHandles.lookup().lookupClass().getSimpleName());

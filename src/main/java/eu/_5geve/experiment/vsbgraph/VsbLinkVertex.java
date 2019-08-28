@@ -1,15 +1,18 @@
 package eu._5geve.experiment.vsbgraph;
 
 import eu._5geve.blueprint.vsb.VsbLink;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class VsbLinkVertex implements VsbVertex {
+
+  private static final AtomicLong NEXT_ID = new AtomicLong(0);
 
   private final VsbLink vsbLink;
   private final String id;
 
   VsbLinkVertex(VsbLink vsbLink) {
     this.vsbLink = vsbLink;
-    this.id = Integer.toString(System.identityHashCode(this));
+    this.id = Long.toString(NEXT_ID.getAndIncrement());
   }
 
   public String toString() {
