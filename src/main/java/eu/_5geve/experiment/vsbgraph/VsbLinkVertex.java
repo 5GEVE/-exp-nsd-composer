@@ -6,16 +6,14 @@ public class VsbLinkVertex implements VsbVertex {
 
   private final VsbLink vsbLink;
   private final String id;
-  private final String type;
 
   VsbLinkVertex(VsbLink vsbLink) {
     this.vsbLink = vsbLink;
     this.id = Integer.toString(System.identityHashCode(this));
-    this.type = "vsbLink";
   }
 
   public String toString() {
-    return this.type + "_" + String.join("_", this.vsbLink.getEndPointIds());
+    return "vsbLink_" + String.join("_", this.vsbLink.getEndPointIds());
   }
 
   public int hashCode() {
@@ -35,8 +33,4 @@ public class VsbLinkVertex implements VsbVertex {
     return id;
   }
 
-  @Override
-  public String getType() {
-    return this.type;
-  }
 }

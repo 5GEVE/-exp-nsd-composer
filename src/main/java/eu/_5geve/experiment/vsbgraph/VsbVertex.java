@@ -4,6 +4,4 @@ public interface VsbVertex {
 
   String getId();
 
-  String getType();
-
 }

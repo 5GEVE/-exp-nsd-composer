@@ -64,11 +64,11 @@ public class VsbGraph {
     ComponentNameProvider<VsbVertex> vertexLabelProvider = VsbVertex::toString;
     ComponentAttributeProvider<VsbVertex> vertexAttributeProvider = v -> {
       Map<String, Attribute> map = new LinkedHashMap<>();
-      if (v.getType().equals("vsbLink")) {
+      if (v instanceof VsbLinkVertex) {
         map.put("shape", DefaultAttribute.createAttribute("oval"));
         map.put("style", DefaultAttribute.createAttribute("filled"));
         map.put("fillcolor", DefaultAttribute.createAttribute("dodgerblue"));
-      } else if (v.getType().equals("atomicComponent")) {
+      } else if (v instanceof AtomicComponentVertex) {
         map.put("shape", DefaultAttribute.createAttribute("box"));
         map.put("style", DefaultAttribute.createAttribute("filled"));
         map.put("fillcolor", DefaultAttribute.createAttribute("yellowgreen"));
@@ -89,9 +89,9 @@ public class VsbGraph {
     ComponentNameProvider<VsbVertex> vertexLabelProvider = VsbVertex::toString;
     ComponentAttributeProvider<VsbVertex> vertexAttributeProvider = v -> {
       Map<String, Attribute> map = new LinkedHashMap<>();
-      if (v.getType().equals("vsbLink")) {
+      if (v instanceof VsbLinkVertex) {
         map.put("color", DefaultAttribute.createAttribute("blue"));
-      } else if (v.getType().equals("atomicComponent")) {
+      } else if (v instanceof AtomicComponentVertex) {
         map.put("color", DefaultAttribute.createAttribute("yellow"));
       } else {
         map = null;

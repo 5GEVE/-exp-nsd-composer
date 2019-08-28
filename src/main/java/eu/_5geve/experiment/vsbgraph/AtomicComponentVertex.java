@@ -5,15 +5,13 @@ import eu._5geve.blueprint.vsb.VsComponent;
 public class AtomicComponentVertex implements VsbVertex {
 
   private final VsComponent vsComponent;
-  private final String type;
 
   AtomicComponentVertex(VsComponent vsComponent) {
     this.vsComponent = vsComponent;
-    this.type = "atomicComponent";
   }
 
   public String toString() {
-    return this.type + "_" + this.vsComponent.getComponentId();
+    return "atomicComponent_" + this.vsComponent.getComponentId();
   }
 
   public int hashCode() {
@@ -31,11 +29,6 @@ public class AtomicComponentVertex implements VsbVertex {
   @Override
   public String getId() {
     return vsComponent.getComponentId();
-  }
-
-  @Override
-  public String getType() {
-    return this.type;
   }
 
 }
