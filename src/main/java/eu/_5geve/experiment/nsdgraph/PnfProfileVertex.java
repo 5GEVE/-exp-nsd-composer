@@ -5,15 +5,13 @@ import it.nextworks.nfvmano.libs.descriptors.nsd.PnfProfile;
 public class PnfProfileVertex implements ProfileVertex {
 
   private final PnfProfile pnfProfile;
-  private final String type;
 
   PnfProfileVertex(PnfProfile pnfProfile) {
     this.pnfProfile = pnfProfile;
-    this.type = "pnfProfile";
   }
 
   public String toString() {
-    return this.type + "_" + this.pnfProfile.getPnfProfileId();
+    return "pnfProfile_" + this.pnfProfile.getPnfProfileId();
   }
 
   public int hashCode() {
@@ -26,10 +24,6 @@ public class PnfProfileVertex implements ProfileVertex {
 
   public PnfProfile getPnfProfile() {
     return pnfProfile;
-  }
-
-  public String getType() {
-    return type;
   }
 
   @Override

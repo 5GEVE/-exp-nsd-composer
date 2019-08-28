@@ -79,11 +79,11 @@ public class NsdGraph {
     ComponentNameProvider<ProfileVertex> vertexLabelProvider = ProfileVertex::toString;
     ComponentAttributeProvider<ProfileVertex> vertexAttributeProvider = v -> {
       Map<String, Attribute> map = new LinkedHashMap<>();
-      if (v.getType().equals("vlProfile")) {
+      if (v instanceof VirtualLinkProfileVertex) {
         map.put("shape", DefaultAttribute.createAttribute("oval"));
         map.put("style", DefaultAttribute.createAttribute("filled"));
         map.put("fillcolor", DefaultAttribute.createAttribute("dodgerblue"));
-      } else if (v.getType().equals("vnfProfile") || v.getType().equals("pnfProfile")) {
+      } else if (v instanceof VnfProfileVertex || v instanceof PnfProfileVertex) {
         map.put("shape", DefaultAttribute.createAttribute("box"));
         map.put("style", DefaultAttribute.createAttribute("filled"));
         map.put("fillcolor", DefaultAttribute.createAttribute("yellowgreen"));
@@ -104,9 +104,9 @@ public class NsdGraph {
     ComponentNameProvider<ProfileVertex> vertexLabelProvider = ProfileVertex::toString;
     ComponentAttributeProvider<ProfileVertex> vertexAttributeProvider = v -> {
       Map<String, Attribute> map = new LinkedHashMap<>();
-      if (v.getType().equals("vlProfile")) {
+      if (v instanceof VirtualLinkProfileVertex) {
         map.put("color", DefaultAttribute.createAttribute("blue"));
-      } else if (v.getType().equals("vnfProfile") || v.getType().equals("pnfProfile")) {
+      } else if (v instanceof VnfProfileVertex || v instanceof PnfProfileVertex) {
         map.put("color", DefaultAttribute.createAttribute("yellow"));
       } else {
         map = null;

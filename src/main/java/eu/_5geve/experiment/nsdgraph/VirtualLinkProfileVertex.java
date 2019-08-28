@@ -5,15 +5,13 @@ import it.nextworks.nfvmano.libs.descriptors.common.elements.VirtualLinkProfile;
 public class VirtualLinkProfileVertex implements ProfileVertex {
 
   private final VirtualLinkProfile vlProfile;
-  private final String type;
 
   VirtualLinkProfileVertex(VirtualLinkProfile vlProfile) {
     this.vlProfile = vlProfile;
-    this.type = "vlProfile";
   }
 
   public String toString() {
-    return this.type + "_" + this.vlProfile.getVirtualLinkProfileId();
+    return "vlProfile_" + this.vlProfile.getVirtualLinkProfileId();
   }
 
   public int hashCode() {
@@ -26,10 +24,6 @@ public class VirtualLinkProfileVertex implements ProfileVertex {
 
   public VirtualLinkProfile getVlProfile() {
     return vlProfile;
-  }
-
-  public String getType() {
-    return type;
   }
 
   @Override

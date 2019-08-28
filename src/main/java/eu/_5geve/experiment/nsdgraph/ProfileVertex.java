@@ -4,6 +4,4 @@ public interface ProfileVertex {
 
   String getProfileId();
 
-  String getType();
-
 }
