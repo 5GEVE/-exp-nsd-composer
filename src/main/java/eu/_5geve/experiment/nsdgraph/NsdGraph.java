@@ -7,7 +7,9 @@ import it.nextworks.nfvmano.libs.descriptors.nsd.PnfProfile;
 import it.nextworks.nfvmano.libs.descriptors.nsd.VnfProfile;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.SimpleGraph;
@@ -32,33 +34,42 @@ public class NsdGraph {
     this.g = new SimpleGraph<>(String.class);
 
     // vertices
+    List<VnfProfileVertex> vnfPVertices = new ArrayList<>();
     for (VnfProfile vp : nsd.getNsDf().get(0).getVnfProfile()) {
-      g.addVertex(new VnfProfileVertex(vp));
+      VnfProfileVertex v = new VnfProfileVertex(vp);
+      vnfPVertices.add(v);
+      g.addVertex(v);
     }
+    List<PnfProfileVertex> pnfPVertices = new ArrayList<>();
     for (PnfProfile pp : nsd.getNsDf().get(0).getPnfProfile()) {
-      g.addVertex(new PnfProfileVertex(pp));
+      PnfProfileVertex v = new PnfProfileVertex(pp);
+      pnfPVertices.add(v);
+      g.addVertex(v);
     }
+    List<VirtualLinkProfileVertex> vlPVertices = new ArrayList<>();
     for (VirtualLinkProfile vlp : nsd.getNsDf().get(0).getVirtualLinkProfile()) {
-      g.addVertex(new VirtualLinkProfileVertex(vlp));
+      VirtualLinkProfileVertex v = new VirtualLinkProfileVertex(vlp);
+      vlPVertices.add(v);
+      g.addVertex(v);
     }
 
     // edges
-    for (VnfProfile vp : nsd.getNsDf().get(0).getVnfProfile()) {
-      for (NsVirtualLinkConnectivity vlc : vp.getNsVirtualLinkConnectivity()) {
-        ProfileVertex v1 = g.vertexSet().stream()
-            .filter(v -> v.getProfileId().equals(vp.getVnfProfileId())).findAny().get();
-        ProfileVertex v2 = g.vertexSet().stream()
-            .filter(v -> v.getProfileId().equals(vlc.getVirtualLinkProfileId())).findAny().get();
-        g.addEdge(v1, v2, vlc.getCpdId().get(0));
+    for (VnfProfileVertex v1 : vnfPVertices) {
+      for (NsVirtualLinkConnectivity vlc : v1.getVnfProfile().getNsVirtualLinkConnectivity()) {
+        for (VirtualLinkProfileVertex v2 : vlPVertices) {
+          if (vlc.getVirtualLinkProfileId().equals(v2.getVlProfile().getVirtualLinkProfileId())) {
+            g.addEdge(v1, v2, vlc.getCpdId().get(0));
+          }
+        }
       }
     }
-    for (PnfProfile pnfp : nsd.getNsDf().get(0).getPnfProfile()) {
-      for (NsVirtualLinkConnectivity vlc : pnfp.getNsVirtualLinkConnectivity()) {
-        ProfileVertex v1 = g.vertexSet().stream()
-            .filter(v -> v.getProfileId().equals(pnfp.getPnfProfileId())).findAny().get();
-        ProfileVertex v2 = g.vertexSet().stream()
-            .filter(v -> v.getProfileId().equals(vlc.getVirtualLinkProfileId())).findAny().get();
-        g.addEdge(v1, v2, vlc.getCpdId().get(0));
+    for (PnfProfileVertex v1 : pnfPVertices) {
+      for (NsVirtualLinkConnectivity vlc : v1.getPnfProfile().getNsVirtualLinkConnectivity()) {
+        for (VirtualLinkProfileVertex v2 : vlPVertices) {
+          if (vlc.getVirtualLinkProfileId().equals(v2.getVlProfile().getVirtualLinkProfileId())) {
+            g.addEdge(v1, v2, vlc.getCpdId().get(0));
+          }
+        }
       }
     }
   }
