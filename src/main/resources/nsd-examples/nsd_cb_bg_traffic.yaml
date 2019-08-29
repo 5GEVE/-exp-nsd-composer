@@ -1,0 +1,60 @@
+---
+nsdIdentifier: "bg_traffic_v01"
+designer: "CNIT"
+version: "0.1"
+nsdName: "bg_traffic_context"
+nsdInvariantId: "bg_traffic_context"
+vnfdId:
+  - "vBgSrc_01"
+  - "vBgDst_01"
+pnfdId: []
+sapd: []
+virtualLinkDesc: []
+monitoredInfo: []
+autoScalingRule: []
+nsDf:
+  - nsDfId: "df_bg_traffic"
+    flavourKey: "df_bg_traffic"
+    vnfProfile:
+      - vnfProfileId: "vBgSrc_profile"
+        vnfdId: "vBgSrc_01"
+        flavourId: "df_vBgSrc"
+        instantiationLevel: "il_vBgSrc"
+        minNumberOfInstances: 1
+        maxNumberOfInstances: 1
+        nsVirtualLinkConnectivity: []
+      - vnfProfileId: "vBgDst_profile"
+        vnfdId: "vBgDst_01"
+        flavourId: "df_vBgDst"
+        instantiationLevel: "il_vBgDst"
+        minNumberOfInstances: 1
+        maxNumberOfInstances: 1
+        nsVirtualLinkConnectivity: []
+    pnfProfile: []
+    virtualLinkProfile: []
+    nsInstantiationLevel:
+      - nsLevelId: "il_bg_traffic_big"
+        description: "Big instantiation level for background traffic"
+        vnfToLevelMapping:
+          - vnfProfileId: "vBgSrc_profile"
+            numberOfInstances: 1
+          - vnfProfileId: "vBgDst_profile"
+            numberOfInstances: 1
+        virtualLinkToLevelMapping: []
+    defaultNsInstantiationLevelId: "il_bg_traffic_big"
+    nsProfile:
+      - nsProfileId: "ns_profile_bg_traffic_big"
+        nsdId: "bg_traffic_v01"
+        nsDfId: "df_bg_traffic"
+        nsInstantiationLevelId: "il_bg_traffic_big"
+        minNumberOfInstances: 1
+        maxNumberOfInstances: 1
+    dependencies:
+      - primaryId:
+          - "vBgSrc_profile"
+        secondaryId:
+          - "vBgDst_profile"
+security:
+  signature: "bg_traffic_NSD_SIGNATURE"
+  algorithm: "bg_traffic_NSD_ALGORITHM"
+  certificate: "bg_traffic_NSD_CERTIFICATE"
