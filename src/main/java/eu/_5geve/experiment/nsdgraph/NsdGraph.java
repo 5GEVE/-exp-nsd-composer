@@ -29,31 +29,31 @@ public class NsdGraph {
 
   private Nsd nsd;
   private Graph<ProfileVertex, String> g;
+  List<VnfProfileVertex> vnfPVertices = new ArrayList<>();
+  List<PnfProfileVertex> pnfPVertices = new ArrayList<>();
+  List<VirtualLinkProfileVertex> vlPVertices = new ArrayList<>();
+  List<SapVertex> sapVertices = new ArrayList<>();
 
   public NsdGraph(Nsd nsd) {
     this.nsd = nsd;
     this.g = new SimpleGraph<>(String.class);
 
     // vertices
-    List<VnfProfileVertex> vnfPVertices = new ArrayList<>();
     for (VnfProfile vp : nsd.getNsDf().get(0).getVnfProfile()) {
       VnfProfileVertex v = new VnfProfileVertex(vp);
       vnfPVertices.add(v);
       g.addVertex(v);
     }
-    List<PnfProfileVertex> pnfPVertices = new ArrayList<>();
     for (PnfProfile pp : nsd.getNsDf().get(0).getPnfProfile()) {
       PnfProfileVertex v = new PnfProfileVertex(pp);
       pnfPVertices.add(v);
       g.addVertex(v);
     }
-    List<VirtualLinkProfileVertex> vlPVertices = new ArrayList<>();
     for (VirtualLinkProfile vlp : nsd.getNsDf().get(0).getVirtualLinkProfile()) {
       VirtualLinkProfileVertex v = new VirtualLinkProfileVertex(vlp);
       vlPVertices.add(v);
       g.addVertex(v);
     }
-    List<SapVertex> sapVertices = new ArrayList<>();
     for (Sapd s : nsd.getSapd()) {
       SapVertex v = new SapVertex(s);
       sapVertices.add(v);
@@ -150,4 +150,21 @@ public class NsdGraph {
   public Graph<ProfileVertex, String> getG() {
     return g;
   }
+
+  public List<VnfProfileVertex> getVnfPVertices() {
+    return vnfPVertices;
+  }
+
+  public List<PnfProfileVertex> getPnfPVertices() {
+    return pnfPVertices;
+  }
+
+  public List<VirtualLinkProfileVertex> getVlPVertices() {
+    return vlPVertices;
+  }
+
+  public List<SapVertex> getSapVertices() {
+    return sapVertices;
+  }
+
 }
