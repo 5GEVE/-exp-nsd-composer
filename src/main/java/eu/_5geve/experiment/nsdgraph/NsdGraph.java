@@ -4,6 +4,7 @@ import it.nextworks.nfvmano.libs.descriptors.common.elements.VirtualLinkProfile;
 import it.nextworks.nfvmano.libs.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.descriptors.nsd.PnfProfile;
+import it.nextworks.nfvmano.libs.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.descriptors.nsd.VnfProfile;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -52,6 +53,12 @@ public class NsdGraph {
       vlPVertices.add(v);
       g.addVertex(v);
     }
+    List<SapVertex> sapVertices = new ArrayList<>();
+    for (Sapd s : nsd.getSapd()) {
+      SapVertex v = new SapVertex(s);
+      sapVertices.add(v);
+      g.addVertex(v);
+    }
 
     // edges
     for (VnfProfileVertex v1 : vnfPVertices) {
@@ -72,6 +79,14 @@ public class NsdGraph {
         }
       }
     }
+    for (SapVertex v1 : sapVertices) {
+      for (VirtualLinkProfileVertex v2 : vlPVertices) {
+        if (v1.getSapd().getNsVirtualLinkDescId()
+            .equals(v2.getVlProfile().getVirtualLinkDescId())) {
+          g.addEdge(v1, v2, v1.getSapd().getCpdId());
+        }
+      }
+    }
   }
 
   public String exportGraphViz() throws ExportException {
@@ -87,6 +102,10 @@ public class NsdGraph {
         map.put("shape", DefaultAttribute.createAttribute("box"));
         map.put("style", DefaultAttribute.createAttribute("filled"));
         map.put("fillcolor", DefaultAttribute.createAttribute("yellowgreen"));
+      } else if (v instanceof SapVertex) {
+        map.put("shape", DefaultAttribute.createAttribute("circle"));
+        map.put("style", DefaultAttribute.createAttribute("filled"));
+        map.put("fillcolor", DefaultAttribute.createAttribute("firebrick2"));
       } else {
         map = null;
       }
