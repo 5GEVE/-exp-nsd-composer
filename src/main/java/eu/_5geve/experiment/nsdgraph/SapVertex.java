@@ -11,7 +11,7 @@ public class SapVertex implements ProfileVertex {
   }
 
   public String toString() {
-    return this.sapd.getCpdId();
+    return "Sap_" + this.sapd.getCpdId();
   }
 
   public int hashCode() {

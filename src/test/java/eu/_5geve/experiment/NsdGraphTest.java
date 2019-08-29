@@ -40,11 +40,11 @@ public class NsdGraphTest {
           + NL +
           "  vl_profile_origin [ label=\"vlProfile_vl_profile_origin\" shape=\"oval\" style=\"filled\" fillcolor=\"dodgerblue\" ];"
           + NL +
-          "  sap_mgmt [ label=\"sap_mgmt\" shape=\"circle\" style=\"filled\" fillcolor=\"firebrick2\" ];"
+          "  sap_mgmt [ label=\"Sap_sap_mgmt\" shape=\"circle\" style=\"filled\" fillcolor=\"firebrick2\" ];"
           + NL +
-          "  sap_users [ label=\"sap_users\" shape=\"circle\" style=\"filled\" fillcolor=\"firebrick2\" ];"
+          "  sap_users [ label=\"Sap_sap_users\" shape=\"circle\" style=\"filled\" fillcolor=\"firebrick2\" ];"
           + NL +
-          "  sap_origin [ label=\"sap_origin\" shape=\"circle\" style=\"filled\" fillcolor=\"firebrick2\" ];"
+          "  sap_origin [ label=\"Sap_sap_origin\" shape=\"circle\" style=\"filled\" fillcolor=\"firebrick2\" ];"
           + NL +
           "  vCacheMid_profile -- vl_profile_mgmt [ label=\"vCacheMid_mgmt_ext\" ];" + NL +
           "  vCacheMid_profile -- vl_profile_cache [ label=\"vCacheMid_cache_ext\" ];" + NL +
