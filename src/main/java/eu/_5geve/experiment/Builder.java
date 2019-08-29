@@ -32,4 +32,12 @@ public class Builder {
   public List<NsdGraph> getContextNsdGraphs() {
     return contextNsdGraphs;
   }
+
+  public String toString(){
+    StringBuilder b = new StringBuilder();
+    b.append("Builder. Nsd: " + verticalNsdGraph.getNsd().getNsdIdentifier() + "." );
+    b.append(" Contexts: ");
+    contextNsdGraphs.forEach(c -> b.append(c.getNsd().getNsdIdentifier()));
+    return b.toString();
+  }
 }
