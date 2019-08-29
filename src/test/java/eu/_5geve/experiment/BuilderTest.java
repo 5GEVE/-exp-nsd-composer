@@ -29,6 +29,8 @@ public class BuilderTest {
     contexts.add(bgT);
     Builder b = new Builder(vCDN, contexts);
     LOG.info(b.toString());
+
+    b.buildExperiments();
   }
 
 }
