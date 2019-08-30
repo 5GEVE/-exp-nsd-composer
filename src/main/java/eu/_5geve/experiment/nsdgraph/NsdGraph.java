@@ -206,7 +206,6 @@ public class NsdGraph {
     vlPVertices.add(vlpNewV);
     g.addVertex(vlpNewV);
 
-    g.edgeSet().forEach(e -> System.out.println(e));
     ProfileVertex srcV = g.getEdgeSource(edge);
     ProfileVertex tarV = g.getEdgeTarget(edge);
     if (srcV instanceof VnfProfileVertex && tarV instanceof VirtualLinkProfileVertex) {
