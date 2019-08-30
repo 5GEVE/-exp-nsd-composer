@@ -32,7 +32,8 @@ public class Builder {
   public NsdGraph buildExperiment() {
     NsdGraph expNsdGraph = new NsdGraph(verticalNsdGraph.getNsd());
     for (NsdGraph c : contextNsdGraphs) {
-      String cType = "normal"; // else "normal"
+      // TODO handle this information
+      String cType = UserMock.getContextType();
       if (cType.equals("normal")) {
         for (VnfProfileVertex vnfP : c.getVnfPVertices()) {
           // TODO ask user to select a VitualLinkProfileVertex

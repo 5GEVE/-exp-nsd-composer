@@ -14,4 +14,10 @@ public class UserMock {
   public static String getEdge(NsdGraph exp){
     return "vCacheEdge_2_users_ext";
   }
+
+  public static String getContextType(){
+    return "passthrough";
+    //return "normal";
+  }
+
 }
