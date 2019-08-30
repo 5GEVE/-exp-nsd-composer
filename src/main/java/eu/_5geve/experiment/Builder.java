@@ -1,6 +1,7 @@
 package eu._5geve.experiment;
 
 import eu._5geve.experiment.nsdgraph.NsdGraph;
+import eu._5geve.experiment.nsdgraph.UserMock;
 import eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex;
 import eu._5geve.experiment.nsdgraph.VnfProfileVertex;
 import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
@@ -30,20 +31,24 @@ public class Builder {
 
   public NsdGraph buildExperiment() {
     NsdGraph expNsdGraph = new NsdGraph(verticalNsdGraph.getNsd());
-    for (NsdGraph c: contextNsdGraphs){
-      String cType = "passthrough"; // else "normal"
-      if (cType.equals("normal")){
-        for (VnfProfileVertex vnfP: c.getVnfPVertices()){
-          // ask user to select a VitualLinkProfileVertex
-          VirtualLinkProfileVertex vlP = null;
+    for (NsdGraph c : contextNsdGraphs) {
+      String cType = "normal"; // else "normal"
+      if (cType.equals("normal")) {
+        for (VnfProfileVertex vnfP : c.getVnfPVertices()) {
+          // TODO ask user to select a VitualLinkProfileVertex
+          VirtualLinkProfileVertex vlP;
+          if (vnfP.getProfileId().contains("Src")) {
+            vlP = UserMock.getVLPVertex1(expNsdGraph);
+          } else { //if (vnfP.getProfileId().contains("Dst")) {
+            vlP = UserMock.getVLPVertex2(expNsdGraph);
+          }
           expNsdGraph.addVnfProfileVertex(vnfP, vlP);
         }
-      } else if (cType.equals("passthrough")){
-        for (VnfProfileVertex vnfP: c.getVnfPVertices()){
-          // ask user to select an edge
-          String e = null;
+      } else if (cType.equals("passthrough")) {
+        for (VnfProfileVertex vnfP : c.getVnfPVertices()) {
+          // TODO ask user to select an edge
+          String e = UserMock.getEdge(expNsdGraph);
           expNsdGraph.addVnfProfileVertex(vnfP, e);
-
         }
       }
     }
