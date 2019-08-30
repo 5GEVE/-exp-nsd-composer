@@ -1,0 +1,55 @@
+---
+nsdIdentifier: "delay_v01"
+designer: "CNIT"
+version: "0.1"
+nsdName: "delay_context"
+nsdInvariantId: "delay_context"
+vnfdId:
+  - "vDelay_01"
+pnfdId: []
+sapd: []
+virtualLinkDesc: []
+monitoredInfo: []
+autoScalingRule: []
+nsDf:
+  - nsDfId: "df_delay"
+    flavourKey: "df_delay"
+    vnfProfile:
+      - vnfProfileId: "vDelay_profile"
+        vnfdId: "vDelay_01"
+        flavourId: "df_vDelay"
+        instantiationLevel: "il_vDelay"
+        minNumberOfInstances: 1
+        maxNumberOfInstances: 1
+        nsVirtualLinkConnectivity:
+          - virtualLinkProfileId: null
+            cpdId:
+              - "vDelay_cpd_in"
+          - virtualLinkProfileId: null
+            cpdId:
+              - "vDelay_cpd_out"
+    pnfProfile: []
+    virtualLinkProfile: []
+    nsInstantiationLevel:
+      - nsLevelId: "il_delay_big"
+        description: "Big instantiation level for delay"
+        vnfToLevelMapping:
+          - vnfProfileId: "vDelay_profile"
+            numberOfInstances: 1
+        virtualLinkToLevelMapping: []
+    defaultNsInstantiationLevelId: "il_delay_big"
+    nsProfile:
+      - nsProfileId: "ns_profile_delay_big"
+        nsdId: "delay_v01"
+        nsDfId: "df_delay"
+        nsInstantiationLevelId: "il_delay_big"
+        minNumberOfInstances: 1
+        maxNumberOfInstances: 1
+    dependencies:
+      - primaryId:
+          - "vDelay_profile"
+        secondaryId: []
+security:
+  signature: "delay_NSD_SIGNATURE"
+  algorithm: "delay_NSD_ALGORITHM"
+  certificate: "delay_NSD_CERTIFICATE"

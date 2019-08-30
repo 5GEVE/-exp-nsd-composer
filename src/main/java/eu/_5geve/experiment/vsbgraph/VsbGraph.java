@@ -24,6 +24,8 @@ import org.jgrapht.io.StringComponentNameProvider;
 
 public class VsbGraph {
 
+  List<AtomicComponentVertex> aCVertices = new ArrayList<>();
+  List<VsbLinkVertex> vLVertices = new ArrayList<>();
   private VsBlueprint vsB;
   private Graph<VsbVertex, String> g;
 
@@ -32,13 +34,11 @@ public class VsbGraph {
     this.g = new SimpleGraph<>(String.class);
 
     // vertices
-    List<AtomicComponentVertex> aCVertices = new ArrayList<>();
     for (VsComponent vsc : vsB.getAtomicComponents()) {
       AtomicComponentVertex v = new AtomicComponentVertex(vsc);
       aCVertices.add(v);
       g.addVertex(v);
     }
-    List<VsbLinkVertex> vLVertices = new ArrayList<>();
     for (VsbLink vsl : vsB.getConnectivityServices()) {
       VsbLinkVertex v = new VsbLinkVertex(vsl);
       vLVertices.add(v);
@@ -115,5 +115,13 @@ public class VsbGraph {
 
   public Graph<VsbVertex, String> getG() {
     return g;
+  }
+
+  public List<AtomicComponentVertex> getaCVertices() {
+    return aCVertices;
+  }
+
+  public List<VsbLinkVertex> getvLVertices() {
+    return vLVertices;
   }
 }

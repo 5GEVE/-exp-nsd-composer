@@ -22,14 +22,20 @@ nsDf:
         instantiationLevel: "il_vBgSrc"
         minNumberOfInstances: 1
         maxNumberOfInstances: 1
-        nsVirtualLinkConnectivity: []
+        nsVirtualLinkConnectivity:
+        - virtualLinkProfileId: null
+          cpdId:
+            - "vBgSrc_cpd"
       - vnfProfileId: "vBgDst_profile"
         vnfdId: "vBgDst_01"
         flavourId: "df_vBgDst"
         instantiationLevel: "il_vBgDst"
         minNumberOfInstances: 1
         maxNumberOfInstances: 1
-        nsVirtualLinkConnectivity: []
+        nsVirtualLinkConnectivity:
+          - virtualLinkProfileId: null
+            cpdId:
+              - "vBgDst_cpd"
     pnfProfile: []
     virtualLinkProfile: []
     nsInstantiationLevel:

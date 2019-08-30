@@ -1,0 +1,32 @@
+strict graph G {
+  vCacheMid_profile [ label="vnfProfile_vCacheMid_profile" shape="box" style="filled" fillcolor="yellowgreen" ];
+  vCacheEdge_1_profile [ label="vnfProfile_vCacheEdge_1_profile" shape="box" style="filled" fillcolor="yellowgreen" ];
+  vCacheEdge_2_profile [ label="vnfProfile_vCacheEdge_2_profile" shape="box" style="filled" fillcolor="yellowgreen" ];
+  pDNS_profile [ label="pnfProfile_pDNS_profile" shape="box" style="filled" fillcolor="yellowgreen" ];
+  pOrigin_profile [ label="pnfProfile_pOrigin_profile" shape="box" style="filled" fillcolor="yellowgreen" ];
+  vl_profile_mgmt [ label="vlProfile_vl_profile_mgmt" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  vl_profile_users [ label="vlProfile_vl_profile_users" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  vl_profile_cache [ label="vlProfile_vl_profile_cache" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  vl_profile_origin [ label="vlProfile_vl_profile_origin" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  sap_mgmt [ label="Sap_sap_mgmt" shape="circle" style="filled" fillcolor="firebrick2" ];
+  sap_users [ label="Sap_sap_users" shape="circle" style="filled" fillcolor="firebrick2" ];
+  sap_origin [ label="Sap_sap_origin" shape="circle" style="filled" fillcolor="firebrick2" ];
+  vDelay_profile [ label="vnfProfile_vDelay_profile" shape="box" style="filled" fillcolor="yellowgreen" ];
+  vl_profile_vDelay_profile [ label="vlProfile_vl_profile_vDelay_profile" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  vCacheMid_profile -- vl_profile_mgmt [ label="vCacheMid_mgmt_ext" ];
+  vCacheMid_profile -- vl_profile_cache [ label="vCacheMid_cache_ext" ];
+  vCacheMid_profile -- vl_profile_origin [ label="vCacheMid_origin_ext" ];
+  vCacheEdge_1_profile -- vl_profile_mgmt [ label="vCacheEdge_1_mgmt_ext" ];
+  vCacheEdge_1_profile -- vl_profile_cache [ label="vCacheEdge_1_cache_ext" ];
+  vCacheEdge_1_profile -- vl_profile_users [ label="vCacheEdge_1_users_ext" ];
+  vCacheEdge_2_profile -- vl_profile_mgmt [ label="vCacheEdge_2_mgmt_ext" ];
+  vCacheEdge_2_profile -- vl_profile_cache [ label="vCacheEdge_2_cache_ext" ];
+  pDNS_profile -- vl_profile_mgmt [ label="dns_users" ];
+  pOrigin_profile -- vl_profile_mgmt [ label="origin_caches" ];
+  sap_mgmt -- vl_profile_mgmt [ label="sap_mgmt" ];
+  sap_users -- vl_profile_users [ label="sap_users" ];
+  sap_origin -- vl_profile_origin [ label="sap_origin" ];
+  vCacheEdge_2_profile -- vl_profile_vDelay_profile [ label="vCacheEdge_2_users_ext_new" ];
+  vl_profile_vDelay_profile -- vDelay_profile [ label="vDelay_cpd_in" ];
+  vDelay_profile -- vl_profile_users [ label="vDelay_cpd_out" ];
+}
