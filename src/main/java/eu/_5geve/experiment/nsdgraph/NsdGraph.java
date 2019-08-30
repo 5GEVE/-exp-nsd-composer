@@ -180,6 +180,8 @@ public class NsdGraph {
    */
   public void addVnfProfileVertex(VnfProfileVertex contextV, VirtualLinkProfileVertex vlP) {
     // TODO update Nsd model
+
+    // Update Graph
     vnfPVertices.add(contextV);
     g.addVertex(contextV);
     g.addEdge(contextV, vlP,
@@ -209,13 +211,17 @@ public class NsdGraph {
     ProfileVertex srcV = g.getEdgeSource(edge);
     ProfileVertex tarV = g.getEdgeTarget(edge);
     if (srcV instanceof VnfProfileVertex && tarV instanceof VirtualLinkProfileVertex) {
-      g.addEdge(srcV, vlpNewV, srcV.getProfileId() + "_" + vlpNewV.getProfileId());
-      g.addEdge(vlpNewV, contextV, vlpNewV.getProfileId() + "+" + contextV.getProfileId());
-      g.addEdge(contextV, tarV, contextV.getProfileId() + "_" + tarV.getProfileId());
+      g.addEdge(srcV, vlpNewV, edge + "_new");
+      g.addEdge(vlpNewV, contextV,
+          contextV.getVnfProfile().getNsVirtualLinkConnectivity().get(0).getCpdId().get(0));
+      g.addEdge(contextV, tarV,
+          contextV.getVnfProfile().getNsVirtualLinkConnectivity().get(1).getCpdId().get(0));
     } else if (srcV instanceof VirtualLinkProfileVertex && tarV instanceof VnfProfileVertex) {
-      g.addEdge(srcV, contextV, srcV.getProfileId() + "_" + contextV.getProfileId());
-      g.addEdge(contextV, vlpNewV, contextV.getProfileId() + "_" + vlpNewV.getProfileId());
-      g.addEdge(vlpNewV, tarV, vlpNewV.getProfileId() + "_" + tarV.getProfileId());
+      g.addEdge(srcV, contextV,
+          contextV.getVnfProfile().getNsVirtualLinkConnectivity().get(0).getCpdId().get(0));
+      g.addEdge(contextV, vlpNewV,
+          contextV.getVnfProfile().getNsVirtualLinkConnectivity().get(1).getCpdId().get(0));
+      g.addEdge(vlpNewV, tarV, edge + "_new");
     } else {
       throw new IllegalArgumentException("Graph is not valid");
     }

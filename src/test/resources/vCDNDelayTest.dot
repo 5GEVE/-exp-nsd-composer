@@ -26,7 +26,7 @@ strict graph G {
   sap_mgmt -- vl_profile_mgmt [ label="sap_mgmt" ];
   sap_users -- vl_profile_users [ label="sap_users" ];
   sap_origin -- vl_profile_origin [ label="sap_origin" ];
-  vCacheEdge_2_profile -- vl_profile_vDelay_profile [ label="vCacheEdge_2_profile_vl_profile_vDelay_profile" ];
-  vl_profile_vDelay_profile -- vDelay_profile [ label="vl_profile_vDelay_profile+vDelay_profile" ];
-  vDelay_profile -- vl_profile_users [ label="vDelay_profile_vl_profile_users" ];
+  vCacheEdge_2_profile -- vl_profile_vDelay_profile [ label="vCacheEdge_2_users_ext_new" ];
+  vl_profile_vDelay_profile -- vDelay_profile [ label="vDelay_cpd_in" ];
+  vDelay_profile -- vl_profile_users [ label="vDelay_cpd_out" ];
 }
