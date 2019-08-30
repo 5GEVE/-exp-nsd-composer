@@ -2,6 +2,7 @@ package eu._5geve.experiment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import eu._5geve.experiment.Builder.CompositionStrat;
 import eu._5geve.experiment.nsdgraph.NsdGraph;
 import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import org.jgrapht.io.ExportException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +34,23 @@ public class BuilderTest {
     Builder b = new Builder(vCDN, contexts);
     LOG.info(b.toString());
 
-    NsdGraph exp = b.buildExperiment();
+    NsdGraph exp = b.buildExperiment(CompositionStrat.CONNECT);
+    LOG.info("\n---\n" + exp.exportGraphViz());
+  }
+
+  @Test
+  public void vCDNdelayTest() throws IOException, ExportException {
+    InputStream isvCDN = App.class.getResourceAsStream("/nsd-examples/nsd_vCDN_pnf_gui.yaml");
+    Nsd vCDN = OBJECT_MAPPER.readValue(isvCDN, Nsd.class);
+    InputStream isDel = App.class.getResourceAsStream("/nsd-examples/nsd_cb_del.yaml");
+    Nsd del = OBJECT_MAPPER.readValue(isDel, Nsd.class);
+
+    ArrayList<Nsd> contexts = new ArrayList<>();
+    contexts.add(del);
+    Builder b = new Builder(vCDN, contexts);
+    LOG.info(b.toString());
+
+    NsdGraph exp = b.buildExperiment(CompositionStrat.PASS);
     LOG.info("\n---\n" + exp.exportGraphViz());
   }
 

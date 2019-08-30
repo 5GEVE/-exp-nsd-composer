@@ -8,9 +8,9 @@ import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
-import javax.jws.soap.SOAPBinding.Use;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Builder {
 
@@ -30,12 +30,11 @@ public class Builder {
     contextNsds.forEach(c -> this.contextNsdGraphs.add(new NsdGraph(c)));
   }
 
-  public NsdGraph buildExperiment() {
+  public NsdGraph buildExperiment(CompositionStrat strat) {
     NsdGraph expNsdGraph = new NsdGraph(verticalNsdGraph.getNsd());
     for (NsdGraph c : contextNsdGraphs) {
-      // TODO handle this information
-      String cType = UserMock.getContextType();
-      if (cType.equals("normal")) {
+      // TODO compositionStrategy should depend on the context.
+      if (strat == CompositionStrat.CONNECT) {
         for (VnfProfileVertex vnfP : c.getVnfPVertices()) {
           // TODO ask user to select a VitualLinkProfileVertex
           VirtualLinkProfileVertex vlP;
@@ -46,19 +45,21 @@ public class Builder {
           }
           expNsdGraph.addVnfProfileVertex(vnfP, vlP);
         }
-      } else if (cType.equals("passthrough")) {
+      } else if (strat == CompositionStrat.PASS) {
         boolean first = true;
         for (VnfProfileVertex vnfP : c.getVnfPVertices()) {
           // TODO ask user to select an edge
           String e = "";
-          if (first){
+          if (first) {
             e = UserMock.getEdge1(expNsdGraph);
-            first=false;
-          } else{
+            first = false;
+          } else {
             e = UserMock.getEdge2(expNsdGraph);
           }
           expNsdGraph.addVnfProfileVertex(vnfP, e);
         }
+      } else {
+        throw new NotImplementedException();
       }
     }
     return expNsdGraph;
@@ -74,9 +75,14 @@ public class Builder {
 
   public String toString() {
     StringBuilder b = new StringBuilder();
-    b.append("Builder. Nsd: " + verticalNsdGraph.getNsd().getNsdIdentifier() + ".");
+    b.append("Builder. Nsd: ").append(verticalNsdGraph.getNsd().getNsdIdentifier()).append(".");
     b.append(" Contexts: ");
     contextNsdGraphs.forEach(c -> b.append(c.getNsd().getNsdIdentifier()));
     return b.toString();
+  }
+
+  public enum CompositionStrat {
+    CONNECT,
+    PASS
   }
 }
