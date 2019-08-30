@@ -2,10 +2,10 @@ package eu._5geve.experiment;
 
 import eu._5geve.experiment.nsdgraph.NsdGraph;
 import eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex;
+import eu._5geve.experiment.nsdgraph.VnfProfileVertex;
 import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,30 +28,26 @@ public class Builder {
     contextNsds.forEach(c -> this.contextNsdGraphs.add(new NsdGraph(c)));
   }
 
-  static <E> void permK(List<E> p, int i, int k, List<List<E>> out) {
-    if (i == k) {
-      List<E> l = new ArrayList<>(p.subList(0, k));
-      out.add(l);
-    } else {
-      for (int j = i; j < p.size(); j++) {
-        Collections.swap(p, i, j);
-        permK(p, i + 1, k, out);
-        Collections.swap(p, i, j);
+  public NsdGraph buildExperiment() {
+    NsdGraph expNsdGraph = new NsdGraph(verticalNsdGraph.getNsd());
+    for (NsdGraph c: contextNsdGraphs){
+      String cType = "passthrough"; // else "normal"
+      if (cType.equals("normal")){
+        for (VnfProfileVertex vnfP: c.getVnfPVertices()){
+          // ask user to select a VitualLinkProfileVertex
+          VirtualLinkProfileVertex vlP = null;
+          expNsdGraph.addVnfProfileVertex(vnfP, vlP);
+        }
+      } else if (cType.equals("passthrough")){
+        for (VnfProfileVertex vnfP: c.getVnfPVertices()){
+          // ask user to select an edge
+          String e = null;
+          expNsdGraph.addVnfProfileVertex(vnfP, e);
+
+        }
       }
     }
-  }
-
-  public List<NsdGraph> buildExperiments() {
-    // Creating just one experiment (simple case)
-    NsdGraph expNsdGraph = new NsdGraph(verticalNsdGraph.getNsd());
-
-    // context with 2 elements. Compute k-permutations of virtual links
-    List<List<VirtualLinkProfileVertex>> perm = new ArrayList<>();
-    permK(expNsdGraph.getVlPVertices(), 0, 2, perm);
-    perm.forEach(
-        p -> LOG.info("[" + p.get(0).getProfileId() + "," + p.get(1).getProfileId() + "]"));
-
-    return new ArrayList<>();
+    return expNsdGraph;
   }
 
   public NsdGraph getVerticalNsdGraph() {

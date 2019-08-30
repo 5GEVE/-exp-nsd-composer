@@ -27,12 +27,12 @@ import org.jgrapht.io.StringComponentNameProvider;
 
 public class NsdGraph {
 
-  private Nsd nsd;
-  private Graph<ProfileVertex, String> g;
   List<VnfProfileVertex> vnfPVertices = new ArrayList<>();
   List<PnfProfileVertex> pnfPVertices = new ArrayList<>();
   List<VirtualLinkProfileVertex> vlPVertices = new ArrayList<>();
   List<SapVertex> sapVertices = new ArrayList<>();
+  private Nsd nsd;
+  private Graph<ProfileVertex, String> g;
 
   public NsdGraph(Nsd nsd) {
     this.nsd = nsd;
@@ -167,4 +167,23 @@ public class NsdGraph {
     return sapVertices;
   }
 
+  public void addVnfProfileVertex(VnfProfileVertex vnfP, VirtualLinkProfileVertex vlP) {
+    // TODO update Nsd model
+    vnfPVertices.add(vnfP);
+    g.addVertex(vnfP);
+    g.addEdge(vnfP, vlP,
+        vnfP.getVnfProfile().getNsVirtualLinkConnectivity().get(0).getCpdId().get(0));
+  }
+
+  public void addVnfProfileVertex(VnfProfileVertex vnfP, String edge) {
+    // TODO update Nsd model
+    vnfPVertices.add(vnfP);
+    g.addVertex(vnfP);
+    // create 2 new VirtualLinkProfileVertex
+    VirtualLinkProfileVertex vlp1 = null;
+    VirtualLinkProfileVertex vlp2 = null;
+    g.addEdge(vnfP, vlp1, "new_name_1");
+    g.addEdge(vnfP, vlp2, "new_name_2");
+    g.removeEdge(edge);
+  }
 }
