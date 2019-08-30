@@ -1,5 +1,7 @@
 package eu._5geve.experiment;
 
+import static org.junit.Assert.assertEquals;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import eu._5geve.blueprint.vsb.VsBlueprint;
@@ -7,49 +9,20 @@ import eu._5geve.experiment.vsbgraph.VsbGraph;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
+import java.util.Scanner;
 import org.jgrapht.io.ExportException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
-
 public class VsbGraphTest {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
-  private static final String NL = System.getProperty("line.separator");
-  private final static String VCDN_GRAPHVIZ =
-      "strict graph G {" + NL +
-          "  vCacheMid_01 [ label=\"atomicComponent_vCacheMid_01\" shape=\"box\" style=\"filled\" fillcolor=\"yellowgreen\" ];"
-          + NL +
-          "  pDNS_v01 [ label=\"atomicComponent_pDNS_v01\" shape=\"box\" style=\"filled\" fillcolor=\"yellowgreen\" ];"
-          + NL +
-          "  vCacheEdge_1_01 [ label=\"atomicComponent_vCacheEdge_1_01\" shape=\"box\" style=\"filled\" fillcolor=\"yellowgreen\" ];"
-          + NL +
-          "  pOrigin_v01 [ label=\"atomicComponent_pOrigin_v01\" shape=\"box\" style=\"filled\" fillcolor=\"yellowgreen\" ];"
-          + NL +
-          "  0 [ label=\"vsbLink_vCacheEdge_1_users_ext\" shape=\"oval\" style=\"filled\" fillcolor=\"dodgerblue\" ];"
-          + NL +
-          "  1 [ label=\"vsbLink_vCacheEdge_1_mgmt_ext_dns_users_vCacheMid_mgmt_ext_origin_caches\" shape=\"oval\" style=\"filled\" fillcolor=\"dodgerblue\" ];"
-          + NL +
-          "  2 [ label=\"vsbLink_vCacheEdge_1_cache_ext_vCacheMid_cache_ext\" shape=\"oval\" style=\"filled\" fillcolor=\"dodgerblue\" ];"
-          + NL +
-          "  3 [ label=\"vsbLink_vCacheMid_origin_ext\" shape=\"oval\" style=\"filled\" fillcolor=\"dodgerblue\" ];"
-          + NL +
-          "  vCacheMid_01 -- 1 [ label=\"vCacheMid_mgmt_ext\" ];" + NL +
-          "  vCacheMid_01 -- 2 [ label=\"vCacheMid_cache_ext\" ];" + NL +
-          "  vCacheMid_01 -- 3 [ label=\"vCacheMid_origin_ext\" ];" + NL +
-          "  pDNS_v01 -- 1 [ label=\"dns_users\" ];" + NL +
-          "  vCacheEdge_1_01 -- 1 [ label=\"vCacheEdge_1_mgmt_ext\" ];" + NL +
-          "  vCacheEdge_1_01 -- 2 [ label=\"vCacheEdge_1_cache_ext\" ];" + NL +
-          "  vCacheEdge_1_01 -- 0 [ label=\"vCacheEdge_1_users_ext\" ];" + NL +
-          "  pOrigin_v01 -- 1 [ label=\"origin_caches\" ];" + NL +
-          "}" + NL;
   private static Logger LOG = LoggerFactory
       .getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 
   @Test
-  public void vCDNGuiTest() throws IOException {
+  public void vCDNGuiTest() throws IOException, ExportException {
     InputStream isVsb = App.class.getResourceAsStream("/nsd-examples/vsb_vCDN_gui.yaml");
     VsBlueprint vsb = OBJECT_MAPPER.readValue(isVsb, VsBlueprint.class);
 
@@ -60,20 +33,12 @@ public class VsbGraphTest {
     // Copy the output to a text file called 'example.txt'
     // Create a PNG with:
     // sfdp -Tpng example.txt -o example.png
-    try {
-      LOG.info("GraphViz export:\n{}", vsbGraph.exportGraphViz());
-      assertEquals(VCDN_GRAPHVIZ, vsbGraph.exportGraphViz());
-    } catch (ExportException e) {
-      e.printStackTrace();
-    }
+    LOG.info("GraphViz export:\n{}", vsbGraph.exportGraphViz());
 
-    try {
-      LOG.info("GraphML export:\n{}", vsbGraph.exportGraphML());
-    } catch (ExportException e) {
-      e.printStackTrace();
-    }
-
-
+    String testFile = new Scanner(this.getClass().getResourceAsStream("/VsbvCDNGuiTest.dot"),
+        "UTF-8")
+        .useDelimiter("\\A").next();
+    assertEquals(testFile, vsbGraph.exportGraphViz());
   }
 
 }
