@@ -1,6 +1,7 @@
 package eu._5geve.experiment.nsdgraph;
 
 import it.nextworks.nfvmano.libs.descriptors.common.elements.VirtualLinkProfile;
+import it.nextworks.nfvmano.libs.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.descriptors.nsd.PnfProfile;
@@ -8,6 +9,7 @@ import it.nextworks.nfvmano.libs.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.descriptors.nsd.VnfProfile;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,6 +26,8 @@ import org.jgrapht.io.ExportException;
 import org.jgrapht.io.GraphMLExporter;
 import org.jgrapht.io.IntegerComponentNameProvider;
 import org.jgrapht.io.StringComponentNameProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NsdGraph {
 
@@ -167,23 +171,55 @@ public class NsdGraph {
     return sapVertices;
   }
 
-  public void addVnfProfileVertex(VnfProfileVertex vnfP, VirtualLinkProfileVertex vlP) {
+  /**
+   * Add a 'normal' VNF of a context Nsd. The new vertex is simply connected to the
+   * VirtualLinkProfileVertex in the input.
+   *
+   * @param contextV A context VNF vertex.
+   * @param vlP The vertex where the VNF should be attached to.
+   */
+  public void addVnfProfileVertex(VnfProfileVertex contextV, VirtualLinkProfileVertex vlP) {
     // TODO update Nsd model
-    vnfPVertices.add(vnfP);
-    g.addVertex(vnfP);
-    g.addEdge(vnfP, vlP,
-        vnfP.getVnfProfile().getNsVirtualLinkConnectivity().get(0).getCpdId().get(0));
+    vnfPVertices.add(contextV);
+    g.addVertex(contextV);
+    g.addEdge(contextV, vlP,
+        contextV.getVnfProfile().getNsVirtualLinkConnectivity().get(0).getCpdId().get(0));
   }
 
-  public void addVnfProfileVertex(VnfProfileVertex vnfP, String edge) {
+  /**
+   * Add a 'passthrough' VNF of a context Nsd. A new VirtualLinkProfileVertex is created as well as
+   * necessary edges. The edge in input is removed from the graph.
+   *
+   * @param contextV A context VNF vertex.
+   * @param edge The edge where the VNF should be placed.
+   */
+  public void addVnfProfileVertex(VnfProfileVertex contextV, String edge) {
     // TODO update Nsd model
-    vnfPVertices.add(vnfP);
-    g.addVertex(vnfP);
-    // create 2 new VirtualLinkProfileVertex
-    VirtualLinkProfileVertex vlp1 = null;
-    VirtualLinkProfileVertex vlp2 = null;
-    g.addEdge(vnfP, vlp1, "new_name_1");
-    g.addEdge(vnfP, vlp2, "new_name_2");
+    VirtualLinkProfile vlpNew = new VirtualLinkProfile(new NsDf(),
+        "vl_profile_" + contextV.getProfileId(), "vl_" + contextV.getProfileId(),
+        "vl_df_" + contextV.getProfileId(), null, null, null, null);
+
+    // Update graph
+    vnfPVertices.add(contextV);
+    g.addVertex(contextV);
+    VirtualLinkProfileVertex vlpNewV = new VirtualLinkProfileVertex(vlpNew);
+    vlPVertices.add(vlpNewV);
+    g.addVertex(vlpNewV);
+
+    g.edgeSet().forEach(e -> System.out.println(e));
+    ProfileVertex srcV = g.getEdgeSource(edge);
+    ProfileVertex tarV = g.getEdgeTarget(edge);
+    if (srcV instanceof VnfProfileVertex && tarV instanceof VirtualLinkProfileVertex) {
+      g.addEdge(srcV, vlpNewV, srcV.getProfileId() + "_" + vlpNewV.getProfileId());
+      g.addEdge(vlpNewV, contextV, vlpNewV.getProfileId() + "+" + contextV.getProfileId());
+      g.addEdge(contextV, tarV, contextV.getProfileId() + "_" + tarV.getProfileId());
+    } else if (srcV instanceof VirtualLinkProfileVertex && tarV instanceof VnfProfileVertex) {
+      g.addEdge(srcV, contextV, srcV.getProfileId() + "_" + contextV.getProfileId());
+      g.addEdge(contextV, vlpNewV, contextV.getProfileId() + "_" + vlpNewV.getProfileId());
+      g.addEdge(vlpNewV, tarV, vlpNewV.getProfileId() + "_" + tarV.getProfileId());
+    } else {
+      throw new IllegalArgumentException("Graph is not valid");
+    }
     g.removeEdge(edge);
   }
 }

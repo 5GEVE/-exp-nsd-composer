@@ -8,6 +8,7 @@ import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
+import javax.jws.soap.SOAPBinding.Use;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,9 +47,16 @@ public class Builder {
           expNsdGraph.addVnfProfileVertex(vnfP, vlP);
         }
       } else if (cType.equals("passthrough")) {
+        boolean first = true;
         for (VnfProfileVertex vnfP : c.getVnfPVertices()) {
           // TODO ask user to select an edge
-          String e = UserMock.getEdge(expNsdGraph);
+          String e = "";
+          if (first){
+            e = UserMock.getEdge1(expNsdGraph);
+            first=false;
+          } else{
+            e = UserMock.getEdge2(expNsdGraph);
+          }
           expNsdGraph.addVnfProfileVertex(vnfP, e);
         }
       }
