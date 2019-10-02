@@ -107,9 +107,9 @@ public class NsdGraph {
         map.put("style", DefaultAttribute.createAttribute("filled"));
         map.put("fillcolor", DefaultAttribute.createAttribute("yellowgreen"));
       } else if (v instanceof SapVertex) {
-        map.put("shape", DefaultAttribute.createAttribute("circle"));
+        map.put("shape", DefaultAttribute.createAttribute("oval"));
         map.put("style", DefaultAttribute.createAttribute("filled"));
-        map.put("fillcolor", DefaultAttribute.createAttribute("firebrick2"));
+        map.put("fillcolor", DefaultAttribute.createAttribute("darksalmon"));
       } else {
         map = null;
       }
@@ -117,6 +117,7 @@ public class NsdGraph {
     };
     DOTExporter<ProfileVertex, String> exporter = new DOTExporter<>(vertexIdProvider,
         vertexLabelProvider, new StringComponentNameProvider<>(), vertexAttributeProvider, null);
+    exporter.putGraphAttribute("splines", "false");
     Writer writer = new StringWriter();
     exporter.exportGraph(g, writer);
     return writer.toString();
