@@ -1,6 +1,6 @@
 package eu._5geve.experiment.nsdgraph;
 
-import it.nextworks.nfvmano.libs.descriptors.nsd.VnfProfile;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 
 public class VnfProfileVertex implements ProfileVertex {
 

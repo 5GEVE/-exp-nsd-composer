@@ -5,7 +5,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import eu._5geve.blueprint.vsb.VsBlueprint;
 import eu._5geve.experiment.nsdgraph.NsdGraph;
 import eu._5geve.experiment.nsdgraph.ProfileVertex;
-import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;

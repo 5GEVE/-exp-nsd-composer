@@ -1,12 +1,12 @@
 package eu._5geve.experiment.nsdgraph;
 
-import it.nextworks.nfvmano.libs.descriptors.common.elements.VirtualLinkProfile;
-import it.nextworks.nfvmano.libs.descriptors.nsd.NsDf;
-import it.nextworks.nfvmano.libs.descriptors.nsd.NsVirtualLinkConnectivity;
-import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
-import it.nextworks.nfvmano.libs.descriptors.nsd.PnfProfile;
-import it.nextworks.nfvmano.libs.descriptors.nsd.Sapd;
-import it.nextworks.nfvmano.libs.descriptors.nsd.VnfProfile;
+import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.PnfProfile;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.invoke.MethodHandles;

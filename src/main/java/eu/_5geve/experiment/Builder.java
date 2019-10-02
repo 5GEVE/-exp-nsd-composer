@@ -4,7 +4,7 @@ import eu._5geve.experiment.nsdgraph.NsdGraph;
 import eu._5geve.experiment.nsdgraph.UserMock;
 import eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex;
 import eu._5geve.experiment.nsdgraph.VnfProfileVertex;
-import it.nextworks.nfvmano.libs.descriptors.nsd.Nsd;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;

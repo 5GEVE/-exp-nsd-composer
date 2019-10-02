@@ -1,6 +1,6 @@
 package eu._5geve.experiment.nsdgraph;
 
-import it.nextworks.nfvmano.libs.descriptors.nsd.Sapd;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 
 public class SapVertex implements ProfileVertex {
 
