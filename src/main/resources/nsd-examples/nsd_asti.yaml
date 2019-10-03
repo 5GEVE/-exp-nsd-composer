@@ -1,5 +1,5 @@
 ---
-nsdIdentifier: "vCDN_pnf_v01"
+nsdIdentifier: "nsd_asti"
 designer: "NXW"
 version: "0.1"
 nsdName: "vCDN_TIMEO_BLUESPACE"
