@@ -2,6 +2,8 @@ package eu._5geve.experiment.nsdgraph;
 
 public class UserMock {
 
+  //TODO in Test code set variable to know which test is being executed and return correct values
+
   public static VirtualLinkProfileVertex getVLPVertex1(NsdGraph exp) {
     return (VirtualLinkProfileVertex) exp.getG().vertexSet().stream()
         .filter(v -> v.getProfileId().equals("vl_profile_users")).findAny().get();

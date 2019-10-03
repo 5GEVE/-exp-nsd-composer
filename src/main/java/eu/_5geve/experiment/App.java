@@ -31,7 +31,7 @@ public class App {
     Nsd nsd = OBJECT_MAPPER.readValue(is, Nsd.class);
     LOG.info("Dump:\n{}", OBJECT_MAPPER.writeValueAsString(nsd));
 
-    InputStream isVsb = App.class.getResourceAsStream("/nsd-examples/vsb_vCDN_gui.yaml");
+    InputStream isVsb = App.class.getResourceAsStream("/vsb-examples/vsb_vCDN_gui.yaml");
     VsBlueprint vsb = OBJECT_MAPPER.readValue(isVsb, VsBlueprint.class);
     LOG.info("Dump:\n{}", OBJECT_MAPPER.writeValueAsString(vsb));
 

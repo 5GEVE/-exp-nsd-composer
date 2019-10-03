@@ -23,7 +23,7 @@ public class VsbGraphTest {
 
   @Test
   public void vCDNGuiTest() throws IOException, ExportException {
-    InputStream isVsb = App.class.getResourceAsStream("/nsd-examples/vsb_vCDN_gui.yaml");
+    InputStream isVsb = App.class.getResourceAsStream("/vsb-examples/vsb_vCDN_gui.yaml");
     VsBlueprint vsb = OBJECT_MAPPER.readValue(isVsb, VsBlueprint.class);
 
     VsbGraph vsbGraph = new VsbGraph(vsb);
@@ -41,4 +41,23 @@ public class VsbGraphTest {
     assertEquals(testFile, vsbGraph.exportGraphViz());
   }
 
+  @Test
+  public void ASTITest() throws IOException, ExportException {
+    InputStream isVsb = App.class.getResourceAsStream("/vsb-examples/vsb_asti_agv.yaml");
+    VsBlueprint vsb = OBJECT_MAPPER.readValue(isVsb, VsBlueprint.class);
+
+    VsbGraph vsbGraph = new VsbGraph(vsb);
+
+    // TODO move this information
+    // Export to graphviz.
+    // Copy the output to a text file called 'example.txt'
+    // Create a PNG with:
+    // sfdp -Tpng example.txt -o example.png
+    LOG.info("GraphViz export:\n{}", vsbGraph.exportGraphViz());
+
+    String testFile = new Scanner(this.getClass().getResourceAsStream("/VsbvCDNGuiTest.dot"),
+        "UTF-8")
+        .useDelimiter("\\A").next();
+    assertEquals(testFile, vsbGraph.exportGraphViz());
+  }
 }
