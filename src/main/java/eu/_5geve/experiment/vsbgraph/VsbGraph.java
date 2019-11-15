@@ -79,6 +79,7 @@ public class VsbGraph {
     };
     DOTExporter<VsbVertex, String> exporter = new DOTExporter<>(vertexIdProvider,
         vertexLabelProvider, new StringComponentNameProvider<>(), vertexAttributeProvider, null);
+    exporter.putGraphAttribute("splines", "false");
     Writer writer = new StringWriter();
     exporter.exportGraph(g, writer);
     return writer.toString();
