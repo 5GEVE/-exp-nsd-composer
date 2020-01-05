@@ -22,28 +22,8 @@ public class NsdGraphTest {
   private static Logger LOG = LoggerFactory
       .getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 
+  @Test
   @Ignore
-  @Test
-  public void vCDNGuiTest() throws IOException, ExportException {
-    InputStream isNsd = App.class.getResourceAsStream("/nsd-examples/nsd_vCDN_pnf_gui.yaml");
-    Nsd nsd = OBJECT_MAPPER.readValue(isNsd, Nsd.class);
-
-    NsdGraph nsdGraph = new NsdGraph(nsd);
-
-    // TODO move this information
-    // Export to graphviz.
-    // Copy the output to a text file called 'example.txt'
-    // Create a PNG with:
-    // sfdp -Tpng example.txt -o example.png
-    LOG.info("GraphViz export:\n{}", nsdGraph.exportGraphViz());
-
-    String testFile = new Scanner(this.getClass().getResourceAsStream("/NsdvCDNGuiTest.dot"),
-        "UTF-8")
-        .useDelimiter("\\A").next();
-    assertEquals(testFile, nsdGraph.exportGraphViz());
-  }
-
-  @Test
   public void NsdAstiTest() throws IOException, ExportException {
     InputStream isNsd = App.class.getResourceAsStream("/nsd-examples/nsd_asti.yaml");
     Nsd nsd = OBJECT_MAPPER.readValue(isNsd, Nsd.class);
@@ -57,6 +37,7 @@ public class NsdGraphTest {
     // sfdp -Tpng example.txt -o example.png
     LOG.info("GraphViz export:\n{}", nsdGraph.exportGraphViz());
 
+    // TODO
     //String testFile = new Scanner(this.getClass().getResourceAsStream("/NsdvCDNGuiTest.dot"),
     //    "UTF-8")
     //    .useDelimiter("\\A").next();
