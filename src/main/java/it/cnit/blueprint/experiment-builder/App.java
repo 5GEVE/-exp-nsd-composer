@@ -86,7 +86,7 @@ public class App {
     g.addEdge(v3, v1);
     g.addEdge(v4, v3);
 
-    GraphJApplet applet = new GraphJApplet();
+    eu._5geve.experiment.GraphJApplet applet = new eu._5geve.experiment.GraphJApplet();
     applet.init(g);
 
     JFrame frame = new JFrame();

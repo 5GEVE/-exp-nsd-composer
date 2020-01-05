@@ -3,7 +3,7 @@ package eu._5geve.experiment.vsbgraph;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class VsbLinkVertex implements VsbVertex {
+public class VsbLinkVertex implements eu._5geve.experiment.vsbgraph.VsbVertex {
 
   private static final AtomicLong NEXT_ID = new AtomicLong(0);
 

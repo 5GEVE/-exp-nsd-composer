@@ -2,7 +2,7 @@ package eu._5geve.experiment.vsbgraph;
 
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 
-public class AtomicComponentVertex implements VsbVertex {
+public class AtomicComponentVertex implements eu._5geve.experiment.vsbgraph.VsbVertex {
 
   private final VsComponent vsComponent;
 

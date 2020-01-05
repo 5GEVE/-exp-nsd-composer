@@ -32,7 +32,7 @@ public class BuilderTest {
 
     ArrayList<Nsd> contexts = new ArrayList<>();
     contexts.add(del);
-    Builder b = new Builder(vCDN, contexts);
+    eu._5geve.experiment.Builder b = new eu._5geve.experiment.Builder(vCDN, contexts);
     LOG.info(b.toString());
 
     NsdGraph exp = b.buildExperiment(CompositionStrat.PASS);
