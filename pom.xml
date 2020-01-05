@@ -11,7 +11,7 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>it.cnit.blueprint</groupId>
-  <artifactId>experiment-builder</artifactId>
+  <artifactId>expbuilder</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <description>A REST API module to compose VSD and CDs.</description>
   <url>https://github.com/TheWall89/5geve-experiment-builder</url>
@@ -116,7 +116,7 @@
             <configuration>
               <images>
                 <image>
-                  <alias>experiment-builder-dev</alias>
+                  <alias>expbuilder-dev</alias>
                   <name>${docker.repository}/${project.name}:${project.version}</name>
                   <build>
                     <dockerFileDir>${project.basedir}</dockerFileDir>
@@ -144,7 +144,7 @@
             <configuration>
               <images>
                 <image>
-                  <alias>experiment-builder-prod</alias>
+                  <alias>expbuilder-prod</alias>
                   <name>${docker.repository}/${project.name}:${project.version}</name>
                   <build>
                     <dockerFileDir>${project.basedir}</dockerFileDir>
