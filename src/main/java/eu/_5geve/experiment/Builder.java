@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Builder {
 
@@ -59,7 +58,7 @@ public class Builder {
           expNsdGraph.addVnfProfileVertex(vnfP, e);
         }
       } else {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException("Not Implemented yet.");
       }
     }
     return expNsdGraph;

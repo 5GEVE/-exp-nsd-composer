@@ -1,8 +1,8 @@
 package eu._5geve.experiment.vsbgraph;
 
-import eu._5geve.blueprint.vsb.VsBlueprint;
-import eu._5geve.blueprint.vsb.VsComponent;
-import eu._5geve.blueprint.vsb.VsbLink;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package eu._5geve.experiment.vsbgraph;
 
-import eu._5geve.blueprint.vsb.VsbLink;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class VsbLinkVertex implements VsbVertex {

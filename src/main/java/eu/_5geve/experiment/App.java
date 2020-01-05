@@ -2,9 +2,9 @@ package eu._5geve.experiment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import eu._5geve.blueprint.vsb.VsBlueprint;
 import eu._5geve.experiment.nsdgraph.NsdGraph;
 import eu._5geve.experiment.nsdgraph.ProfileVertex;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
 import java.io.InputStream;

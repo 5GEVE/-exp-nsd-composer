@@ -1,6 +1,6 @@
 package eu._5geve.experiment.vsbgraph;
 
-import eu._5geve.blueprint.vsb.VsComponent;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 
 public class AtomicComponentVertex implements VsbVertex {
 

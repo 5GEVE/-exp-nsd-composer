@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import eu._5geve.blueprint.vsb.VsBlueprint;
 import eu._5geve.experiment.vsbgraph.VsbGraph;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
