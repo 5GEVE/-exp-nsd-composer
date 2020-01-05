@@ -78,18 +78,19 @@ endPoints:
   external: true
   management: true
   ranConnection: true
-vsBlueprintId: null
+blueprintId: "d52f534c-ac7d-4588-9ba2-29420b0eebd9"
 serviceSequence:
-- vsComponentId: "vCacheEdge_1_01"
-  endPointId: "vCacheEdge_1_users_ext"
-- vsComponentId: "vCacheEdge_1_01"
-  endPointId: "vCacheEdge_1_cache_ext"
-- vsComponentId: "vCacheMid_01"
-  endPointId: "vCacheMid_cache_ext"
-- vsComponentId: "vCacheMid_01"
-  endPointId: "vCacheMid_origin_ext"
-- vsComponentId: "pOrigin_v01"
-  endPointId: "origin_caches"
+- hopEndPoints:
+  - vsComponentId: "vCacheEdge_1_01"
+    endPointId: "vCacheEdge_1_users_ext"
+  - vsComponentId: "vCacheEdge_1_01"
+    endPointId: "vCacheEdge_1_cache_ext"
+  - vsComponentId: "vCacheMid_01"
+    endPointId: "vCacheMid_cache_ext"
+  - vsComponentId: "vCacheMid_01"
+    endPointId: "vCacheMid_origin_ext"
+  - vsComponentId: "pOrigin_v01"
+    endPointId: "origin_caches"
 connectivityServices:
 - endPointIds:
   - "vCacheEdge_1_users_ext"

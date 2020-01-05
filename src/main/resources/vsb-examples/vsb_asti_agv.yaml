@@ -1,54 +1,28 @@
-# vsb_asti_agv
+# vsb_asti_agv.yaml
 ---
-vsBlueprintId: '513e154e-4bee-45f1-9a11-40716dbbb684'
+blueprintId: 'vsb_asti_agv'
 version: '1.0'
 name: 'ASTI AGV control and automation'
 description: 'Blueprint for AGVs using 5G network for Automation and Control purposes'
-imgUrl: ''
 parameters:
   - parameterId: 'number_of_AGVs'
     parameterName: 'Number of AGVs'
     parameterType: 'number'
     parameterDescription: 'Number of AGVs (Mandatory)'
     applicabilityField: 'autonomous_vehicle'
-  - parameterId: 'location_of_AGVs'
-    parameterName: 'Location of the AGVs'
-    parameterType: 'geolocation'
-    parameterDescription: 'Location of AGVs (Mandatory)'
-    applicabilityField: 'autonomous_vehicle'
-  - parameterId: 'no_of_ctrl_servers'
-    parameterName: 'Number of controller servers'
-    parameterType: 'number'
-    parameterDescription: 'Number of VNF instances to be used for the Controller'
-    applicabilityField: 'autonomous_vehicle'
-  - parameterId: 'ctrl_image'
-    parameterName: 'PLC virtual image'
-    parameterType: 'string'
-    parameterDescription: 'Path or URL to the image of PLC software (Mandatory)'
-    applicabilityField: 'autonomous_vehicle'
-  - parameterId: 'average_data_rate_per_AGV'
-    parameterName: 'Average data rate per AGV'
-    parameterType: 'number'
-    parameterDescription: 'Average data rate per AGV (Optional)'
-    applicabilityField: 'autonomous_vehicle'
-  - parameterId: 'sap_location'
-    parameterName: 'Service Access Point location'
-    parameterType: 'geolocation'
-    parameterDescription: 'Service Access Point Location (Optional)'
-    applicabilityField: 'access_network'
 atomicComponents:
   - componentId: 'RAN'
     serversNumber: 1
     # componentName: 'Radio Access Network'
     imagesUrls: []
-    endPointsIds: ['SapRANVs', 'CpRANCtrl']
+    endPointsIds: ['SapRANVs', 'CpRANEpc']
     lifecycleOperations: {}
     # scalingRules: []
-  - componentId: 'Ctrl'
+  - componentId: 'Master_PLC'
     # componentName: 'Robot Controller Server'
     serversNumber: 1
-    imagesUrls: ['ctrl_image']
-    endPointsIds: ['CpCtrlRAN', 'CpCtrlEPC']
+    imagesUrls: ['master_plc_image']
+    endPointsIds: ['CpMPLC']
     lifecycleOperations:
       instantiate: 'scripts/instantiate'
       terminate: 'scripts/terminate'
@@ -56,16 +30,16 @@ atomicComponents:
       heal: 'scripts/heal'
     # scaling_rules: ['scale out if load > 60% for 2 mins']
   - componentId: 'vEPC'
-    # component_name: 'Virtualized EPC'
+    # componentName: 'Virtualized EPC'
     serversNumber: 1
     imagesUrls: []
-    endPointsIds: ['cpEPCCtrl', 'SapCoreExt']
+    endPointsIds: ['cpEPCRan', 'SapCoreExt']
     lifecycleOperations: null
     # scaling_rules: []
   - componentId: 'Mgmt'
-    # component_name: 'Robot Management Server'
+    # componentName: 'Robot Management Server'
     serversNumber: 1
-    imagesUrls: ['path/to/img_robot_mgmt.qcow']
+    imagesUrls: ['mgmt_image']
     endPointsIds: ['SapMgmt', 'SapAdmin']
     lifecycleOperations:
       instantiate: 'scripts/instantiate'
@@ -78,19 +52,15 @@ endPoints:
     external: true
     management: false
     ranConnection: true
-  - endPointId: 'CpRANCtrl'
+  - endPointId: 'CpRANEpc'
     external: false
     management: false
     ranConnection: false
-  - endPointId: 'CpCtrlRAN'
+  - endPointId: 'CpMPLC'
     external: false
     management: false
     ranConnection: false
-  - endPointId: 'CpCtrlEPC'
-    external: false
-    management: false
-    ranConnection: false
-  - endPointId: 'CpEPCCtrl'
+  - endPointId: 'CpEPCRan'
     external: false
     management: false
     ranConnection: false
@@ -106,82 +76,44 @@ endPoints:
     external: true
     management: false
     ranConnection: false
-translationRules:
-  - input:
-      - parameterId: 'number_of_AGVs'
-        minValue: 0
-        maxValue: 3
-      - parameterId: 'no_of_ctrl_servers'
-        minValue: 1
-        maxValue: 3
-    nsdId: 'nsd_asti_small'
-    nsdVersion: '1.0'
-    nsFlavourId: 'fl_asti_small'
-    nsInstantiationLevelId: 'il_asti_small'
-  - input:
-      - parameterId: 'number_of_AGVs'
-        minValue: 4
-        maxValue: 10
-      - parameterId: 'no_of_ctrl_servers'
-        minValue: 3
-        maxValue: 5
-    nsdId: 'nsd_asti_medium_id'
-    nsdVersion: '1.0'
-    nsFlavourId: 'fl_asti_medium'
-    nsInstantiationLevelId: 'il_asti_medium'
 connectivityServices:
-  - endPointIds: ['CpRanCtrl', 'CpCtrlRan']
-    external: false
-  - endPointIds: ['CpCtrlEPC', 'CpEPCCtrl']
+  - endPointIds: ['CpRanEpc', 'CpMPLC', 'CpEpcRan']
     external: false
   - endPointIds: ['SapCoreExt', 'SapMgmt']
     external: false
 serviceSequence:
-  - vsComponentId: 'RAN'
-    endPointId: 'SapRANVs'
-  - vsComponentId: 'RAN'
-    endPointId: 'CpRANCtrl'
-  - vsComponentId: 'Ctrl'
-    endPointId: 'CpCtrlRAN'
-contexts: ['ctx_id_1', 'ctx_id_2']
+  # sensor data flow
+  - hopEndPoints:
+    - vsComponentId: 'RAN'
+      endPointId: 'SapRANVs'
+    - vsComponentId: 'RAN'
+      endPointId: 'CpRANEpc'
+    - vsComponentId: 'Master_PLC'
+      endPointId: 'CpMPLC'
+compatibleContextBlueprint: ['ctx_delay', 'ctx_bg_traffic']
+applicationMetrics:
+  - metricId: 'navigation_level'
+    name: 'Measurement of the quality of the AGV navigation.'
+    metricCollectionType: 'GAUGE'
+    unit: ''
+    interval: '1s'
+    topic: '/app/navigation_level'
+  - metricId: 'power_consumption'
+    name: 'Measurement of the power consumption from the AGV.'
+    metricCollectionType: 'GAUGE'
+    unit: 'watt'
+    interval: '1s'
+    topic: '/app/power_consumption'
+  - metricId: 'time_to_lose_guide'
+    name: 'Amount after which the AGV lost the guide.'
+    metricCollectionType: 'CUMULATIVE'
+    unit: 's'
+    interval: '1s'
+    topic: '/app/time_to_lose_guide'
+  - metricId: 'connected_robots'
+    name: 'Number of currently connected robots'
+    metricCollectionType: 'GAUGE'
+    unit: ''
+    interval: '5s'
+    topic: '/app/connected-robots'
 
-# TODO fields to discuss
-
-# sites: ['spain']
-
-# sst: 'URLLC'
-
-# sla:
-#   - sla_req_id: 'SapRANVs_bw'
-#     sla_req_name: 'SapRANVs minimum bandwidth'
-#     sla_req_type: 'bandwidth'
-#     end_point_ids: ['SapRANVs']
-#     min_value: '10'
-#     unit: 'Mbps'
-#   - sla_req_id: 'Ran_Ctrl_lat'
-#     sla_req_name: 'Ran to Controller latency'
-#     sla_req_type: 'latency'
-#     end_point_ids: ['CpRanCtrl', 'CpCtrlRan']
-#     min_value: '20'
-#     unit: 'ms'
-#   - sla_req_id: 'availability'
-#     sla_req_name: 'Service availability level'
-#     sla_req_type: 'service_availability'
-#     end_point_ids: []
-#     min_value: 'on-demand'
-#     unit: 'level'
-
-# constraints:
-#   - constraint_id: 'CoverageArea'
-#     constraint_name: 'Radio Coverage Area'
-#     constraint_value: 'sap_location'
-
-# capabilities: ['provider_managed']
-
-#monitoring:
-#  - metric_id: 'sapUu_bw'
-#    metric_name: 'sapUu bandwidth'
-#    metric_type: 'bandwidth'
-
-# lifetime: 'on-demand'
-# charging: 'tbd'

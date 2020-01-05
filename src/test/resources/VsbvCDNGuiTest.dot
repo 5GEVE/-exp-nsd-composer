@@ -1,4 +1,5 @@
 strict graph G {
+  splines=false;
   vCacheMid_01 [ label="atomicComponent_vCacheMid_01" shape="box" style="filled" fillcolor="yellowgreen" ];
   pDNS_v01 [ label="atomicComponent_pDNS_v01" shape="box" style="filled" fillcolor="yellowgreen" ];
   vCacheEdge_1_01 [ label="atomicComponent_vCacheEdge_1_01" shape="box" style="filled" fillcolor="yellowgreen" ];
