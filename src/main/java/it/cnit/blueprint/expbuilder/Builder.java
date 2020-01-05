@@ -1,9 +1,9 @@
-package eu._5geve.experiment;
+package it.cnit.blueprint.expbuilder;
 
-import eu._5geve.experiment.nsdgraph.NsdGraph;
-import eu._5geve.experiment.nsdgraph.UserMock;
-import eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex;
-import eu._5geve.experiment.nsdgraph.VnfProfileVertex;
+import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraph;
+import it.cnit.blueprint.expbuilder.nsdgraph.UserMock;
+import it.cnit.blueprint.expbuilder.nsdgraph.VirtualLinkProfileVertex;
+import it.cnit.blueprint.expbuilder.nsdgraph.VnfProfileVertex;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;

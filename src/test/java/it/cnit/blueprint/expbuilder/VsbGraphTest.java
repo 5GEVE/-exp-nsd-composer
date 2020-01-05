@@ -1,11 +1,9 @@
-package eu._5geve.experiment;
-
-import static org.junit.Assert.assertEquals;
+package it.cnit.blueprint.expbuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import eu._5geve.experiment.nsdgraph.NsdGraph;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import it.cnit.blueprint.expbuilder.vsbgraph.VsbGraph;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
@@ -15,7 +13,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NsdGraphTest {
+public class VsbGraphTest {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
   private static Logger LOG = LoggerFactory
@@ -23,24 +21,23 @@ public class NsdGraphTest {
 
   @Test
   @Ignore
-  public void NsdAstiTest() throws IOException, ExportException {
-    InputStream isNsd = eu._5geve.experiment.App.class.getResourceAsStream("/nsd-examples/nsd_asti.yaml");
-    Nsd nsd = OBJECT_MAPPER.readValue(isNsd, Nsd.class);
+  public void ASTITest() throws IOException, ExportException {
+    InputStream isVsb = App.class.getResourceAsStream("/vsb-examples/vsb_asti_agv.yaml");
+    VsBlueprint vsb = OBJECT_MAPPER.readValue(isVsb, VsBlueprint.class);
 
-    NsdGraph nsdGraph = new NsdGraph(nsd);
+    VsbGraph vsbGraph = new VsbGraph(vsb);
 
     // TODO move this information
     // Export to graphviz.
     // Copy the output to a text file called 'example.txt'
     // Create a PNG with:
     // sfdp -Tpng example.txt -o example.png
-    LOG.info("GraphViz export:\n{}", nsdGraph.exportGraphViz());
+    LOG.info("GraphViz export:\n{}", vsbGraph.exportGraphViz());
 
     // TODO
-    //String testFile = new Scanner(this.getClass().getResourceAsStream("/NsdvCDNGuiTest.dot"),
-    //    "UTF-8")
-    //    .useDelimiter("\\A").next();
-    //assertEquals(testFile, nsdGraph.exportGraphViz());
+//    String testFile = new Scanner(this.getClass().getResourceAsStream("/VsbvCDNGuiTest.dot"),
+//        "UTF-8")
+//        .useDelimiter("\\A").next();
+//    assertEquals(testFile, vsbGraph.exportGraphViz());
   }
-
 }

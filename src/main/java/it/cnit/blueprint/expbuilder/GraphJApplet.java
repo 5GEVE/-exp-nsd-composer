@@ -1,4 +1,4 @@
-package eu._5geve.experiment;
+package it.cnit.blueprint.expbuilder;
 
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.swing.mxGraphComponent;

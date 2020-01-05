@@ -1,8 +1,8 @@
-package eu._5geve.experiment.vsbgraph;
+package it.cnit.blueprint.expbuilder.vsbgraph;
 
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 
-public class AtomicComponentVertex implements eu._5geve.experiment.vsbgraph.VsbVertex {
+public class AtomicComponentVertex implements VsbVertex {
 
   private final VsComponent vsComponent;
 

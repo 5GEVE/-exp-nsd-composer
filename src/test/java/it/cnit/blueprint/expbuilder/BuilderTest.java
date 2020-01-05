@@ -1,9 +1,9 @@
-package eu._5geve.experiment;
+package it.cnit.blueprint.expbuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import eu._5geve.experiment.Builder.CompositionStrat;
-import eu._5geve.experiment.nsdgraph.NsdGraph;
+import it.cnit.blueprint.expbuilder.Builder.CompositionStrat;
+import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraph;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +32,7 @@ public class BuilderTest {
 
     ArrayList<Nsd> contexts = new ArrayList<>();
     contexts.add(del);
-    eu._5geve.experiment.Builder b = new eu._5geve.experiment.Builder(vCDN, contexts);
+    Builder b = new Builder(vCDN, contexts);
     LOG.info(b.toString());
 
     NsdGraph exp = b.buildExperiment(CompositionStrat.PASS);

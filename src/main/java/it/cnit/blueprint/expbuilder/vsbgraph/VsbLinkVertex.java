@@ -1,9 +1,9 @@
-package eu._5geve.experiment.vsbgraph;
+package it.cnit.blueprint.expbuilder.vsbgraph;
 
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class VsbLinkVertex implements eu._5geve.experiment.vsbgraph.VsbVertex {
+public class VsbLinkVertex implements VsbVertex {
 
   private static final AtomicLong NEXT_ID = new AtomicLong(0);
 

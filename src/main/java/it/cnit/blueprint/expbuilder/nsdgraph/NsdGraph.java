@@ -1,4 +1,4 @@
-package eu._5geve.experiment.nsdgraph;
+package it.cnit.blueprint.expbuilder.nsdgraph;
 
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
@@ -28,12 +28,12 @@ import org.jgrapht.io.StringComponentNameProvider;
 
 public class NsdGraph {
 
-  List<eu._5geve.experiment.nsdgraph.VnfProfileVertex> vnfPVertices = new ArrayList<>();
-  List<eu._5geve.experiment.nsdgraph.PnfProfileVertex> pnfPVertices = new ArrayList<>();
-  List<eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex> vlPVertices = new ArrayList<>();
-  List<eu._5geve.experiment.nsdgraph.SapVertex> sapVertices = new ArrayList<>();
+  List<VnfProfileVertex> vnfPVertices = new ArrayList<>();
+  List<PnfProfileVertex> pnfPVertices = new ArrayList<>();
+  List<VirtualLinkProfileVertex> vlPVertices = new ArrayList<>();
+  List<SapVertex> sapVertices = new ArrayList<>();
   private Nsd nsd;
-  private Graph<eu._5geve.experiment.nsdgraph.ProfileVertex, String> g;
+  private Graph<ProfileVertex, String> g;
 
   public NsdGraph(Nsd nsd) {
     this.nsd = nsd;
@@ -41,47 +41,49 @@ public class NsdGraph {
 
     // vertices
     for (VnfProfile vp : nsd.getNsDf().get(0).getVnfProfile()) {
-      eu._5geve.experiment.nsdgraph.VnfProfileVertex v = new eu._5geve.experiment.nsdgraph.VnfProfileVertex(vp);
+      VnfProfileVertex v = new VnfProfileVertex(vp);
       vnfPVertices.add(v);
       g.addVertex(v);
     }
     for (PnfProfile pp : nsd.getNsDf().get(0).getPnfProfile()) {
-      eu._5geve.experiment.nsdgraph.PnfProfileVertex v = new eu._5geve.experiment.nsdgraph.PnfProfileVertex(pp);
+      PnfProfileVertex v = new PnfProfileVertex(
+          pp);
       pnfPVertices.add(v);
       g.addVertex(v);
     }
     for (VirtualLinkProfile vlp : nsd.getNsDf().get(0).getVirtualLinkProfile()) {
-      eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex v = new eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex(vlp);
+      VirtualLinkProfileVertex v = new VirtualLinkProfileVertex(
+          vlp);
       vlPVertices.add(v);
       g.addVertex(v);
     }
     for (Sapd s : nsd.getSapd()) {
-      eu._5geve.experiment.nsdgraph.SapVertex v = new eu._5geve.experiment.nsdgraph.SapVertex(s);
+      SapVertex v = new SapVertex(s);
       sapVertices.add(v);
       g.addVertex(v);
     }
 
     // edges
-    for (eu._5geve.experiment.nsdgraph.VnfProfileVertex v1 : vnfPVertices) {
+    for (VnfProfileVertex v1 : vnfPVertices) {
       for (NsVirtualLinkConnectivity vlc : v1.getVnfProfile().getNsVirtualLinkConnectivity()) {
-        for (eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex v2 : vlPVertices) {
+        for (VirtualLinkProfileVertex v2 : vlPVertices) {
           if (vlc.getVirtualLinkProfileId().equals(v2.getVlProfile().getVirtualLinkProfileId())) {
             g.addEdge(v1, v2, vlc.getCpdId().get(0));
           }
         }
       }
     }
-    for (eu._5geve.experiment.nsdgraph.PnfProfileVertex v1 : pnfPVertices) {
+    for (PnfProfileVertex v1 : pnfPVertices) {
       for (NsVirtualLinkConnectivity vlc : v1.getPnfProfile().getNsVirtualLinkConnectivity()) {
-        for (eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex v2 : vlPVertices) {
+        for (VirtualLinkProfileVertex v2 : vlPVertices) {
           if (vlc.getVirtualLinkProfileId().equals(v2.getVlProfile().getVirtualLinkProfileId())) {
             g.addEdge(v1, v2, vlc.getCpdId().get(0));
           }
         }
       }
     }
-    for (eu._5geve.experiment.nsdgraph.SapVertex v1 : sapVertices) {
-      for (eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex v2 : vlPVertices) {
+    for (SapVertex v1 : sapVertices) {
+      for (VirtualLinkProfileVertex v2 : vlPVertices) {
         if (v1.getSapd().getNsVirtualLinkDescId()
             .equals(v2.getVlProfile().getVirtualLinkDescId())) {
           g.addEdge(v1, v2, v1.getSapd().getCpdId());
@@ -91,20 +93,20 @@ public class NsdGraph {
   }
 
   public String exportGraphViz() throws ExportException {
-    ComponentNameProvider<eu._5geve.experiment.nsdgraph.ProfileVertex> vertexIdProvider = eu._5geve.experiment.nsdgraph.ProfileVertex::getProfileId;
-    ComponentNameProvider<eu._5geve.experiment.nsdgraph.ProfileVertex> vertexLabelProvider = eu._5geve.experiment.nsdgraph.ProfileVertex::toString;
-    ComponentAttributeProvider<eu._5geve.experiment.nsdgraph.ProfileVertex> vertexAttributeProvider = v -> {
+    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getProfileId;
+    ComponentNameProvider<ProfileVertex> vertexLabelProvider = ProfileVertex::toString;
+    ComponentAttributeProvider<ProfileVertex> vertexAttributeProvider = v -> {
       Map<String, Attribute> map = new LinkedHashMap<>();
-      if (v instanceof eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex) {
+      if (v instanceof VirtualLinkProfileVertex) {
         map.put("shape", DefaultAttribute.createAttribute("oval"));
         map.put("style", DefaultAttribute.createAttribute("filled"));
         map.put("fillcolor", DefaultAttribute.createAttribute("dodgerblue"));
-      } else if (v instanceof eu._5geve.experiment.nsdgraph.VnfProfileVertex
-          || v instanceof eu._5geve.experiment.nsdgraph.PnfProfileVertex) {
+      } else if (v instanceof VnfProfileVertex
+          || v instanceof PnfProfileVertex) {
         map.put("shape", DefaultAttribute.createAttribute("box"));
         map.put("style", DefaultAttribute.createAttribute("filled"));
         map.put("fillcolor", DefaultAttribute.createAttribute("yellowgreen"));
-      } else if (v instanceof eu._5geve.experiment.nsdgraph.SapVertex) {
+      } else if (v instanceof SapVertex) {
         map.put("shape", DefaultAttribute.createAttribute("oval"));
         map.put("style", DefaultAttribute.createAttribute("filled"));
         map.put("fillcolor", DefaultAttribute.createAttribute("darksalmon"));
@@ -113,7 +115,8 @@ public class NsdGraph {
       }
       return map;
     };
-    DOTExporter<eu._5geve.experiment.nsdgraph.ProfileVertex, String> exporter = new DOTExporter<>(vertexIdProvider,
+    DOTExporter<ProfileVertex, String> exporter = new DOTExporter<>(
+        vertexIdProvider,
         vertexLabelProvider, new StringComponentNameProvider<>(), vertexAttributeProvider, null);
     exporter.putGraphAttribute("splines", "false");
     Writer writer = new StringWriter();
@@ -122,21 +125,22 @@ public class NsdGraph {
   }
 
   public String exportGraphML() throws ExportException {
-    ComponentNameProvider<eu._5geve.experiment.nsdgraph.ProfileVertex> vertexIdProvider = eu._5geve.experiment.nsdgraph.ProfileVertex::getProfileId;
-    ComponentNameProvider<eu._5geve.experiment.nsdgraph.ProfileVertex> vertexLabelProvider = eu._5geve.experiment.nsdgraph.ProfileVertex::toString;
-    ComponentAttributeProvider<eu._5geve.experiment.nsdgraph.ProfileVertex> vertexAttributeProvider = v -> {
+    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getProfileId;
+    ComponentNameProvider<ProfileVertex> vertexLabelProvider = ProfileVertex::toString;
+    ComponentAttributeProvider<ProfileVertex> vertexAttributeProvider = v -> {
       Map<String, Attribute> map = new LinkedHashMap<>();
-      if (v instanceof eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex) {
+      if (v instanceof VirtualLinkProfileVertex) {
         map.put("color", DefaultAttribute.createAttribute("blue"));
-      } else if (v instanceof eu._5geve.experiment.nsdgraph.VnfProfileVertex
-          || v instanceof eu._5geve.experiment.nsdgraph.PnfProfileVertex) {
+      } else if (v instanceof VnfProfileVertex
+          || v instanceof PnfProfileVertex) {
         map.put("color", DefaultAttribute.createAttribute("yellow"));
       } else {
         map = null;
       }
       return map;
     };
-    GraphMLExporter<eu._5geve.experiment.nsdgraph.ProfileVertex, String> exporter = new GraphMLExporter<>(vertexIdProvider,
+    GraphMLExporter<ProfileVertex, String> exporter = new GraphMLExporter<>(
+        vertexIdProvider,
         vertexLabelProvider, vertexAttributeProvider, new IntegerComponentNameProvider<>(),
         new StringComponentNameProvider<>(), null);
     exporter
@@ -151,23 +155,23 @@ public class NsdGraph {
     return nsd;
   }
 
-  public Graph<eu._5geve.experiment.nsdgraph.ProfileVertex, String> getG() {
+  public Graph<ProfileVertex, String> getG() {
     return g;
   }
 
-  public List<eu._5geve.experiment.nsdgraph.VnfProfileVertex> getVnfPVertices() {
+  public List<VnfProfileVertex> getVnfPVertices() {
     return vnfPVertices;
   }
 
-  public List<eu._5geve.experiment.nsdgraph.PnfProfileVertex> getPnfPVertices() {
+  public List<PnfProfileVertex> getPnfPVertices() {
     return pnfPVertices;
   }
 
-  public List<eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex> getVlPVertices() {
+  public List<VirtualLinkProfileVertex> getVlPVertices() {
     return vlPVertices;
   }
 
-  public List<eu._5geve.experiment.nsdgraph.SapVertex> getSapVertices() {
+  public List<SapVertex> getSapVertices() {
     return sapVertices;
   }
 
@@ -179,7 +183,8 @@ public class NsdGraph {
    * @param vlP The vertex where the VNF should be attached to.
    */
   public void addVnfProfileVertex(
-      eu._5geve.experiment.nsdgraph.VnfProfileVertex contextV, eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex vlP) {
+      VnfProfileVertex contextV,
+      VirtualLinkProfileVertex vlP) {
     // TODO update Nsd model
 
     // Update Graph
@@ -196,7 +201,8 @@ public class NsdGraph {
    * @param contextV A context VNF vertex.
    * @param edge The edge where the VNF should be placed.
    */
-  public void addVnfProfileVertex(eu._5geve.experiment.nsdgraph.VnfProfileVertex contextV, String edge) {
+  public void addVnfProfileVertex(VnfProfileVertex contextV,
+      String edge) {
     // TODO update Nsd model
     VirtualLinkProfile vlpNew = new VirtualLinkProfile(new NsDf(),
         "vl_profile_" + contextV.getProfileId(), "vl_" + contextV.getProfileId(),
@@ -205,21 +211,22 @@ public class NsdGraph {
     // Update graph
     vnfPVertices.add(contextV);
     g.addVertex(contextV);
-    eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex vlpNewV = new eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex(vlpNew);
+    VirtualLinkProfileVertex vlpNewV = new VirtualLinkProfileVertex(
+        vlpNew);
     vlPVertices.add(vlpNewV);
     g.addVertex(vlpNewV);
 
-    eu._5geve.experiment.nsdgraph.ProfileVertex srcV = g.getEdgeSource(edge);
-    eu._5geve.experiment.nsdgraph.ProfileVertex tarV = g.getEdgeTarget(edge);
-    if (srcV instanceof eu._5geve.experiment.nsdgraph.VnfProfileVertex
-        && tarV instanceof eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex) {
+    ProfileVertex srcV = g.getEdgeSource(edge);
+    ProfileVertex tarV = g.getEdgeTarget(edge);
+    if (srcV instanceof VnfProfileVertex
+        && tarV instanceof VirtualLinkProfileVertex) {
       g.addEdge(srcV, vlpNewV, edge + "_new");
       g.addEdge(vlpNewV, contextV,
           contextV.getVnfProfile().getNsVirtualLinkConnectivity().get(0).getCpdId().get(0));
       g.addEdge(contextV, tarV,
           contextV.getVnfProfile().getNsVirtualLinkConnectivity().get(1).getCpdId().get(0));
-    } else if (srcV instanceof eu._5geve.experiment.nsdgraph.VirtualLinkProfileVertex
-        && tarV instanceof eu._5geve.experiment.nsdgraph.VnfProfileVertex) {
+    } else if (srcV instanceof VirtualLinkProfileVertex
+        && tarV instanceof VnfProfileVertex) {
       g.addEdge(srcV, contextV,
           contextV.getVnfProfile().getNsVirtualLinkConnectivity().get(0).getCpdId().get(0));
       g.addEdge(contextV, vlpNewV,

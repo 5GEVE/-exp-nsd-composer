@@ -1,4 +1,4 @@
-package eu._5geve.experiment.nsdgraph;
+package it.cnit.blueprint.expbuilder.nsdgraph;
 
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.PnfProfile;
 

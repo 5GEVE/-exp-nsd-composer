@@ -1,4 +1,4 @@
-package eu._5geve.experiment.nsdgraph;
+package it.cnit.blueprint.expbuilder.nsdgraph;
 
 public class UserMock {
 

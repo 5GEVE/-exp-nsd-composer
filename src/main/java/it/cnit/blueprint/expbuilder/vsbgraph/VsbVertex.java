@@ -1,4 +1,4 @@
-package eu._5geve.experiment.vsbgraph;
+package it.cnit.blueprint.expbuilder.vsbgraph;
 
 public interface VsbVertex {
 
