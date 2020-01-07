@@ -3,6 +3,7 @@ package it.cnit.blueprint.expbuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.cnit.blueprint.expbuilder.vsbgraph.VsbGraph;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnBoardVsBlueprintRequest;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
@@ -18,9 +19,12 @@ public class VsbGraphTest {
       .getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 
   @Test
-  public void Ares2tTrackerTest() throws IOException, ExportException {
+  public void Ares2tTrackerTest()
+      throws IOException, MalformattedElementException, ExportException {
+
     InputStream is = App.class.getResourceAsStream("/Ares2T_Tracker_vsb_req.json");
     OnBoardVsBlueprintRequest req = OBJECT_MAPPER.readValue(is, OnBoardVsBlueprintRequest.class);
+    req.getVsBlueprint().isValid();
 
     VsbGraph vsbGraph = new VsbGraph(req.getVsBlueprint());
     // TODO move this information
