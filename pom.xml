@@ -86,6 +86,12 @@
       <version>0.0.2-EVE-SNAPSHOT</version>
     </dependency>
 
+    <dependency>
+      <groupId>it.nextworks.nfvmano</groupId>
+      <artifactId>VsBlueprintsCatalogueInterfaces</artifactId>
+      <version>0.0.2-EVE-SNAPSHOT</version>
+    </dependency>
+
     <!-- https://github.com/nextworks-it/nfv-ifa-libs/tree/feat-librefactor -->
     <dependency>
       <groupId>it.nextworks.nfvmano</groupId>
