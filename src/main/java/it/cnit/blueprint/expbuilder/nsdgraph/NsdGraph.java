@@ -120,6 +120,7 @@ public class NsdGraph {
         vertexLabelProvider, new StringComponentNameProvider<>(), vertexAttributeProvider, null);
     exporter.putGraphAttribute("splines", "false");
     exporter.putGraphAttribute("overlap", "false");
+    exporter.putGraphAttribute("mindist", "2.0");
     Writer writer = new StringWriter();
     exporter.exportGraph(g, writer);
     return writer.toString();
