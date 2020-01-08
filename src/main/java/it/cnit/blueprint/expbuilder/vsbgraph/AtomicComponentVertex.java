@@ -11,7 +11,7 @@ public class AtomicComponentVertex implements VsbVertex {
   }
 
   public String toString() {
-    return "atomicComponent_" + this.vsComponent.getComponentId();
+    return "AC_" + this.vsComponent.getComponentId();
   }
 
   public int hashCode() {

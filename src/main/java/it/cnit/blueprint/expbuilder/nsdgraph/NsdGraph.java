@@ -119,6 +119,7 @@ public class NsdGraph {
         vertexIdProvider,
         vertexLabelProvider, new StringComponentNameProvider<>(), vertexAttributeProvider, null);
     exporter.putGraphAttribute("splines", "false");
+    exporter.putGraphAttribute("overlap", "false");
     Writer writer = new StringWriter();
     exporter.exportGraph(g, writer);
     return writer.toString();

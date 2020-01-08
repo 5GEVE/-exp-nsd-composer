@@ -26,7 +26,7 @@ public class VsbGraph {
 
   List<AtomicComponentVertex> aCVertices = new ArrayList<>();
   List<VsbLinkVertex> vLVertices = new ArrayList<>();
-  private VsBlueprint vsB;
+  private final VsBlueprint vsB;
   private Graph<VsbVertex, String> g;
 
   public VsbGraph(VsBlueprint vsB) {
@@ -80,6 +80,7 @@ public class VsbGraph {
     DOTExporter<VsbVertex, String> exporter = new DOTExporter<>(vertexIdProvider,
         vertexLabelProvider, new StringComponentNameProvider<>(), vertexAttributeProvider, null);
     exporter.putGraphAttribute("splines", "false");
+    exporter.putGraphAttribute("overlap", "false");
     Writer writer = new StringWriter();
     exporter.exportGraph(g, writer);
     return writer.toString();

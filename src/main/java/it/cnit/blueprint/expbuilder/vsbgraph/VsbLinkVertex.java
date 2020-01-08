@@ -16,7 +16,7 @@ public class VsbLinkVertex implements VsbVertex {
   }
 
   public String toString() {
-    return "vsbLink_" + String.join("_", this.vsbLink.getEndPointIds());
+    return "VL_" + String.join("_", this.vsbLink.getEndPointIds());
   }
 
   public int hashCode() {
