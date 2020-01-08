@@ -39,6 +39,17 @@ To run the Docker container with plain Docker, use the following (substitute the
 docker run -it --rm -p 5005:5005 mpergolesi/5geve-experiment-builder:0.0.1-SNAPSHOT
 ```
 
+### Graph export for visualization
+
+`VsbGraph` and `NsdGraph` provide methods to export graphs to graphviz format.
+Running tests will produce output examples.
+
+Copy the output to a text file called 'example.txt' and create a PNG with
+```
+circo -Tpng example.txt -o example.png
+```
+
+Or copy the output to an online Graphviz editor like [Edotor](https://edotor.net/).
 
 ## User guide (release)
 

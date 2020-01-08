@@ -28,11 +28,6 @@ public class NsdGraphTest {
     req.getNsds().get(0).isValid();
 
     NsdGraph nsdGraph = new NsdGraph(req.getNsds().get(0));
-    // TODO move this information
-    // Export to graphviz.
-    // Copy the output to a text file called 'example.txt'
-    // Create a PNG with:
-    // sfdp -Tpng example.txt -o example.png
     LOG.info("GraphViz export:\n{}", nsdGraph.exportGraphViz());
 
     // TODO
