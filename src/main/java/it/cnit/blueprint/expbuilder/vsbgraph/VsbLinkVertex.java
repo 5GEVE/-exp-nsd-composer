@@ -33,7 +33,7 @@ public class VsbLinkVertex implements VsbVertex {
 
   @Override
   public String getId() {
-    return id;
+    return String.join("_", this.vsbLink.getEndPointIds());
   }
 
 }

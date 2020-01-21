@@ -1,7 +1,9 @@
 package it.cnit.blueprint.expbuilder.vsbgraph;
 
+import it.cnit.blueprint.expbuilder.nsdgraph.SapVertex;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -26,6 +28,7 @@ public class VsbGraph {
 
   List<AtomicComponentVertex> aCVertices = new ArrayList<>();
   List<VsbLinkVertex> vLVertices = new ArrayList<>();
+  List<VsbSapVertex> sapVertices = new ArrayList<>();
   private final VsBlueprint vsB;
   private Graph<VsbVertex, String> g;
 
@@ -44,15 +47,31 @@ public class VsbGraph {
       vLVertices.add(v);
       g.addVertex(v);
     }
+    for (VsbEndpoint vse : vsB.getEndPoints()) {
+      if (vse.getEndPointId().contains("sap")) {
+        VsbSapVertex v = new VsbSapVertex(vse);
+        sapVertices.add(v);
+        g.addVertex(v);
+      }
+    }
 
     // edges
     for (AtomicComponentVertex v1 : aCVertices) {
       for (String vscEp : v1.getVsComponent().getEndPointsIds()) {
         for (VsbLinkVertex v2 : vLVertices) {
           for (String vslEp : v2.getVsbLink().getEndPointIds()) {
-            if (vscEp.equals(vslEp)) {
+            if (!vscEp.contains("sap") && !vslEp.contains("sap") && vscEp.equals(vslEp)) {
               g.addEdge(v1, v2, vslEp);
             }
+          }
+        }
+      }
+    }
+    for (VsbSapVertex v1 : sapVertices) {
+      for (VsbLinkVertex v2 : vLVertices) {
+        for (String epId : v2.getVsbLink().getEndPointIds()) {
+          if (v1.getVsbEndpoint().getEndPointId().equals(epId)) {
+            g.addEdge(v1, v2, v1.getVsbEndpoint().getEndPointId());
           }
         }
       }
@@ -72,6 +91,10 @@ public class VsbGraph {
         map.put("shape", DefaultAttribute.createAttribute("box"));
         map.put("style", DefaultAttribute.createAttribute("filled"));
         map.put("fillcolor", DefaultAttribute.createAttribute("yellowgreen"));
+      } else if (v instanceof VsbSapVertex) {
+        map.put("shape", DefaultAttribute.createAttribute("oval"));
+        map.put("style", DefaultAttribute.createAttribute("filled"));
+        map.put("fillcolor", DefaultAttribute.createAttribute("darksalmon"));
       } else {
         map = null;
       }
