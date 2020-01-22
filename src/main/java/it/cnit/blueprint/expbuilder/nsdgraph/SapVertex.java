@@ -2,7 +2,7 @@ package it.cnit.blueprint.expbuilder.nsdgraph;
 
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 
-public class SapVertex implements ProfileVertex {
+public class SapVertex extends ProfileVertex {
 
   private final Sapd sapd;
 
@@ -24,11 +24,6 @@ public class SapVertex implements ProfileVertex {
 
   public Sapd getSapd() {
     return sapd;
-  }
-
-  @Override
-  public String getProfileId() {
-    return this.sapd.getCpdId();
   }
 
 }

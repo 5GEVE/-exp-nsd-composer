@@ -3,7 +3,7 @@ package it.cnit.blueprint.expbuilder.vsbgraph;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class VsbSapVertex implements VsbVertex {
+public class VsbSapVertex extends VsbVertex {
 
   private static final AtomicLong NEXT_ID = new AtomicLong(0);
 
@@ -31,8 +31,4 @@ public class VsbSapVertex implements VsbVertex {
     return vsbEndpoint;
   }
 
-  @Override
-  public String getId() {
-    return this.vsbEndpoint.getEndPointId();
-  }
 }

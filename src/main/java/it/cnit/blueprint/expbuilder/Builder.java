@@ -37,7 +37,7 @@ public class Builder {
         for (VnfProfileVertex vnfP : c.getVnfPVertices()) {
           // TODO ask user to select a VitualLinkProfileVertex
           VirtualLinkProfileVertex vlP;
-          if (vnfP.getProfileId().contains("Src")) {
+          if (vnfP.getId().contains("Src")) {
             vlP = UserMock.getVLPVertex1(expNsdGraph);
           } else { //if (vnfP.getProfileId().contains("Dst")) {
             vlP = UserMock.getVLPVertex2(expNsdGraph);

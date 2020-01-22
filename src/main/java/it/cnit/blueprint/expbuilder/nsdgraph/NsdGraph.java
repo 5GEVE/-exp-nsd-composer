@@ -93,7 +93,7 @@ public class NsdGraph {
   }
 
   public String exportGraphViz() throws ExportException {
-    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getProfileId;
+    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getId;
     ComponentNameProvider<ProfileVertex> vertexLabelProvider = ProfileVertex::toString;
     ComponentAttributeProvider<ProfileVertex> vertexAttributeProvider = v -> {
       Map<String, Attribute> map = new LinkedHashMap<>();
@@ -127,7 +127,7 @@ public class NsdGraph {
   }
 
   public String exportGraphML() throws ExportException {
-    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getProfileId;
+    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getId;
     ComponentNameProvider<ProfileVertex> vertexLabelProvider = ProfileVertex::toString;
     ComponentAttributeProvider<ProfileVertex> vertexAttributeProvider = v -> {
       Map<String, Attribute> map = new LinkedHashMap<>();
@@ -207,8 +207,8 @@ public class NsdGraph {
       String edge) {
     // TODO update Nsd model
     VirtualLinkProfile vlpNew = new VirtualLinkProfile(new NsDf(),
-        "vl_profile_" + contextV.getProfileId(), "vl_" + contextV.getProfileId(),
-        "vl_df_" + contextV.getProfileId(), null, null, null, null);
+        "vl_profile_" + contextV.getId(), "vl_" + contextV.getId(),
+        "vl_df_" + contextV.getId(), null, null, null, null);
 
     // Update graph
     vnfPVertices.add(contextV);

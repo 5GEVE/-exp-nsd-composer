@@ -1,7 +1,9 @@
 package it.cnit.blueprint.expbuilder.vsbgraph;
 
-public interface VsbVertex {
+public abstract class VsbVertex {
 
-  String getId();
+  public String getId() {
+    return String.valueOf(hashCode());
+  }
 
 }

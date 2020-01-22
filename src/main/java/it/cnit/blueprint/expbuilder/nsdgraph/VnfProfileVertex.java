@@ -2,7 +2,7 @@ package it.cnit.blueprint.expbuilder.nsdgraph;
 
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 
-public class VnfProfileVertex implements ProfileVertex {
+public class VnfProfileVertex extends ProfileVertex {
 
   private final VnfProfile vnfProfile;
 
@@ -24,11 +24,6 @@ public class VnfProfileVertex implements ProfileVertex {
 
   public VnfProfile getVnfProfile() {
     return vnfProfile;
-  }
-
-  @Override
-  public String getProfileId() {
-    return this.vnfProfile.getVnfProfileId();
   }
 
 }
