@@ -3,11 +3,11 @@ package it.cnit.blueprint.expbuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraph;
-import it.nextworks.nfvmano.catalogue.blueprint.messages.OnBoardVsBlueprintRequest;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
+import java.net.URL;
 import org.jgrapht.io.ExportException;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -23,11 +23,11 @@ public class NsdGraphTest {
   public void Ares2tTrackerTest()
       throws IOException, MalformattedElementException, ExportException {
 
-    InputStream is = App.class.getResourceAsStream("/Ares2T_Tracker_vsb_req.json");
-    OnBoardVsBlueprintRequest req = OBJECT_MAPPER.readValue(is, OnBoardVsBlueprintRequest.class);
-    req.getNsds().get(0).isValid();
+    Nsd[] nsds = OBJECT_MAPPER.readValue(new URL(
+            "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/vsb/vsb_ares2t_tracker/vsb_ares2t_tracker_nsds.yaml"),
+        Nsd[].class);
 
-    NsdGraph nsdGraph = new NsdGraph(req.getNsds().get(0));
+    NsdGraph nsdGraph = new NsdGraph(nsds[0]);
     LOG.info("GraphViz export:\n{}", nsdGraph.exportGraphViz());
 
     // TODO
