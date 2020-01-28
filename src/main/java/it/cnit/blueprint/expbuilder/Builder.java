@@ -4,6 +4,7 @@ import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraph;
 import it.cnit.blueprint.expbuilder.nsdgraph.UserMock;
 import it.cnit.blueprint.expbuilder.nsdgraph.VirtualLinkProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.VnfProfileVertex;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -23,14 +24,16 @@ public class Builder {
     this.contextNsdGraphs = contextNsdGraphs;
   }
 
-  public Builder(Nsd verticalNsd, List<Nsd> contextNsds) {
-    this.verticalNsdGraph = new NsdGraph(verticalNsd);
+  public Builder(Nsd verticalNsd, List<Nsd> contextNsds) throws NotExistingEntityException {
+    this.verticalNsdGraph = new NsdGraph(verticalNsd, "nsDfId", "nsLevelId");
     this.contextNsdGraphs = new ArrayList<>();
-    contextNsds.forEach(c -> this.contextNsdGraphs.add(new NsdGraph(c)));
+    for (Nsd c : contextNsds) {
+      this.contextNsdGraphs.add(new NsdGraph(c, "nsDfId", "nsLevelId"));
+    }
   }
 
-  public NsdGraph buildExperiment(CompositionStrat strat) {
-    NsdGraph expNsdGraph = new NsdGraph(verticalNsdGraph.getNsd());
+  public NsdGraph buildExperiment(CompositionStrat strat) throws NotExistingEntityException {
+    NsdGraph expNsdGraph = new NsdGraph(verticalNsdGraph.getNsd(), "nsDfId", "nsLevelId");
     for (NsdGraph c : contextNsdGraphs) {
       // TODO compositionStrategy should depend on the context.
       if (strat == CompositionStrat.CONNECT) {
