@@ -47,6 +47,8 @@ public class VsbGraph {
       vLVertices.add(v);
       g.addVertex(v);
     }
+    // An insecure way to determine sap endpoints. We leave it this way as it is more important to
+    // compose the NSD instead of the VSB.
     for (VsbEndpoint vse : vsB.getEndPoints()) {
       if (vse.getEndPointId().contains("sap")) {
         VsbSapVertex v = new VsbSapVertex(vse);
