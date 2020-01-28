@@ -1,6 +1,5 @@
 package it.cnit.blueprint.expbuilder.vsbgraph;
 
-import it.cnit.blueprint.expbuilder.nsdgraph.SapVertex;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
