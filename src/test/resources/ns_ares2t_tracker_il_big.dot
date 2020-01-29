@@ -1,0 +1,19 @@
+strict graph G {
+  splines=false;
+  overlap=false;
+  mindist=2.0;
+  -787398638 [ label="vnfProfile_vnfp_big_Ares2T_Tracker" shape="box" style="filled" fillcolor="yellowgreen" ];
+  -38372901 [ label="vnfProfile_vnfp_Ares2T_Vis" shape="box" style="filled" fillcolor="yellowgreen" ];
+  967418674 [ label="vlProfile_vlp_vl_tracking_mobile" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  -128883142 [ label="vlProfile_vlp_vl_tracking_data" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  -1251074678 [ label="vlProfile_vlp_vl_tracking_mgt" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  1391930576 [ label="Sap_sap_tracking_mobile" shape="oval" style="filled" fillcolor="darksalmon" ];
+  972040364 [ label="Sap_sap_tracking_mgt" shape="oval" style="filled" fillcolor="darksalmon" ];
+  -787398638 -- 967418674 [ label="cp_tracker_ext_in" ];
+  -787398638 -- -128883142 [ label="cp_tracker_data" ];
+  -787398638 -- -1251074678 [ label="cp_tracker_mgt" ];
+  -38372901 -- -128883142 [ label="cp_vis_data" ];
+  -38372901 -- -1251074678 [ label="cp_vis_mgt" ];
+  1391930576 -- 967418674 [ label="sap_tracking_mobile" ];
+  972040364 -- -1251074678 [ label="sap_tracking_mgt" ];
+}

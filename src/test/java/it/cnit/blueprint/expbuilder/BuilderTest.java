@@ -2,15 +2,12 @@ package it.cnit.blueprint.expbuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import it.cnit.blueprint.expbuilder.Builder.CompositionStrat;
-import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraph;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
+import java.net.URL;
 import org.jgrapht.io.ExportException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,26 +20,32 @@ public class BuilderTest {
       .getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 
   @Test
-  @Ignore
-  public void ASTIDelTest() throws IOException, ExportException {
-    InputStream isvCDN = this.getClass().getResourceAsStream("/nsd-examples/nsd_asti.yaml");
-    Nsd vCDN = OBJECT_MAPPER.readValue(isvCDN, Nsd.class);
-    InputStream isDel = this.getClass().getResourceAsStream("/nsd-examples/nsd_cb_del.yaml");
-    Nsd del = OBJECT_MAPPER.readValue(isDel, Nsd.class);
+  public void Ares2tTrackerDelayTest()
+      throws IOException, ExportException, NotExistingEntityException {
 
-    ArrayList<Nsd> contexts = new ArrayList<>();
-    contexts.add(del);
-    Builder b = new Builder(vCDN, contexts);
+    Nsd trackerNsd = OBJECT_MAPPER.readValue(new URL(
+            "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/vsb/vsb_ares2t_tracker/vsb_ares2t_tracker_nsds.yaml"),
+        Nsd[].class)[0];
+
+    Nsd delayNsd = OBJECT_MAPPER.readValue(new URL(
+            "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/ctx/ctx_delay/ctx_delay_nsds.yaml"),
+        Nsd[].class)[0];
+
+    Nsd[] contexts = {delayNsd};
+    Builder b = new Builder(trackerNsd, contexts);
     LOG.info(b.toString());
 
-    NsdGraph exp = b.buildExperiment(CompositionStrat.PASS);
-    LOG.info("\n---\n" + exp.exportGraphViz());
+//    NsdGraph exp = b.buildExperiment(CompositionStrat.PASS);
+//    LOG.info("\n---\n" + exp.exportGraphViz());
 
     // TODO
     //String testFile = new Scanner(this.getClass().getResourceAsStream("/vCDNDelayTest.dot"),
     //    "UTF-8")
     //    .useDelimiter("\\A").next();
     //assertEquals(testFile, exp.exportGraphViz());
+
+    // TODO
+    // Check with ExpbNsd from the repo
   }
 
 

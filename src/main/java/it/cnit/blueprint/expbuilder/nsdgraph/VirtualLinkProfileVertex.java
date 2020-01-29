@@ -2,7 +2,7 @@ package it.cnit.blueprint.expbuilder.nsdgraph;
 
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
 
-public class VirtualLinkProfileVertex implements ProfileVertex {
+public class VirtualLinkProfileVertex extends ProfileVertex {
 
   private final VirtualLinkProfile vlProfile;
 
@@ -24,11 +24,6 @@ public class VirtualLinkProfileVertex implements ProfileVertex {
 
   public VirtualLinkProfile getVlProfile() {
     return vlProfile;
-  }
-
-  @Override
-  public String getProfileId() {
-    return this.vlProfile.getVirtualLinkProfileId();
   }
 
 }

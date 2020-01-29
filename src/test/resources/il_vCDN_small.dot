@@ -1,0 +1,27 @@
+strict graph G {
+  splines=false;
+  overlap=false;
+  mindist=2.0;
+  -1909650366 [ label="vnfProfile_vCacheMid_profile" shape="box" style="filled" fillcolor="yellowgreen" ];
+  -848566263 [ label="vnfProfile_vCacheEdge_1_profile" shape="box" style="filled" fillcolor="yellowgreen" ];
+  -1859627231 [ label="pnfProfile_pDNS_profile" shape="box" style="filled" fillcolor="yellowgreen" ];
+  1479624770 [ label="pnfProfile_pOrigin_profile" shape="box" style="filled" fillcolor="yellowgreen" ];
+  1738369620 [ label="vlProfile_vl_profile_mgmt" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  -1937378603 [ label="vlProfile_vl_profile_users" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  -1954540465 [ label="vlProfile_vl_profile_cache" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  -101784583 [ label="vlProfile_vl_profile_origin" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  1219968731 [ label="Sap_sap_mgmt" shape="oval" style="filled" fillcolor="darksalmon" ];
+  -827936978 [ label="Sap_sap_users" shape="oval" style="filled" fillcolor="darksalmon" ];
+  -68832576 [ label="Sap_sap_origin" shape="oval" style="filled" fillcolor="darksalmon" ];
+  -1909650366 -- 1738369620 [ label="vCacheMid_mgmt_ext" ];
+  -1909650366 -- -1954540465 [ label="vCacheMid_cache_ext" ];
+  -1909650366 -- -101784583 [ label="vCacheMid_origin_ext" ];
+  -848566263 -- 1738369620 [ label="vCacheEdge_1_mgmt_ext" ];
+  -848566263 -- -1954540465 [ label="vCacheEdge_1_cache_ext" ];
+  -848566263 -- -1937378603 [ label="vCacheEdge_1_users_ext" ];
+  -1859627231 -- 1738369620 [ label="dns_users" ];
+  1479624770 -- 1738369620 [ label="origin_caches" ];
+  1219968731 -- 1738369620 [ label="sap_mgmt" ];
+  -827936978 -- -1937378603 [ label="sap_users" ];
+  -68832576 -- -101784583 [ label="sap_origin" ];
+}

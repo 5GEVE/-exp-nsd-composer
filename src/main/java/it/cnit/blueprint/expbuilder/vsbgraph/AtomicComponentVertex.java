@@ -2,7 +2,7 @@ package it.cnit.blueprint.expbuilder.vsbgraph;
 
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 
-public class AtomicComponentVertex implements VsbVertex {
+public class AtomicComponentVertex extends VsbVertex {
 
   private final VsComponent vsComponent;
 
@@ -11,7 +11,7 @@ public class AtomicComponentVertex implements VsbVertex {
   }
 
   public String toString() {
-    return "atomicComponent_" + this.vsComponent.getComponentId();
+    return "AC_" + this.vsComponent.getComponentId();
   }
 
   public int hashCode() {
@@ -24,11 +24,6 @@ public class AtomicComponentVertex implements VsbVertex {
 
   public VsComponent getVsComponent() {
     return vsComponent;
-  }
-
-  @Override
-  public String getId() {
-    return vsComponent.getComponentId();
   }
 
 }

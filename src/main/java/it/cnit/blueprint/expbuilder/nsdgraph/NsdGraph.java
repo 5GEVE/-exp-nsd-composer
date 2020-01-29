@@ -1,12 +1,15 @@
 package it.cnit.blueprint.expbuilder.nsdgraph;
 
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.PnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -33,27 +36,32 @@ public class NsdGraph {
   List<VirtualLinkProfileVertex> vlPVertices = new ArrayList<>();
   List<SapVertex> sapVertices = new ArrayList<>();
   private Nsd nsd;
+  private NsDf nsDf;
+  private NsLevel nsLevel;
   private Graph<ProfileVertex, String> g;
 
-  public NsdGraph(Nsd nsd) {
+  public NsdGraph(Nsd nsd, String nsDfId, String nsLevelId) throws NotExistingEntityException {
     this.nsd = nsd;
+    this.nsDf = nsd.getNsDeploymentFlavour(nsDfId);
+    this.nsLevel = this.nsDf.getNsLevel(nsLevelId);
     this.g = new SimpleGraph<>(String.class);
 
-    // vertices
-    for (VnfProfile vp : nsd.getNsDf().get(0).getVnfProfile()) {
-      VnfProfileVertex v = new VnfProfileVertex(vp);
+    //vertices
+    for (VnfToLevelMapping vnfToLevelMapping : this.nsLevel.getVnfToLevelMapping()) {
+      VnfProfileVertex v = new VnfProfileVertex(
+          this.nsDf.getVnfProfile(vnfToLevelMapping.getVnfProfileId()));
+      // TODO handle the number of instances to build the graph
       vnfPVertices.add(v);
       g.addVertex(v);
     }
-    for (PnfProfile pp : nsd.getNsDf().get(0).getPnfProfile()) {
-      PnfProfileVertex v = new PnfProfileVertex(
-          pp);
+    for (PnfProfile pp : this.nsDf.getPnfProfile()) {
+      PnfProfileVertex v = new PnfProfileVertex(pp);
       pnfPVertices.add(v);
       g.addVertex(v);
     }
-    for (VirtualLinkProfile vlp : nsd.getNsDf().get(0).getVirtualLinkProfile()) {
+    for (VirtualLinkToLevelMapping vlToLevelMapping : this.nsLevel.getVirtualLinkToLevelMapping()) {
       VirtualLinkProfileVertex v = new VirtualLinkProfileVertex(
-          vlp);
+          this.nsDf.getVirtualLinkProfile(vlToLevelMapping.getVirtualLinkProfileId()));
       vlPVertices.add(v);
       g.addVertex(v);
     }
@@ -93,7 +101,7 @@ public class NsdGraph {
   }
 
   public String exportGraphViz() throws ExportException {
-    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getProfileId;
+    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getId;
     ComponentNameProvider<ProfileVertex> vertexLabelProvider = ProfileVertex::toString;
     ComponentAttributeProvider<ProfileVertex> vertexAttributeProvider = v -> {
       Map<String, Attribute> map = new LinkedHashMap<>();
@@ -119,13 +127,15 @@ public class NsdGraph {
         vertexIdProvider,
         vertexLabelProvider, new StringComponentNameProvider<>(), vertexAttributeProvider, null);
     exporter.putGraphAttribute("splines", "false");
+    exporter.putGraphAttribute("overlap", "false");
+    exporter.putGraphAttribute("mindist", "2.0");
     Writer writer = new StringWriter();
     exporter.exportGraph(g, writer);
     return writer.toString();
   }
 
   public String exportGraphML() throws ExportException {
-    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getProfileId;
+    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getId;
     ComponentNameProvider<ProfileVertex> vertexLabelProvider = ProfileVertex::toString;
     ComponentAttributeProvider<ProfileVertex> vertexAttributeProvider = v -> {
       Map<String, Attribute> map = new LinkedHashMap<>();
@@ -205,8 +215,8 @@ public class NsdGraph {
       String edge) {
     // TODO update Nsd model
     VirtualLinkProfile vlpNew = new VirtualLinkProfile(new NsDf(),
-        "vl_profile_" + contextV.getProfileId(), "vl_" + contextV.getProfileId(),
-        "vl_df_" + contextV.getProfileId(), null, null, null, null);
+        "vl_profile_" + contextV.getId(), "vl_" + contextV.getId(),
+        "vl_df_" + contextV.getId(), null, null, null, null);
 
     // Update graph
     vnfPVertices.add(contextV);

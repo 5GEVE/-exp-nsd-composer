@@ -2,6 +2,7 @@ package it.cnit.blueprint.expbuilder.vsbgraph;
 
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -26,7 +27,8 @@ public class VsbGraph {
 
   List<AtomicComponentVertex> aCVertices = new ArrayList<>();
   List<VsbLinkVertex> vLVertices = new ArrayList<>();
-  private VsBlueprint vsB;
+  List<VsbSapVertex> sapVertices = new ArrayList<>();
+  private final VsBlueprint vsB;
   private Graph<VsbVertex, String> g;
 
   public VsbGraph(VsBlueprint vsB) {
@@ -44,15 +46,33 @@ public class VsbGraph {
       vLVertices.add(v);
       g.addVertex(v);
     }
+    // An insecure way to determine sap endpoints. We leave it this way as it is more important to
+    // compose the NSD instead of the VSB.
+    for (VsbEndpoint vse : vsB.getEndPoints()) {
+      if (vse.getEndPointId().contains("sap")) {
+        VsbSapVertex v = new VsbSapVertex(vse);
+        sapVertices.add(v);
+        g.addVertex(v);
+      }
+    }
 
     // edges
     for (AtomicComponentVertex v1 : aCVertices) {
       for (String vscEp : v1.getVsComponent().getEndPointsIds()) {
         for (VsbLinkVertex v2 : vLVertices) {
           for (String vslEp : v2.getVsbLink().getEndPointIds()) {
-            if (vscEp.equals(vslEp)) {
+            if (!vscEp.contains("sap") && !vslEp.contains("sap") && vscEp.equals(vslEp)) {
               g.addEdge(v1, v2, vslEp);
             }
+          }
+        }
+      }
+    }
+    for (VsbSapVertex v1 : sapVertices) {
+      for (VsbLinkVertex v2 : vLVertices) {
+        for (String epId : v2.getVsbLink().getEndPointIds()) {
+          if (v1.getVsbEndpoint().getEndPointId().equals(epId)) {
+            g.addEdge(v1, v2, v1.getVsbEndpoint().getEndPointId());
           }
         }
       }
@@ -72,6 +92,10 @@ public class VsbGraph {
         map.put("shape", DefaultAttribute.createAttribute("box"));
         map.put("style", DefaultAttribute.createAttribute("filled"));
         map.put("fillcolor", DefaultAttribute.createAttribute("yellowgreen"));
+      } else if (v instanceof VsbSapVertex) {
+        map.put("shape", DefaultAttribute.createAttribute("oval"));
+        map.put("style", DefaultAttribute.createAttribute("filled"));
+        map.put("fillcolor", DefaultAttribute.createAttribute("darksalmon"));
       } else {
         map = null;
       }
@@ -80,6 +104,8 @@ public class VsbGraph {
     DOTExporter<VsbVertex, String> exporter = new DOTExporter<>(vertexIdProvider,
         vertexLabelProvider, new StringComponentNameProvider<>(), vertexAttributeProvider, null);
     exporter.putGraphAttribute("splines", "false");
+    exporter.putGraphAttribute("overlap", "false");
+    exporter.putGraphAttribute("mindist", "2.0");
     Writer writer = new StringWriter();
     exporter.exportGraph(g, writer);
     return writer.toString();

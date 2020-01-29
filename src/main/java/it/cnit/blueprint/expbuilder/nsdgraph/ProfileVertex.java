@@ -1,7 +1,9 @@
 package it.cnit.blueprint.expbuilder.nsdgraph;
 
-public interface ProfileVertex {
+public abstract class ProfileVertex {
 
-  String getProfileId();
+  public String getId() {
+    return String.valueOf(hashCode());
+  }
 
 }
