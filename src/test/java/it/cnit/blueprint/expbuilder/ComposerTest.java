@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BuilderTest {
+public class ComposerTest {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
@@ -32,8 +32,8 @@ public class BuilderTest {
         Nsd[].class)[0];
 
     Nsd[] contexts = {delayNsd};
-    Builder b = new Builder(trackerNsd, contexts);
-    LOG.info(b.toString());
+//    Composer.buildExperiment(trackerNsd,contexts)
+//    LOG.info(b.toString());
 
 //    NsdGraph exp = b.buildExperiment(CompositionStrat.PASS);
 //    LOG.info("\n---\n" + exp.exportGraphViz());
