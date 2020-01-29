@@ -21,7 +21,7 @@ public class Composer {
       if (ctxComposeResources[i].getStrat() == CompositionStrat.CONNECT) {
         ctxComposes[i] = new CtxComposeConnect(
             ctxComposeResources[i].getNsd(), ctxComposeResources[i].getVirtualLinkIds());
-      } else if (ctxComposeResources[i].getStrat() == CompositionStrat.PASSTHROUG) {
+      } else if (ctxComposeResources[i].getStrat() == CompositionStrat.PASSTHROUGH) {
         ctxComposes[i] = new CtxComposePassthrough(
             ctxComposeResources[i].getNsd(), ctxComposeResources[i].getSapId());
       }
@@ -71,6 +71,6 @@ public class Composer {
 
   public enum CompositionStrat {
     CONNECT,
-    PASSTHROUG
+    PASSTHROUGH
   }
 }
