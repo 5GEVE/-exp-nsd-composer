@@ -1,5 +1,7 @@
 package it.cnit.blueprint.expbuilder.composer;
 
+import it.cnit.blueprint.expbuilder.rest.CtxComposeResource;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +11,29 @@ public class Composer {
   private static Logger LOG = LoggerFactory
       .getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 
-//  public static NsdGraph buildExperiment(Nsd service, Nsd[] contexts, )
+  private Nsd serviceNsd;
+  private CtxCompose[] ctxComposes;
+
+  public Composer(Nsd serviceNsd, CtxComposeResource[] ctxComposeResources) {
+    this.serviceNsd = serviceNsd;
+    this.ctxComposes = new CtxCompose[ctxComposeResources.length];
+    for (int i = 0; i < ctxComposeResources.length; i++) {
+      if (ctxComposeResources[i].getStrat() == CompositionStrat.CONNECT) {
+        ctxComposes[i] = new CtxComposeConnect(
+            ctxComposeResources[i].getNsd(), ctxComposeResources[i].getVirtualLinkIds());
+      } else if (ctxComposeResources[i].getStrat() == CompositionStrat.PASSTHROUG) {
+        ctxComposes[i] = new CtxComposePassthrough(
+            ctxComposeResources[i].getNsd(), ctxComposeResources[i].getSapId());
+      }
+    }
+  }
+
+  public Nsd composeExperiment() {
+    // TODO
+    return null;
+  }
+
+  //  public static NsdGraph buildExperiment(Nsd service, Nsd[] contexts, )
 //      throws NotExistingEntityException {
 //    NsdGraph expNsdGraph = new NsdGraph(verticalNsdGraph.getNsd(), "nsDfId", "nsLevelId");
 //    for (NsdGraph c : contextNsdGraphs) {
@@ -47,6 +71,6 @@ public class Composer {
 
   public enum CompositionStrat {
     CONNECT,
-    PASS
+    PASSTHROUG
   }
 }
