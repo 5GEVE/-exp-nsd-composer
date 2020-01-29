@@ -24,7 +24,7 @@ public class Builder {
     this.contextNsdGraphs = contextNsdGraphs;
   }
 
-  public Builder(Nsd verticalNsd, List<Nsd> contextNsds) throws NotExistingEntityException {
+  public Builder(Nsd verticalNsd, Nsd[] contextNsds) throws NotExistingEntityException {
     this.verticalNsdGraph = new NsdGraph(verticalNsd, "nsDfId", "nsLevelId");
     this.contextNsdGraphs = new ArrayList<>();
     for (Nsd c : contextNsds) {
