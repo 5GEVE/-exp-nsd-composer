@@ -2,6 +2,10 @@ package it.cnit.blueprint.expbuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import it.cnit.blueprint.expbuilder.composer.Composer;
+import it.cnit.blueprint.expbuilder.composer.Composer.CompositionStrat;
+import it.cnit.blueprint.expbuilder.composer.CtxComposePassthrough.PassthroughException;
+import it.cnit.blueprint.expbuilder.rest.CtxComposeResource;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
@@ -21,7 +25,7 @@ public class ComposerTest {
 
   @Test
   public void Ares2tTrackerDelayTest()
-      throws IOException, ExportException, NotExistingEntityException {
+      throws IOException, ExportException, NotExistingEntityException, PassthroughException {
 
     Nsd trackerNsd = OBJECT_MAPPER.readValue(new URL(
             "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/vsb/vsb_ares2t_tracker/vsb_ares2t_tracker_nsds.yaml"),
@@ -30,13 +34,13 @@ public class ComposerTest {
     Nsd delayNsd = OBJECT_MAPPER.readValue(new URL(
             "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/ctx/ctx_delay/ctx_delay_nsds.yaml"),
         Nsd[].class)[0];
+    CtxComposeResource ctxComposeResource = new CtxComposeResource();
+    ctxComposeResource.setNsd(delayNsd);
+    ctxComposeResource.setSapId("sap_tracking_mobile");
+    ctxComposeResource.setStrat(CompositionStrat.PASSTHROUGH);
 
-    Nsd[] contexts = {delayNsd};
-//    Composer.buildExperiment(trackerNsd,contexts)
-//    LOG.info(b.toString());
-
-//    NsdGraph exp = b.buildExperiment(CompositionStrat.PASS);
-//    LOG.info("\n---\n" + exp.exportGraphViz());
+    Composer composer = new Composer(trackerNsd, new CtxComposeResource[]{ctxComposeResource});
+    composer.composeExperiment();
 
     // TODO
     //String testFile = new Scanner(this.getClass().getResourceAsStream("/vCDNDelayTest.dot"),

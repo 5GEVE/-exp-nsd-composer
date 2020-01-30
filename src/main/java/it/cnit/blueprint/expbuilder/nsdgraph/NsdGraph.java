@@ -101,7 +101,7 @@ public class NsdGraph {
   }
 
   public String exportGraphViz() throws ExportException {
-    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getId;
+    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getVertexId;
     ComponentNameProvider<ProfileVertex> vertexLabelProvider = ProfileVertex::toString;
     ComponentAttributeProvider<ProfileVertex> vertexAttributeProvider = v -> {
       Map<String, Attribute> map = new LinkedHashMap<>();
@@ -135,7 +135,7 @@ public class NsdGraph {
   }
 
   public String exportGraphML() throws ExportException {
-    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getId;
+    ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getVertexId;
     ComponentNameProvider<ProfileVertex> vertexLabelProvider = ProfileVertex::toString;
     ComponentAttributeProvider<ProfileVertex> vertexAttributeProvider = v -> {
       Map<String, Attribute> map = new LinkedHashMap<>();
@@ -185,6 +185,22 @@ public class NsdGraph {
     return sapVertices;
   }
 
+  public NsDf getNsDf() {
+    return nsDf;
+  }
+
+  public void setNsDf(NsDf nsDf) {
+    this.nsDf = nsDf;
+  }
+
+  public NsLevel getNsLevel() {
+    return nsLevel;
+  }
+
+  public void setNsLevel(NsLevel nsLevel) {
+    this.nsLevel = nsLevel;
+  }
+
   /**
    * Add a 'normal' VNF of a context Nsd. The new vertex is simply connected to the
    * VirtualLinkProfileVertex in the input.
@@ -215,8 +231,8 @@ public class NsdGraph {
       String edge) {
     // TODO update Nsd model
     VirtualLinkProfile vlpNew = new VirtualLinkProfile(new NsDf(),
-        "vl_profile_" + contextV.getId(), "vl_" + contextV.getId(),
-        "vl_df_" + contextV.getId(), null, null, null, null);
+        "vl_profile_" + contextV.getVertexId(), "vl_" + contextV.getVertexId(),
+        "vl_df_" + contextV.getVertexId(), null, null, null, null);
 
     // Update graph
     vnfPVertices.add(contextV);

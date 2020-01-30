@@ -6,24 +6,16 @@ public class SapVertex extends ProfileVertex {
 
   private final Sapd sapd;
 
-  SapVertex(Sapd sapd) {
+  public SapVertex(Sapd sapd) {
     this.sapd = sapd;
-  }
-
-  public String toString() {
-    return "Sap_" + this.sapd.getCpdId();
-  }
-
-  public int hashCode() {
-    return toString().hashCode();
-  }
-
-  public boolean equals(Object o) {
-    return (o instanceof SapVertex) && (toString().equals(o.toString()));
   }
 
   public Sapd getSapd() {
     return sapd;
   }
 
+  @Override
+  public String getElementId() {
+    return this.sapd.getCpdId();
+  }
 }

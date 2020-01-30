@@ -27,7 +27,7 @@ public class NsdGraphTest {
   public void exportGraphTest(Nsd n) throws NotExistingEntityException, ExportException {
     for (NsDf df : n.getNsDf()) {
       for (NsLevel l : df.getNsInstantiationLevel()) {
-        NsdGraph nsdGraph = new NsdGraph(n, df.getNsDfId(), l.getNsLevelId());
+        NsdGraph nsdGraph = new NsdGraph(n, df.getNsDfId(), l.getNsLevelId()) ;
         LOG.info("GraphViz export:\n{}", nsdGraph.exportGraphViz());
         String testFile = new Scanner(
             App.class.getResourceAsStream(String.format("/%s.dot", l.getNsLevelId())), "UTF-8")
