@@ -2,8 +2,8 @@ package it.cnit.blueprint.expbuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import it.cnit.blueprint.expbuilder.composer.ComposableNsd;
-import it.cnit.blueprint.expbuilder.composer.ComposableNsd.CompositionStrat;
+import it.cnit.blueprint.expbuilder.compose.ComposableNsd;
+import it.cnit.blueprint.expbuilder.compose.ComposableNsd.CompositionStrat;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeResource;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;

@@ -1,4 +1,4 @@
-package it.cnit.blueprint.expbuilder.composer;
+package it.cnit.blueprint.expbuilder.compose;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
