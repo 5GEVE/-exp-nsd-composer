@@ -1,6 +1,7 @@
 package it.cnit.blueprint.expbuilder.compose;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.PnfProfileVertex;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
@@ -31,16 +33,17 @@ import org.jgrapht.graph.SimpleGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@JsonDeserialize(converter = NsdConverter.class)
 public class ComposableNsd extends Nsd {
 
   private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
   @JsonIgnore
-  Map<DfIlKey, Graph<ProfileVertex, String>> graphMap = new HashMap<>();
+  private Map<DfIlKey, Graph<ProfileVertex, String>> graphMap = new HashMap<>();
   @JsonIgnore
-  NsdGraphExporter graphExporter = new GraphVizExporter();
+  private NsdGraphExporter graphExporter = new GraphVizExporter();
 
-  private void buildGraphs() throws NotExistingEntityException {
+  void buildGraphs() throws NotExistingEntityException {
     for (NsDf df : getNsDf()) {
       for (NsLevel l : df.getNsInstantiationLevel()) {
         Graph<ProfileVertex, String> g = new SimpleGraph<>(String.class);
@@ -110,9 +113,6 @@ public class ComposableNsd extends Nsd {
   }
 
   public void composeWith(CtxComposeResource[] ctxRArray) throws NotExistingEntityException {
-    if (graphMap.isEmpty()) {
-      buildGraphs();
-    }
     for (CtxComposeResource ctxR : ctxRArray) {
       for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
         if (ctxR.getStrat() == CompositionStrat.CONNECT) {
@@ -128,10 +128,6 @@ public class ComposableNsd extends Nsd {
   }
 
   public void composeWithConnect(CtxComposeResource ctxR) throws NotExistingEntityException {
-    if (graphMap.isEmpty()) {
-      buildGraphs();
-    }
-
     if (ctxR.getStrat() != CompositionStrat.CONNECT) {
       LOG.error("Composition strategy is not 'CONNECT'. Doing nothing.");
       throw new IllegalArgumentException();
@@ -149,10 +145,6 @@ public class ComposableNsd extends Nsd {
   }
 
   public void composeWithPassthrough(CtxComposeResource ctxR) throws NotExistingEntityException {
-    if (graphMap.isEmpty()) {
-      buildGraphs();
-    }
-
     if (ctxR.getStrat() != CompositionStrat.PASSTHROUGH) {
       LOG.error("Composition strategy is not 'PASSTHROUGH'. Doing nothing.");
       throw new IllegalArgumentException();
@@ -204,7 +196,19 @@ public class ComposableNsd extends Nsd {
     }
   }
 
-  private static class DfIlKey {
+  public String export(DfIlKey key) {
+    if (!graphMap.containsKey(key)) {
+      LOG.error("Graph key '{}' not found.", key.toString());
+      throw new IllegalArgumentException("");
+    }
+    return graphExporter.export(graphMap.get(key));
+  }
+
+  public Set<DfIlKey> getGraphMapKeys() {
+    return graphMap.keySet();
+  }
+
+  public static class DfIlKey {
 
     private final String nsDfId;
     private final String nsIlId;
@@ -212,6 +216,19 @@ public class ComposableNsd extends Nsd {
     private DfIlKey(String nsDfId, String nsIlId) {
       this.nsDfId = nsDfId;
       this.nsIlId = nsIlId;
+    }
+
+    public String getNsDfId() {
+      return nsDfId;
+    }
+
+    public String getNsIlId() {
+      return nsIlId;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("(%s,%s)", nsDfId, nsIlId);
     }
   }
 
