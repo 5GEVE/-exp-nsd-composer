@@ -2,13 +2,15 @@ package it.cnit.blueprint.expbuilder.rest;
 
 import it.cnit.blueprint.expbuilder.compose.ComposableNsd.CompositionStrat;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import java.util.Map;
 
 public class CtxComposeResource {
 
   private Nsd nsd;
   private CompositionStrat strat;
   private String SapId;
-  private String[] VirtualLinkIds;
+  // Map<vnfProfileId, vlProfileId>
+  private Map<String, String> VirtualLinkIds;
 
   public Nsd getNsd() {
     return nsd;
@@ -34,11 +36,11 @@ public class CtxComposeResource {
     SapId = sapId;
   }
 
-  public String[] getVirtualLinkIds() {
+  public Map<String, String> getVirtualLinkIds() {
     return VirtualLinkIds;
   }
 
-  public void setVirtualLinkIds(String[] virtualLinkIds) {
+  public void setVirtualLinkIds(Map<String, String> virtualLinkIds) {
     VirtualLinkIds = virtualLinkIds;
   }
 }

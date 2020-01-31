@@ -139,7 +139,20 @@ public class ComposableNsd extends Nsd {
           getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
           entry.getKey().nsIlId);
       LOG.debug("GraphViz export before:\n{}", graphExporter.export(entry.getValue()));
-      //TODO  Move composition code here.
+
+      for (Map.Entry<String, String> vnfVl : ctxR.getVirtualLinkIds().entrySet()) {
+        // Create new vertices to add
+        VnfProfileVertex v1 = new VnfProfileVertex(
+            ctxR.getNsd().getNsDf().get(0).getVnfProfile(vnfVl.getKey()));
+        VirtualLinkProfileVertex v2 = new VirtualLinkProfileVertex(
+            ctxR.getNsd().getNsDf().get(0).getVirtualLinkProfile(vnfVl.getValue()));
+        // Add vertices
+        entry.getValue().addVertex(v1);
+        entry.getValue().addVertex(v2);
+        // Modify edges
+        entry.getValue().addEdge(v1, v2);
+      }
+
       LOG.debug("GraphViz export after:\n{}", graphExporter.export(entry.getValue()));
     }
   }
