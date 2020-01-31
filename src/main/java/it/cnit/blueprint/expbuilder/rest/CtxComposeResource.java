@@ -1,13 +1,12 @@
 package it.cnit.blueprint.expbuilder.rest;
 
-import it.cnit.blueprint.expbuilder.composer.Composer;
-import it.cnit.blueprint.expbuilder.composer.Composer.CompositionStrat;
+import it.cnit.blueprint.expbuilder.composer.ComposableNsd.CompositionStrat;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 
 public class CtxComposeResource {
 
   private Nsd nsd;
-  private Composer.CompositionStrat strat;
+  private CompositionStrat strat;
   private String SapId;
   private String[] VirtualLinkIds;
 
