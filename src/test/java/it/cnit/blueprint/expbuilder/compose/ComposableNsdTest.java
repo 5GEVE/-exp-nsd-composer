@@ -5,8 +5,12 @@ import static org.junit.Assert.assertEquals;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.App;
+import it.cnit.blueprint.expbuilder.compose.ComposableNsd.CompositionStrat;
 import it.cnit.blueprint.expbuilder.compose.ComposableNsd.DfIlKey;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
+import it.cnit.blueprint.expbuilder.rest.CtxComposeResource;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,17 +30,26 @@ public class ComposableNsdTest {
   final Logger LOG = LoggerFactory.getLogger(ComposableNsdTest.class);
 
   @DataPoints
-  public static List<ComposableNsd> nsdList = new ArrayList<>();
+  public static List<ComposableNsd> vsbNsdList = new ArrayList<>();
+
+  public static List<Nsd> ctxNsdList = new ArrayList<>();
+
+  public static List<Nsd> expNsdList = new ArrayList<>();
 
   @Before
   public void setUp() throws Exception {
     ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
-    nsdList.add(objectMapper.readValue(new URL(
+
+    vsbNsdList.add(objectMapper.readValue(new URL(
             "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/vsb/vsb_ares2t_tracker/vsb_ares2t_tracker_nsds.yaml"),
         ComposableNsd[].class)[0]);
-    nsdList.add(objectMapper.readValue(
+    vsbNsdList.add(objectMapper.readValue(
         App.class.getResourceAsStream("/nsd-examples/nsd_vCDN_pnf_gui.yaml"),
         ComposableNsd[].class)[0]);
+
+    ctxNsdList.add(objectMapper.readValue(new URL(
+            "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/ctx/ctx_delay/ctx_delay_nsds.yaml"),
+        Nsd[].class)[0]);
   }
 
   @Test
@@ -54,13 +67,25 @@ public class ComposableNsdTest {
 
   @Test
   public void composeWith() {
+    // TODO
   }
 
   @Test
   public void composeWithConnect() {
+    // TODO
+    // Check with ExpbNsd from the repo
   }
 
   @Test
-  public void composeWithPassthrough() {
+  public void composeWithPassthrough() throws NotExistingEntityException {
+    ComposableNsd trackerNsd = vsbNsdList.get(0);
+    CtxComposeResource ctxComposeResource = new CtxComposeResource();
+    ctxComposeResource.setNsd(ctxNsdList.get(0));
+    ctxComposeResource.setSapId("sap_tracking_mobile");
+    ctxComposeResource.setStrat(CompositionStrat.PASSTHROUGH);
+    trackerNsd.composeWithPassthrough(ctxComposeResource);
+
+    // TODO
+    // Check with ExpbNsd from the repo
   }
 }
