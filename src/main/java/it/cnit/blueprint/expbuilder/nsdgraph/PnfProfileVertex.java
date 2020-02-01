@@ -6,24 +6,16 @@ public class PnfProfileVertex extends ProfileVertex {
 
   private final PnfProfile pnfProfile;
 
-  PnfProfileVertex(PnfProfile pnfProfile) {
+  public PnfProfileVertex(PnfProfile pnfProfile) {
     this.pnfProfile = pnfProfile;
-  }
-
-  public String toString() {
-    return "pnfProfile_" + this.pnfProfile.getPnfProfileId();
-  }
-
-  public int hashCode() {
-    return toString().hashCode();
-  }
-
-  public boolean equals(Object o) {
-    return (o instanceof PnfProfileVertex) && (toString().equals(o.toString()));
   }
 
   public PnfProfile getPnfProfile() {
     return pnfProfile;
   }
 
+  @Override
+  public String getElementId() {
+    return pnfProfile.getPnfProfileId();
+  }
 }
