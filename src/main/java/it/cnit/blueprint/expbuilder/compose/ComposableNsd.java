@@ -3,8 +3,8 @@ package it.cnit.blueprint.expbuilder.compose;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
-import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
+import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.PnfProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.SapVertex;
@@ -166,7 +166,7 @@ public class ComposableNsd extends Nsd {
     // TODO handle other exceptions here
 
     for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
-      LOG.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using CONNECT",
+      LOG.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using PASSTHROUGH",
           getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
           entry.getKey().nsIlId);
       LOG.debug("GraphViz export before:\n{}", graphExporter.export(entry.getValue()));
@@ -210,7 +210,7 @@ public class ComposableNsd extends Nsd {
     }
   }
 
-  public void setGraphExporter(GraphExporter exporter){
+  public void setGraphExporter(GraphExporter exporter) {
     this.graphExporter = exporter;
   }
 
