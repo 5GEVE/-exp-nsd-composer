@@ -12,7 +12,7 @@ import org.jgrapht.io.DOTExporter;
 import org.jgrapht.io.DefaultAttribute;
 import org.jgrapht.io.StringComponentNameProvider;
 
-public class GraphVizExporter implements NsdGraphExporter {
+public class GraphVizExporter implements GraphExporter {
 
   @Override
   public String export(Graph<ProfileVertex, String> g) {

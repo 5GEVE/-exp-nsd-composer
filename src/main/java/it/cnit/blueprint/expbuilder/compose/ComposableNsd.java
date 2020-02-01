@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
-import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphExporter;
+import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.PnfProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.SapVertex;
@@ -42,7 +42,7 @@ public class ComposableNsd extends Nsd {
   @JsonIgnore
   private Map<DfIlKey, Graph<ProfileVertex, String>> graphMap = new HashMap<>();
   @JsonIgnore
-  private NsdGraphExporter graphExporter = new GraphVizExporter();
+  private GraphExporter graphExporter = new GraphVizExporter();
 
   void buildGraphs() throws NotExistingEntityException {
     for (NsDf df : getNsDf()) {
@@ -208,6 +208,10 @@ public class ComposableNsd extends Nsd {
 
       LOG.debug("GraphViz export after:\n{}", graphExporter.export(entry.getValue()));
     }
+  }
+
+  public void setGraphExporter(GraphExporter exporter){
+    this.graphExporter = exporter;
   }
 
   public String export(DfIlKey key) {

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.App;
 import it.cnit.blueprint.expbuilder.compose.ComposableNsd.DfIlKey;
+import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,7 @@ public class ComposableNsdTest {
   @Test
   @Theory
   public void buildGraphsExport(ComposableNsd nsd) {
+    nsd.setGraphExporter(new GraphVizExporter());
     for (DfIlKey k : nsd.getGraphMapKeys()) {
       LOG.debug("GraphViz export for '{}':\n{}", k.toString(), nsd.export(k));
       String testFile = new Scanner(
