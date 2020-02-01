@@ -139,7 +139,7 @@ public class ComposableNsd extends Nsd {
       LOG.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using CONNECT",
           getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
           entry.getKey().nsIlId);
-      LOG.debug("GraphViz export before:\n{}", graphExporter.export(entry.getValue()));
+      LOG.debug("Export before:\n{}", graphExporter.export(entry.getValue()));
 
       for (Map.Entry<String, String> vnfVl : ctxR.getVirtualLinkIds().entrySet()) {
         // Create new vertices to add
@@ -154,7 +154,7 @@ public class ComposableNsd extends Nsd {
         entry.getValue().addEdge(v1, v2);
       }
 
-      LOG.debug("GraphViz export after:\n{}", graphExporter.export(entry.getValue()));
+      LOG.debug("Export after:\n{}", graphExporter.export(entry.getValue()));
     }
   }
 
@@ -169,7 +169,7 @@ public class ComposableNsd extends Nsd {
       LOG.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using PASSTHROUGH",
           getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
           entry.getKey().nsIlId);
-      LOG.debug("GraphViz export before:\n{}", graphExporter.export(entry.getValue()));
+      LOG.debug("Export before:\n{}", graphExporter.export(entry.getValue()));
 
       // TODO update Nsd model when modifying the graph.
 
@@ -206,7 +206,7 @@ public class ComposableNsd extends Nsd {
           String.format("cp_%s_out", contextV.getVnfProfile().getVnfProfileId()));
       entry.getValue().removeEdge(edgeOld);
 
-      LOG.debug("GraphViz export after:\n{}", graphExporter.export(entry.getValue()));
+      LOG.debug("Export after:\n{}", graphExporter.export(entry.getValue()));
     }
   }
 
