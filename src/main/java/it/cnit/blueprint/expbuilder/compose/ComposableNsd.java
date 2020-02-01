@@ -2,6 +2,7 @@ package it.cnit.blueprint.expbuilder.compose;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.util.StdConverter;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.PnfProfileVertex;
@@ -33,7 +34,7 @@ import org.jgrapht.graph.SimpleGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@JsonDeserialize(converter = NsdConverter.class)
+@JsonDeserialize(converter = ComposableNsd.NsdConverter.class)
 public class ComposableNsd extends Nsd {
 
   private Logger LOG = LoggerFactory.getLogger(this.getClass());
@@ -248,5 +249,20 @@ public class ComposableNsd extends Nsd {
   public enum CompositionStrat {
     CONNECT,
     PASSTHROUGH
+  }
+
+  public static class NsdConverter extends StdConverter<ComposableNsd, ComposableNsd> {
+
+    // Used to emulate the @PostConstruct
+    // TODO check if we can fix this workaround with Spring
+    @Override
+    public ComposableNsd convert(ComposableNsd composableNsd) {
+      try {
+        composableNsd.buildGraphs();
+      } catch (NotExistingEntityException e) {
+        e.printStackTrace();
+      }
+      return composableNsd;
+    }
   }
 }
