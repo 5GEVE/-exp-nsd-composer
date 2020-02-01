@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
-import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.PnfProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.SapVertex;
@@ -33,7 +32,10 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 @JsonDeserialize(converter = ComposableNsd.NsdConverter.class)
 public class ComposableNsd extends Nsd {
 
@@ -41,8 +43,10 @@ public class ComposableNsd extends Nsd {
 
   @JsonIgnore
   private Map<DfIlKey, Graph<ProfileVertex, String>> graphMap = new HashMap<>();
+
+  @Autowired
   @JsonIgnore
-  private GraphExporter graphExporter = new GraphVizExporter();
+  public GraphExporter graphExporter;
 
   void buildGraphs() throws NotExistingEntityException {
     for (NsDf df : getNsDf()) {

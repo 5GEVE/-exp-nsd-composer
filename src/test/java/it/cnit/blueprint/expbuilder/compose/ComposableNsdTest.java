@@ -42,7 +42,7 @@ public class ComposableNsdTest {
   public void buildGraphsExportVcdn() throws IOException {
     ComposableNsd vcdnNsd = OBJECT_MAPPER.readValue(App.class.getResourceAsStream(nsdVcdnPnfGui),
         ComposableNsd[].class)[0];
-    vcdnNsd.setGraphExporter(new GraphVizExporter());
+//    vcdnNsd.setGraphExporter(new GraphVizExporter());
     for (DfIlKey k : vcdnNsd.getGraphMapKeys()) {
       LOG.debug("GraphViz export for '{}':\n{}", k.toString(), vcdnNsd.export(k));
       String testFile = new Scanner(
@@ -56,7 +56,7 @@ public class ComposableNsdTest {
   public void buildGraphsExportAres2tTracker() throws IOException {
     ComposableNsd trackerNsd = OBJECT_MAPPER.readValue(vsbAres2tTrackerNsds,
         ComposableNsd[].class)[0];
-    trackerNsd.setGraphExporter(new GraphVizExporter());
+//    trackerNsd.setGraphExporter(new GraphVizExporter());
     for (DfIlKey k : trackerNsd.getGraphMapKeys()) {
       LOG.debug("GraphViz export for '{}':\n{}", k.toString(), trackerNsd.export(k));
       String testFile = new Scanner(

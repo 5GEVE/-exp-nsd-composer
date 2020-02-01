@@ -11,7 +11,11 @@ import org.jgrapht.io.ComponentNameProvider;
 import org.jgrapht.io.DOTExporter;
 import org.jgrapht.io.DefaultAttribute;
 import org.jgrapht.io.StringComponentNameProvider;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
 
+@Component
+@Primary
 public class GraphVizExporter implements GraphExporter {
 
   @Override
