@@ -11,51 +11,56 @@ import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeResource;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Scanner;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ComposableNsdTest {
 
-  final Logger LOG = LoggerFactory.getLogger(ComposableNsdTest.class);
+  final static Logger LOG = LoggerFactory.getLogger(ComposableNsdTest.class);
 
-  private ObjectMapper OBJECT_MAPPER;
-  private URL vsbAres2tTrackerNsds;
-  private String nsdVcdnPnfGui;
-  private URL ctxDelayNsds;
+  private static ObjectMapper OBJECT_MAPPER;
+  // Test input
+  private ComposableNsd vCdnNsd;
+  private ComposableNsd trackerNsd;
+  private Nsd delayNsd;
+
+  @BeforeClass
+  public static void setUpClass() {
+    OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
+  }
 
   @Before
   public void setUp() throws Exception {
-    OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
-    vsbAres2tTrackerNsds = new URL(
-        "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/vsb/vsb_ares2t_tracker/vsb_ares2t_tracker_nsds.yaml");
-    nsdVcdnPnfGui = "/nsd-examples/nsd_vCDN_pnf_gui.yaml";
-    ctxDelayNsds = new URL(
-        "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/ctx/ctx_delay/ctx_delay_nsds.yaml");
+    vCdnNsd = OBJECT_MAPPER.readValue(
+        App.class.getResourceAsStream("/nsd-examples/nsd_vCDN_pnf_gui.yaml"),
+        ComposableNsd[].class)[0];
+    trackerNsd = OBJECT_MAPPER.readValue(new URL(
+            "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/vsb/vsb_ares2t_tracker/vsb_ares2t_tracker_nsds.yaml"),
+        ComposableNsd[].class)[0];
+    delayNsd = OBJECT_MAPPER.readValue(new URL(
+            "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/ctx/ctx_delay/ctx_delay_nsds.yaml"),
+        Nsd[].class)[0];
   }
 
   @Test
-  public void buildGraphsExportVcdn() throws IOException {
-    ComposableNsd vcdnNsd = OBJECT_MAPPER.readValue(App.class.getResourceAsStream(nsdVcdnPnfGui),
-        ComposableNsd[].class)[0];
-//    vcdnNsd.setGraphExporter(new GraphVizExporter());
-    for (DfIlKey k : vcdnNsd.getGraphMapKeys()) {
-      LOG.debug("GraphViz export for '{}':\n{}", k.toString(), vcdnNsd.export(k));
+  public void buildGraphsExportVCdn() {
+    vCdnNsd.setGraphExporter(new GraphVizExporter());
+    for (DfIlKey k : vCdnNsd.getGraphMapKeys()) {
+      LOG.debug("GraphViz export for '{}':\n{}", k.toString(), vCdnNsd.export(k));
       String testFile = new Scanner(
           App.class.getResourceAsStream(String.format("/%s.dot", k.getNsIlId())), "UTF-8")
           .useDelimiter("\\A").next();
-      assertEquals(testFile, vcdnNsd.export(k));
+      assertEquals(testFile, vCdnNsd.export(k));
     }
   }
 
   @Test
-  public void buildGraphsExportAres2tTracker() throws IOException {
-    ComposableNsd trackerNsd = OBJECT_MAPPER.readValue(vsbAres2tTrackerNsds,
-        ComposableNsd[].class)[0];
+  public void buildGraphsExportAres2tTracker() {
 //    trackerNsd.setGraphExporter(new GraphVizExporter());
     for (DfIlKey k : trackerNsd.getGraphMapKeys()) {
       LOG.debug("GraphViz export for '{}':\n{}", k.toString(), trackerNsd.export(k));
@@ -78,11 +83,8 @@ public class ComposableNsdTest {
   }
 
   @Test
-  public void composeWithPassthrough() throws NotExistingEntityException, IOException {
-    ComposableNsd trackerNsd = OBJECT_MAPPER.readValue(vsbAres2tTrackerNsds,
-        ComposableNsd[].class)[0];
-    Nsd delayNsd = OBJECT_MAPPER.readValue(ctxDelayNsds,
-        Nsd[].class)[0];
+  public void composeWithPassthrough() throws NotExistingEntityException {
+//    trackerNsd.setGraphExporter(new GraphVizExporter());
     CtxComposeResource ctxComposeResource = new CtxComposeResource();
     ctxComposeResource.setNsd(delayNsd);
     ctxComposeResource.setSapId("sap_tracking_mobile");
