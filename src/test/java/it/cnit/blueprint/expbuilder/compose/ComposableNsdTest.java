@@ -8,6 +8,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.App;
 import it.cnit.blueprint.expbuilder.compose.ComposableNsd.CompositionStrat;
 import it.cnit.blueprint.expbuilder.compose.ComposableNsd.DfIlKey;
+import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
+import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeResource;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
@@ -16,26 +18,16 @@ import java.util.Scanner;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("logging-test")
 public class ComposableNsdTest {
 
   final static Logger LOG = LoggerFactory.getLogger(ComposableNsdTest.class);
 
   private static ObjectMapper OBJECT_MAPPER;
   // Test input
-  @Autowired
   private ComposableNsd vCdnComposer;
-  @Autowired
   private ComposableNsd trackerComposer;
   private Nsd delayNsd;
 
@@ -46,14 +38,15 @@ public class ComposableNsdTest {
 
   @Before
   public void setUp() throws Exception {
+    GraphExporter exporter = new GraphVizExporter();
     Nsd vCDN = OBJECT_MAPPER.readValue(
         App.class.getResourceAsStream("/nsd-examples/nsd_vCDN_pnf_gui.yaml"),
         Nsd[].class)[0];
-    vCdnComposer.setNsd(vCDN);
+    vCdnComposer = new ComposableNsd(vCDN, exporter);
     Nsd tracker = OBJECT_MAPPER.readValue(new URL(
             "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/vsb/vsb_ares2t_tracker/vsb_ares2t_tracker_nsds.yaml"),
         Nsd[].class)[0];
-    trackerComposer.setNsd(tracker);
+    trackerComposer = new ComposableNsd(tracker, exporter);
     delayNsd = OBJECT_MAPPER.readValue(new URL(
             "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/ctx/ctx_delay/ctx_delay_nsds.yaml"),
         Nsd[].class)[0];
