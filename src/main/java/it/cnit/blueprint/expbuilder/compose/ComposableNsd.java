@@ -33,13 +33,19 @@ import org.jgrapht.graph.SimpleGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 @Component
+@Scope("prototype")
 @JsonDeserialize(converter = ComposableNsd.NsdConverter.class)
-public class ComposableNsd extends Nsd {
+public class ComposableNsd {
 
   private Logger LOG = LoggerFactory.getLogger(this.getClass());
+
+  //TODO check for uninitialized Nsd.
+  private Nsd nsd;
 
   @JsonIgnore
   private Map<DfIlKey, Graph<ProfileVertex, String>> graphMap = new HashMap<>();
@@ -49,7 +55,7 @@ public class ComposableNsd extends Nsd {
   public GraphExporter graphExporter;
 
   void buildGraphs() throws NotExistingEntityException {
-    for (NsDf df : getNsDf()) {
+    for (NsDf df : nsd.getNsDf()) {
       for (NsLevel l : df.getNsInstantiationLevel()) {
         Graph<ProfileVertex, String> g = new SimpleGraph<>(String.class);
         List<VnfProfileVertex> vnfPVertices = new ArrayList<>();
@@ -76,7 +82,7 @@ public class ComposableNsd extends Nsd {
           vlPVertices.add(v);
           g.addVertex(v);
         }
-        for (Sapd s : getSapd()) {
+        for (Sapd s : nsd.getSapd()) {
           SapVertex v = new SapVertex(s);
           sapVertices.add(v);
           g.addVertex(v);
@@ -141,7 +147,7 @@ public class ComposableNsd extends Nsd {
 
     for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
       LOG.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using CONNECT",
-          getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
+          nsd.getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
           entry.getKey().nsIlId);
       LOG.debug("Export before:\n{}", export(entry.getKey()));
 
@@ -171,7 +177,7 @@ public class ComposableNsd extends Nsd {
 
     for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
       LOG.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using PASSTHROUGH",
-          getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
+          nsd.getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
           entry.getKey().nsIlId);
       LOG.debug("Export before:\n{}", export(entry.getKey()));
 
@@ -189,7 +195,7 @@ public class ComposableNsd extends Nsd {
           ctxR.getNsd().getNsDf().get(0).getVnfProfile().get(0));
       VirtualLinkProfileVertex vlVnew = new VirtualLinkProfileVertex(
           new VirtualLinkProfile(
-              this.getNsDeploymentFlavour(entry.getKey().nsDfId),
+              nsd.getNsDeploymentFlavour(entry.getKey().nsDfId),
               "vl_profile_" + contextV.getVnfProfile().getVnfProfileId(),
               "vl_" + contextV.getVnfProfile().getVnfProfileId(),
               "vl_df_" + contextV.getVnfProfile().getVnfProfileId(), null, null,
@@ -228,6 +234,14 @@ public class ComposableNsd extends Nsd {
 
   public Set<DfIlKey> getGraphMapKeys() {
     return graphMap.keySet();
+  }
+
+  public Nsd getNsd() {
+    return nsd;
+  }
+
+  public void setNsd(Nsd nsd) {
+    this.nsd = nsd;
   }
 
   public static class DfIlKey {
