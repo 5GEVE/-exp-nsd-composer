@@ -1,6 +1,7 @@
 package it.cnit.blueprint.expbuilder.compose;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -58,7 +59,7 @@ public class ComposableNsdTest {
 
   @Test
   public void buildGraphsExportVCdn() {
-//    vCdnNsd.setGraphExporter(new GraphVizExporter());
+    assertNotEquals(0, vCdnComposer.getGraphMapKeys());
     for (DfIlKey k : vCdnComposer.getGraphMapKeys()) {
       LOG.debug("GraphViz export for '{}':\n{}", k.toString(), vCdnComposer.export(k));
       String testFile = new Scanner(
@@ -70,7 +71,7 @@ public class ComposableNsdTest {
 
   @Test
   public void buildGraphsExportAres2tTracker() {
-//    trackerNsd.setGraphExporter(new GraphVizExporter());
+    assertNotEquals(0, trackerComposer.getGraphMapKeys());
     for (DfIlKey k : trackerComposer.getGraphMapKeys()) {
       LOG.debug("GraphViz export for '{}':\n{}", k.toString(), trackerComposer.export(k));
       String testFile = new Scanner(
@@ -93,7 +94,7 @@ public class ComposableNsdTest {
 
   @Test
   public void composeWithPassthrough() throws NotExistingEntityException {
-//    trackerNsd.setGraphExporter(new GraphVizExporter());
+    assertNotEquals(0, trackerComposer.getGraphMapKeys());
     CtxComposeResource ctxComposeResource = new CtxComposeResource();
     ctxComposeResource.setNsd(delayNsd);
     ctxComposeResource.setSapId("sap_tracking_mobile");

@@ -2,7 +2,6 @@ package it.cnit.blueprint.expbuilder.compose;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.util.StdConverter;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.PnfProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
@@ -34,12 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @Scope("prototype")
-@JsonDeserialize(converter = ComposableNsd.NsdConverter.class)
 public class ComposableNsd {
 
   private Logger LOG = LoggerFactory.getLogger(this.getClass());
@@ -240,8 +237,9 @@ public class ComposableNsd {
     return nsd;
   }
 
-  public void setNsd(Nsd nsd) {
+  public void setNsd(Nsd nsd) throws NotExistingEntityException {
     this.nsd = nsd;
+    buildGraphs();
   }
 
   public static class DfIlKey {
@@ -273,18 +271,4 @@ public class ComposableNsd {
     PASSTHROUGH
   }
 
-  public static class NsdConverter extends StdConverter<ComposableNsd, ComposableNsd> {
-
-    // Used to emulate the @PostConstruct
-    // TODO check if we can fix this workaround with Spring
-    @Override
-    public ComposableNsd convert(ComposableNsd composableNsd) {
-      try {
-        composableNsd.buildGraphs();
-      } catch (NotExistingEntityException e) {
-        e.printStackTrace();
-      }
-      return composableNsd;
-    }
-  }
 }
