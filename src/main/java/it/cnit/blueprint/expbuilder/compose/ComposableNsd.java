@@ -1,6 +1,5 @@
 package it.cnit.blueprint.expbuilder.compose;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.PnfProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
@@ -43,11 +42,9 @@ public class ComposableNsd {
   //TODO check for uninitialized Nsd.
   private Nsd nsd;
 
-  @JsonIgnore
   private Map<DfIlKey, Graph<ProfileVertex, String>> graphMap = new HashMap<>();
 
   @Autowired
-  @JsonIgnore
   public GraphExporter graphExporter;
 
   void buildGraphs() throws NotExistingEntityException {
