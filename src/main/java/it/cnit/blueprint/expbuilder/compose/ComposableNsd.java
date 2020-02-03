@@ -47,72 +47,84 @@ public class ComposableNsd {
   @Autowired
   public GraphExporter graphExporter;
 
-  void buildGraphs() throws NotExistingEntityException {
-    for (NsDf df : nsd.getNsDf()) {
-      for (NsLevel l : df.getNsInstantiationLevel()) {
-        Graph<ProfileVertex, String> g = new SimpleGraph<>(String.class);
-        List<VnfProfileVertex> vnfPVertices = new ArrayList<>();
-        List<PnfProfileVertex> pnfPVertices = new ArrayList<>();
-        List<VirtualLinkProfileVertex> vlPVertices = new ArrayList<>();
-        List<SapVertex> sapVertices = new ArrayList<>();
+  public ComposableNsd(Nsd nsd, GraphExporter graphExporter) {
+    this.nsd = nsd;
+    buildGraphs();
+    this.graphExporter = graphExporter;
+  }
 
-        //vertices
-        for (VnfToLevelMapping vnfToLevelMapping : l.getVnfToLevelMapping()) {
-          VnfProfileVertex v = new VnfProfileVertex(
-              df.getVnfProfile(vnfToLevelMapping.getVnfProfileId()));
-          // TODO handle the number of instances to build the graph
-          vnfPVertices.add(v);
-          g.addVertex(v);
-        }
-        for (PnfProfile pp : df.getPnfProfile()) {
-          PnfProfileVertex v = new PnfProfileVertex(pp);
-          pnfPVertices.add(v);
-          g.addVertex(v);
-        }
-        for (VirtualLinkToLevelMapping vlToLevelMapping : l.getVirtualLinkToLevelMapping()) {
-          VirtualLinkProfileVertex v = new VirtualLinkProfileVertex(
-              df.getVirtualLinkProfile(vlToLevelMapping.getVirtualLinkProfileId()));
-          vlPVertices.add(v);
-          g.addVertex(v);
-        }
-        for (Sapd s : nsd.getSapd()) {
-          SapVertex v = new SapVertex(s);
-          sapVertices.add(v);
-          g.addVertex(v);
-        }
+  private void buildGraphs() {
+    try {
+      for (NsDf df : nsd.getNsDf()) {
+        for (NsLevel l : df.getNsInstantiationLevel()) {
+          Graph<ProfileVertex, String> g = new SimpleGraph<>(String.class);
+          List<VnfProfileVertex> vnfPVertices = new ArrayList<>();
+          List<PnfProfileVertex> pnfPVertices = new ArrayList<>();
+          List<VirtualLinkProfileVertex> vlPVertices = new ArrayList<>();
+          List<SapVertex> sapVertices = new ArrayList<>();
 
-        // edges
-        for (VnfProfileVertex v1 : vnfPVertices) {
-          for (NsVirtualLinkConnectivity vlc : v1.getVnfProfile().getNsVirtualLinkConnectivity()) {
-            for (VirtualLinkProfileVertex v2 : vlPVertices) {
-              if (vlc.getVirtualLinkProfileId()
-                  .equals(v2.getVlProfile().getVirtualLinkProfileId())) {
-                g.addEdge(v1, v2, vlc.getCpdId().get(0));
+          //vertices
+          for (VnfToLevelMapping vnfToLevelMapping : l.getVnfToLevelMapping()) {
+            VnfProfileVertex v = new VnfProfileVertex(
+                df.getVnfProfile(vnfToLevelMapping.getVnfProfileId()));
+            // TODO handle the number of instances to build the graph
+            vnfPVertices.add(v);
+            g.addVertex(v);
+          }
+          for (PnfProfile pp : df.getPnfProfile()) {
+            PnfProfileVertex v = new PnfProfileVertex(pp);
+            pnfPVertices.add(v);
+            g.addVertex(v);
+          }
+          for (VirtualLinkToLevelMapping vlToLevelMapping : l.getVirtualLinkToLevelMapping()) {
+            VirtualLinkProfileVertex v = new VirtualLinkProfileVertex(
+                df.getVirtualLinkProfile(vlToLevelMapping.getVirtualLinkProfileId()));
+            vlPVertices.add(v);
+            g.addVertex(v);
+          }
+          for (Sapd s : nsd.getSapd()) {
+            SapVertex v = new SapVertex(s);
+            sapVertices.add(v);
+            g.addVertex(v);
+          }
+
+          // edges
+          for (VnfProfileVertex v1 : vnfPVertices) {
+            for (NsVirtualLinkConnectivity vlc : v1.getVnfProfile()
+                .getNsVirtualLinkConnectivity()) {
+              for (VirtualLinkProfileVertex v2 : vlPVertices) {
+                if (vlc.getVirtualLinkProfileId()
+                    .equals(v2.getVlProfile().getVirtualLinkProfileId())) {
+                  g.addEdge(v1, v2, vlc.getCpdId().get(0));
+                }
               }
             }
           }
-        }
-        for (PnfProfileVertex v1 : pnfPVertices) {
-          for (NsVirtualLinkConnectivity vlc : v1.getPnfProfile().getNsVirtualLinkConnectivity()) {
-            for (VirtualLinkProfileVertex v2 : vlPVertices) {
-              if (vlc.getVirtualLinkProfileId()
-                  .equals(v2.getVlProfile().getVirtualLinkProfileId())) {
-                g.addEdge(v1, v2, vlc.getCpdId().get(0));
+          for (PnfProfileVertex v1 : pnfPVertices) {
+            for (NsVirtualLinkConnectivity vlc : v1.getPnfProfile()
+                .getNsVirtualLinkConnectivity()) {
+              for (VirtualLinkProfileVertex v2 : vlPVertices) {
+                if (vlc.getVirtualLinkProfileId()
+                    .equals(v2.getVlProfile().getVirtualLinkProfileId())) {
+                  g.addEdge(v1, v2, vlc.getCpdId().get(0));
+                }
               }
             }
           }
-        }
-        for (SapVertex v1 : sapVertices) {
-          for (VirtualLinkProfileVertex v2 : vlPVertices) {
-            if (v1.getSapd().getNsVirtualLinkDescId()
-                .equals(v2.getVlProfile().getVirtualLinkDescId())) {
-              g.addEdge(v1, v2, v1.getSapd().getCpdId());
+          for (SapVertex v1 : sapVertices) {
+            for (VirtualLinkProfileVertex v2 : vlPVertices) {
+              if (v1.getSapd().getNsVirtualLinkDescId()
+                  .equals(v2.getVlProfile().getVirtualLinkDescId())) {
+                g.addEdge(v1, v2, v1.getSapd().getCpdId());
+              }
             }
           }
-        }
 
-        graphMap.put(new DfIlKey(df.getNsDfId(), l.getNsLevelId()), g);
+          graphMap.put(new DfIlKey(df.getNsDfId(), l.getNsLevelId()), g);
+        }
       }
+    } catch (NotExistingEntityException e) {
+      LOG.error("Error: {}", e.getMessage());
     }
   }
 
@@ -224,15 +236,6 @@ public class ComposableNsd {
 
   public Set<DfIlKey> getGraphMapKeys() {
     return graphMap.keySet();
-  }
-
-  public Nsd getNsd() {
-    return nsd;
-  }
-
-  public void setNsd(Nsd nsd) throws NotExistingEntityException {
-    this.nsd = nsd;
-    buildGraphs();
   }
 
   public static class DfIlKey {
