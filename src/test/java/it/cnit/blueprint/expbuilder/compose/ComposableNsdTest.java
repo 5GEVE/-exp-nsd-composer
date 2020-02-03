@@ -13,9 +13,10 @@ import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeResource;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -27,33 +28,25 @@ public class ComposableNsdTest {
 
   private static ObjectMapper OBJECT_MAPPER;
   // Test input
-  private ComposableNsd vCdnComposer;
-  private ComposableNsd trackerComposer;
-  private Nsd delayNsd;
+  private static String vCDNPath;
+  private static URL trackerURL, delayURL;
+  private static GraphExporter graphExporter;
 
   @BeforeClass
-  public static void setUpClass() {
+  public static void setUpClass() throws MalformedURLException {
     OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
-  }
-
-  @Before
-  public void setUp() throws Exception {
-    GraphExporter exporter = new GraphVizExporter();
-    Nsd vCDN = OBJECT_MAPPER.readValue(
-        App.class.getResourceAsStream("/nsd-examples/nsd_vCDN_pnf_gui.yaml"),
-        Nsd[].class)[0];
-    vCdnComposer = new ComposableNsd(vCDN, exporter);
-    Nsd tracker = OBJECT_MAPPER.readValue(new URL(
-            "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/vsb/vsb_ares2t_tracker/vsb_ares2t_tracker_nsds.yaml"),
-        Nsd[].class)[0];
-    trackerComposer = new ComposableNsd(tracker, exporter);
-    delayNsd = OBJECT_MAPPER.readValue(new URL(
-            "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/ctx/ctx_delay/ctx_delay_nsds.yaml"),
-        Nsd[].class)[0];
+    vCDNPath = "/nsd-examples/nsd_vCDN_pnf_gui.yaml";
+    trackerURL = new URL(
+        "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/vsb/vsb_ares2t_tracker/vsb_ares2t_tracker_nsds.yaml");
+    delayURL = new URL(
+        "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/ctx/ctx_delay/ctx_delay_nsds.yaml");
+    graphExporter = new GraphVizExporter();
   }
 
   @Test
-  public void buildGraphsExportVCdn() {
+  public void buildGraphsExportVCdn() throws IOException {
+    Nsd vCDN = OBJECT_MAPPER.readValue(App.class.getResourceAsStream(vCDNPath), Nsd[].class)[0];
+    ComposableNsd vCdnComposer = new ComposableNsd(vCDN, graphExporter);
     assertNotEquals(0, vCdnComposer.getGraphMapKeys());
     for (DfIlKey k : vCdnComposer.getGraphMapKeys()) {
       LOG.debug("GraphViz export for '{}':\n{}", k.toString(), vCdnComposer.export(k));
@@ -65,7 +58,9 @@ public class ComposableNsdTest {
   }
 
   @Test
-  public void buildGraphsExportAres2tTracker() {
+  public void buildGraphsExportAres2tTracker() throws IOException {
+    Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
+    ComposableNsd trackerComposer = new ComposableNsd(tracker, graphExporter);
     assertNotEquals(0, trackerComposer.getGraphMapKeys());
     for (DfIlKey k : trackerComposer.getGraphMapKeys()) {
       LOG.debug("GraphViz export for '{}':\n{}", k.toString(), trackerComposer.export(k));
@@ -88,8 +83,11 @@ public class ComposableNsdTest {
   }
 
   @Test
-  public void composeWithPassthrough() throws NotExistingEntityException {
+  public void composeWithPassthrough() throws NotExistingEntityException, IOException {
+    Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
+    ComposableNsd trackerComposer = new ComposableNsd(tracker, graphExporter);
     assertNotEquals(0, trackerComposer.getGraphMapKeys());
+    Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
     CtxComposeResource ctxComposeResource = new CtxComposeResource();
     ctxComposeResource.setNsd(delayNsd);
     ctxComposeResource.setSapId("sap_tracking_mobile");
