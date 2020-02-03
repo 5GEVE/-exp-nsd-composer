@@ -1,10 +1,6 @@
 package it.cnit.blueprint.expbuilder.compose;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.util.StdConverter;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
-import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.PnfProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.SapVertex;
@@ -33,19 +29,26 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
-@JsonDeserialize(converter = ComposableNsd.NsdConverter.class)
-public class ComposableNsd extends Nsd {
+@Service
+@Scope("prototype")
+public class ComposableNsd {
 
   private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-  @JsonIgnore
+  //TODO check for uninitialized Nsd.
+  private Nsd nsd;
+
   private Map<DfIlKey, Graph<ProfileVertex, String>> graphMap = new HashMap<>();
-  @JsonIgnore
-  private GraphExporter graphExporter = new GraphVizExporter();
+
+  @Autowired
+  public GraphExporter graphExporter;
 
   void buildGraphs() throws NotExistingEntityException {
-    for (NsDf df : getNsDf()) {
+    for (NsDf df : nsd.getNsDf()) {
       for (NsLevel l : df.getNsInstantiationLevel()) {
         Graph<ProfileVertex, String> g = new SimpleGraph<>(String.class);
         List<VnfProfileVertex> vnfPVertices = new ArrayList<>();
@@ -72,7 +75,7 @@ public class ComposableNsd extends Nsd {
           vlPVertices.add(v);
           g.addVertex(v);
         }
-        for (Sapd s : getSapd()) {
+        for (Sapd s : nsd.getSapd()) {
           SapVertex v = new SapVertex(s);
           sapVertices.add(v);
           g.addVertex(v);
@@ -137,7 +140,7 @@ public class ComposableNsd extends Nsd {
 
     for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
       LOG.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using CONNECT",
-          getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
+          nsd.getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
           entry.getKey().nsIlId);
       LOG.debug("Export before:\n{}", export(entry.getKey()));
 
@@ -167,7 +170,7 @@ public class ComposableNsd extends Nsd {
 
     for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
       LOG.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using PASSTHROUGH",
-          getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
+          nsd.getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
           entry.getKey().nsIlId);
       LOG.debug("Export before:\n{}", export(entry.getKey()));
 
@@ -185,17 +188,14 @@ public class ComposableNsd extends Nsd {
           ctxR.getNsd().getNsDf().get(0).getVnfProfile().get(0));
       VirtualLinkProfileVertex vlVnew = new VirtualLinkProfileVertex(
           new VirtualLinkProfile(
-              this.getNsDeploymentFlavour(entry.getKey().nsDfId),
+              nsd.getNsDeploymentFlavour(entry.getKey().nsDfId),
               "vl_profile_" + contextV.getVnfProfile().getVnfProfileId(),
               "vl_" + contextV.getVnfProfile().getVnfProfileId(),
               "vl_df_" + contextV.getVnfProfile().getVnfProfileId(), null, null,
               new LinkBitrateRequirements("1", "1"), new LinkBitrateRequirements("1", "1")));
 
       // Add vertices
-      // TODO remove commented as probably unneded
-//      entry.getValue().getVnfPVertices().add(contextV);
       entry.getValue().addVertex(contextV);
-//      entry.getValue().getVlPVertices().add(vlVnew);
       entry.getValue().addVertex(vlVnew);
 
       // Modify edges
@@ -224,6 +224,15 @@ public class ComposableNsd extends Nsd {
 
   public Set<DfIlKey> getGraphMapKeys() {
     return graphMap.keySet();
+  }
+
+  public Nsd getNsd() {
+    return nsd;
+  }
+
+  public void setNsd(Nsd nsd) throws NotExistingEntityException {
+    this.nsd = nsd;
+    buildGraphs();
   }
 
   public static class DfIlKey {
@@ -255,18 +264,4 @@ public class ComposableNsd extends Nsd {
     PASSTHROUGH
   }
 
-  public static class NsdConverter extends StdConverter<ComposableNsd, ComposableNsd> {
-
-    // Used to emulate the @PostConstruct
-    // TODO check if we can fix this workaround with Spring
-    @Override
-    public ComposableNsd convert(ComposableNsd composableNsd) {
-      try {
-        composableNsd.buildGraphs();
-      } catch (NotExistingEntityException e) {
-        e.printStackTrace();
-      }
-      return composableNsd;
-    }
-  }
 }
