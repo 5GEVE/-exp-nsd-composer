@@ -1,7 +1,6 @@
 package it.cnit.blueprint.expbuilder.compose;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.PnfProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
@@ -199,10 +198,7 @@ public class ComposableNsd {
               new LinkBitrateRequirements("1", "1"), new LinkBitrateRequirements("1", "1")));
 
       // Add vertices
-      // TODO remove commented as probably unneded
-//      entry.getValue().getVnfPVertices().add(contextV);
       entry.getValue().addVertex(contextV);
-//      entry.getValue().getVlPVertices().add(vlVnew);
       entry.getValue().addVertex(vlVnew);
 
       // Modify edges
