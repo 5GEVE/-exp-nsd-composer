@@ -10,18 +10,12 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="5geve-experiment-builder" target="8" />
-      <module name="builder" target="8" />
       <module name="expbuilder" target="8" />
-      <module name="experiment-builder" target="8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="5geve-experiment-builder" options="-parameters" />
-      <module name="builder" options="-parameters" />
       <module name="expbuilder" options="-parameters" />
-      <module name="experiment-builder" options="-parameters" />
     </option>
   </component>
 </project>
