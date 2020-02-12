@@ -25,9 +25,7 @@ public class App {
       .getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 
   public static void main(String[] args) {
-    SpringApplication app = new SpringApplication(App.class);
-    app.setLogStartupInfo(false);
-    ConfigurableApplicationContext c = app.run(args);
+    ConfigurableApplicationContext c = new SpringApplication(App.class).run(args);
     LOG.debug("Beans found: {}", (Object) c.getBeanDefinitionNames());
     LOG.debug("nsd -> {}", c.getBean(ComposableNsd.class));
     LOG.debug("exporter -> {}", c.getBean(ComposableNsd.class).graphExporter);
