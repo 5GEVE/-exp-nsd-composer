@@ -13,11 +13,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 
-@SpringBootApplication(exclude = {
-    DataSourceAutoConfiguration.class,
-    DataSourceTransactionManagerAutoConfiguration.class,
-    HibernateJpaAutoConfiguration.class
-})
+@SpringBootApplication
 public class App {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
@@ -26,9 +22,9 @@ public class App {
 
   public static void main(String[] args) {
     ConfigurableApplicationContext c = new SpringApplication(App.class).run(args);
-    LOG.debug("Beans found: {}", (Object) c.getBeanDefinitionNames());
-    LOG.debug("nsd -> {}", c.getBean(ComposableNsd.class));
-    LOG.debug("exporter -> {}", c.getBean(ComposableNsd.class).graphExporter);
+//    LOG.debug("Beans found: {}", (Object) c.getBeanDefinitionNames());
+//    LOG.debug("nsd -> {}", c.getBean(ComposableNsd.class));
+//    LOG.debug("exporter -> {}", c.getBean(ComposableNsd.class).graphExporter);
   }
 
 }
