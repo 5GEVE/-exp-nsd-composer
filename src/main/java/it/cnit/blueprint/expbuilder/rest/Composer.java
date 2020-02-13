@@ -1,4 +1,4 @@
-package it.cnit.blueprint.expbuilder.compose;
+package it.cnit.blueprint.expbuilder.rest;
 
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.PnfProfileVertex;
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Scope("prototype")
-public class ComposableNsd {
+public class Composer {
 
   private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
@@ -47,7 +47,7 @@ public class ComposableNsd {
   @Autowired
   public GraphExporter graphExporter;
 
-  public ComposableNsd(Nsd nsd, GraphExporter graphExporter) {
+  public Composer(Nsd nsd, GraphExporter graphExporter) {
     this.nsd = nsd;
     buildGraphs();
     this.graphExporter = graphExporter;

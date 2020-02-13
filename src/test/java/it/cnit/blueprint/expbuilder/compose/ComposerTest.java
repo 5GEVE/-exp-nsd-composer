@@ -6,8 +6,9 @@ import static org.junit.Assert.assertNotEquals;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.App;
-import it.cnit.blueprint.expbuilder.compose.ComposableNsd.CompositionStrat;
-import it.cnit.blueprint.expbuilder.compose.ComposableNsd.DfIlKey;
+import it.cnit.blueprint.expbuilder.rest.Composer;
+import it.cnit.blueprint.expbuilder.rest.Composer.CompositionStrat;
+import it.cnit.blueprint.expbuilder.rest.Composer.DfIlKey;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
@@ -22,9 +23,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ComposableNsdTest {
+public class ComposerTest {
 
-  final static Logger LOG = LoggerFactory.getLogger(ComposableNsdTest.class);
+  final static Logger LOG = LoggerFactory.getLogger(ComposerTest.class);
 
   private static ObjectMapper OBJECT_MAPPER;
   // Test input
@@ -46,7 +47,7 @@ public class ComposableNsdTest {
   @Test
   public void buildGraphsExportVCdn() throws IOException {
     Nsd vCDN = OBJECT_MAPPER.readValue(App.class.getResourceAsStream(vCDNPath), Nsd[].class)[0];
-    ComposableNsd vCdnComposer = new ComposableNsd(vCDN, graphExporter);
+    Composer vCdnComposer = new Composer(vCDN, graphExporter);
     assertNotEquals(0, vCdnComposer.getGraphMapKeys());
     for (DfIlKey k : vCdnComposer.getGraphMapKeys()) {
       LOG.debug("GraphViz export for '{}':\n{}", k.toString(), vCdnComposer.export(k));
@@ -60,7 +61,7 @@ public class ComposableNsdTest {
   @Test
   public void buildGraphsExportAres2tTracker() throws IOException {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
-    ComposableNsd trackerComposer = new ComposableNsd(tracker, graphExporter);
+    Composer trackerComposer = new Composer(tracker, graphExporter);
     assertNotEquals(0, trackerComposer.getGraphMapKeys());
     for (DfIlKey k : trackerComposer.getGraphMapKeys()) {
       LOG.debug("GraphViz export for '{}':\n{}", k.toString(), trackerComposer.export(k));
@@ -85,7 +86,7 @@ public class ComposableNsdTest {
   @Test
   public void composeWithPassthrough() throws NotExistingEntityException, IOException {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
-    ComposableNsd trackerComposer = new ComposableNsd(tracker, graphExporter);
+    Composer trackerComposer = new Composer(tracker, graphExporter);
     assertNotEquals(0, trackerComposer.getGraphMapKeys());
     Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo();
