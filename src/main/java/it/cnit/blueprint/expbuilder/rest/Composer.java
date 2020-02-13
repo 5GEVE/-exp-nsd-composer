@@ -6,7 +6,6 @@ import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.SapVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.VirtualLinkProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.VnfProfileVertex;
-import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.LinkBitrateRequirements;
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
