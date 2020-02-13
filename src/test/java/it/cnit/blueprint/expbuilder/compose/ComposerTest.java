@@ -6,11 +6,11 @@ import static org.junit.Assert.assertNotEquals;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.App;
+import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
+import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.rest.Composer;
 import it.cnit.blueprint.expbuilder.rest.Composer.CompositionStrat;
 import it.cnit.blueprint.expbuilder.rest.Composer.DfIlKey;
-import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
-import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
@@ -47,7 +47,8 @@ public class ComposerTest {
   @Test
   public void buildGraphsExportVCdn() throws IOException {
     Nsd vCDN = OBJECT_MAPPER.readValue(App.class.getResourceAsStream(vCDNPath), Nsd[].class)[0];
-    Composer vCdnComposer = new Composer(vCDN, graphExporter);
+    Composer vCdnComposer = new Composer(graphExporter);
+    vCdnComposer.init(vCDN);
     assertNotEquals(0, vCdnComposer.getGraphMapKeys());
     for (DfIlKey k : vCdnComposer.getGraphMapKeys()) {
       LOG.debug("GraphViz export for '{}':\n{}", k.toString(), vCdnComposer.export(k));
@@ -61,7 +62,8 @@ public class ComposerTest {
   @Test
   public void buildGraphsExportAres2tTracker() throws IOException {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
-    Composer trackerComposer = new Composer(tracker, graphExporter);
+    Composer trackerComposer = new Composer(graphExporter);
+    trackerComposer.init(tracker);
     assertNotEquals(0, trackerComposer.getGraphMapKeys());
     for (DfIlKey k : trackerComposer.getGraphMapKeys()) {
       LOG.debug("GraphViz export for '{}':\n{}", k.toString(), trackerComposer.export(k));
@@ -86,7 +88,8 @@ public class ComposerTest {
   @Test
   public void composeWithPassthrough() throws NotExistingEntityException, IOException {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
-    Composer trackerComposer = new Composer(tracker, graphExporter);
+    Composer trackerComposer = new Composer(graphExporter);
+    trackerComposer.init(tracker);
     assertNotEquals(0, trackerComposer.getGraphMapKeys());
     Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo();
