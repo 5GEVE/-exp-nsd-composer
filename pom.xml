@@ -56,6 +56,13 @@
       <optional>true</optional>
     </dependency>
 
+    <!-- Lombok -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- https://mvnrepository.com/artifact/org.jgrapht/jgrapht-core -->
     <dependency>
       <groupId>org.jgrapht</groupId>
