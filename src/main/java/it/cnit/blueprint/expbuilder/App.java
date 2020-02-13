@@ -2,22 +2,16 @@ package it.cnit.blueprint.expbuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import it.cnit.blueprint.expbuilder.compose.ComposableNsd;
 import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.ConfigurableApplicationContext;
 
-@SpringBootApplication(exclude = {
-    DataSourceAutoConfiguration.class,
-    DataSourceTransactionManagerAutoConfiguration.class,
-    HibernateJpaAutoConfiguration.class
-})
+@SpringBootApplication
+@EntityScan(basePackages = {"it.nextworks.nfvmano.libs.ifa", "it.cnit.blueprint.expbuilder"})
 public class App {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
@@ -26,9 +20,9 @@ public class App {
 
   public static void main(String[] args) {
     ConfigurableApplicationContext c = new SpringApplication(App.class).run(args);
-    LOG.debug("Beans found: {}", (Object) c.getBeanDefinitionNames());
-    LOG.debug("nsd -> {}", c.getBean(ComposableNsd.class));
-    LOG.debug("exporter -> {}", c.getBean(ComposableNsd.class).graphExporter);
+//    LOG.debug("Beans found: {}", (Object) c.getBeanDefinitionNames());
+//    LOG.debug("nsd -> {}", c.getBean(ComposableNsd.class));
+//    LOG.debug("exporter -> {}", c.getBean(ComposableNsd.class).graphExporter);
   }
 
 }
