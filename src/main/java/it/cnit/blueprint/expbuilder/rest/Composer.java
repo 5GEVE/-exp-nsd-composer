@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
@@ -31,9 +33,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.WebApplicationContext;
 
 @Service
-@Scope("prototype")
+@Scope(WebApplicationContext.SCOPE_REQUEST)
 public class Composer {
 
   private Logger LOG = LoggerFactory.getLogger(this.getClass());
@@ -41,15 +44,20 @@ public class Composer {
   //TODO check for uninitialized Nsd.
   private Nsd nsd;
 
+  @Getter
   private Map<DfIlKey, Graph<ProfileVertex, String>> graphMap = new HashMap<>();
 
-  @Autowired
+  @Setter
   public GraphExporter graphExporter;
 
-  public Composer(Nsd nsd, GraphExporter graphExporter) {
+  @Autowired
+  public Composer(GraphExporter graphExporter) {
+    this.graphExporter = graphExporter;
+  }
+
+  public void init(Nsd nsd){
     this.nsd = nsd;
     buildGraphs();
-    this.graphExporter = graphExporter;
   }
 
   private void buildGraphs() {
@@ -219,10 +227,6 @@ public class Composer {
 
       LOG.debug("Export after:\n{}", export(entry.getKey()));
     }
-  }
-
-  public void setGraphExporter(GraphExporter exporter) {
-    this.graphExporter = exporter;
   }
 
   public String export(DfIlKey key) {
