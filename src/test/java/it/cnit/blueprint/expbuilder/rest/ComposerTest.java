@@ -1,4 +1,4 @@
-package it.cnit.blueprint.expbuilder.compose;
+package it.cnit.blueprint.expbuilder.rest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -8,10 +8,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.App;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
-import it.cnit.blueprint.expbuilder.rest.Composer;
 import it.cnit.blueprint.expbuilder.rest.Composer.CompositionStrat;
 import it.cnit.blueprint.expbuilder.rest.Composer.DfIlKey;
-import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
