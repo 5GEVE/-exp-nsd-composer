@@ -6,7 +6,7 @@ import java.util.Map;
 import lombok.Data;
 
 @Data
-public class CtxComposeResource {
+public class CtxComposeInfo {
 
   private Nsd nsd;
   private CompositionStrat strat;

@@ -1,22 +1,24 @@
 package it.cnit.blueprint.expbuilder.rest;
 
-import java.util.concurrent.atomic.AtomicLong;
+import it.nextworks.nfvmano.catalogue.blueprint.messages.OnBoardVsBlueprintRequest;
+import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardExpBlueprintRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class Controller {
 
-  private final AtomicLong counter = new AtomicLong();
-
-  @GetMapping(value = "/expb")
-  public ExpBlueprintResource getExpBlueprint() {
-    return new ExpBlueprintResource(counter.incrementAndGet());
+  @GetMapping("/experiment")
+  public OnboardExpBlueprintRequest retrieveExperiment() {
+    return null;
   }
 
-  @PostMapping(value = "/expb")
-  public void postExpB() {
+  @PostMapping("/experiment")
+  public OnboardExpBlueprintRequest composeExperiment(@RequestBody OnBoardVsBlueprintRequest vsb) {
+    //TODO
+    return null;
   }
 
 }
