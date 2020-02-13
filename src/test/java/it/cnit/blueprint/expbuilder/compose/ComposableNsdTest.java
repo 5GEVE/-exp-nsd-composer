@@ -10,7 +10,7 @@ import it.cnit.blueprint.expbuilder.compose.ComposableNsd.CompositionStrat;
 import it.cnit.blueprint.expbuilder.compose.ComposableNsd.DfIlKey;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
-import it.cnit.blueprint.expbuilder.rest.CtxComposeResource;
+import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
@@ -88,11 +88,12 @@ public class ComposableNsdTest {
     ComposableNsd trackerComposer = new ComposableNsd(tracker, graphExporter);
     assertNotEquals(0, trackerComposer.getGraphMapKeys());
     Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
-    CtxComposeResource ctxComposeResource = new CtxComposeResource();
-    ctxComposeResource.setNsd(delayNsd);
-    ctxComposeResource.setSapId("sap_tracking_mobile");
-    ctxComposeResource.setStrat(CompositionStrat.PASSTHROUGH);
-    trackerComposer.composeWithPassthrough(ctxComposeResource);
+    CtxComposeInfo ctxComposeInfo = new CtxComposeInfo();
+    ctxComposeInfo.setNsd(delayNsd);
+    ctxComposeInfo.setSapId("sap_tracking_mobile");
+    ctxComposeInfo.setStrat(CompositionStrat.PASSTHROUGH);
+    LOG.info(OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
+    trackerComposer.composeWithPassthrough(ctxComposeInfo);
 
     // TODO
     // Check with ExpbNsd from the repo

@@ -6,7 +6,7 @@ import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.SapVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.VirtualLinkProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.VnfProfileVertex;
-import it.cnit.blueprint.expbuilder.rest.CtxComposeResource;
+import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.LinkBitrateRequirements;
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
@@ -128,8 +128,8 @@ public class ComposableNsd {
     }
   }
 
-  public void composeWith(CtxComposeResource[] ctxRArray) throws NotExistingEntityException {
-    for (CtxComposeResource ctxR : ctxRArray) {
+  public void composeWith(CtxComposeInfo[] ctxRArray) throws NotExistingEntityException {
+    for (CtxComposeInfo ctxR : ctxRArray) {
       for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
         if (ctxR.getStrat() == CompositionStrat.CONNECT) {
           this.composeWithConnect(ctxR);
@@ -143,7 +143,7 @@ public class ComposableNsd {
     }
   }
 
-  public void composeWithConnect(CtxComposeResource ctxR) throws NotExistingEntityException {
+  public void composeWithConnect(CtxComposeInfo ctxR) throws NotExistingEntityException {
     if (ctxR.getStrat() != CompositionStrat.CONNECT) {
       LOG.error("Composition strategy is not 'CONNECT'. Doing nothing.");
       throw new IllegalArgumentException();
@@ -173,7 +173,7 @@ public class ComposableNsd {
     }
   }
 
-  public void composeWithPassthrough(CtxComposeResource ctxR) throws NotExistingEntityException {
+  public void composeWithPassthrough(CtxComposeInfo ctxR) throws NotExistingEntityException {
     if (ctxR.getStrat() != CompositionStrat.PASSTHROUGH) {
       LOG.error("Composition strategy is not 'PASSTHROUGH'. Doing nothing.");
       throw new IllegalArgumentException();
