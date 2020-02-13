@@ -1,6 +1,8 @@
 package it.cnit.blueprint.expbuilder.rest;
 
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardExpBlueprintRequest;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,6 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class Controller {
 
+  private final Composer composer;
+
+  @Autowired
+  public Controller(Composer composer) {
+    this.composer = composer;
+  }
+
   @GetMapping("/experiment")
   public OnboardExpBlueprintRequest retrieveExperiment() {
     return null;
@@ -16,6 +25,12 @@ public class Controller {
 
   @PostMapping("/experiment")
   public OnboardExpBlueprintRequest composeExperiment(@RequestBody ComposeRequest composeRequest) {
+    composer.init(composeRequest.getVsbRequest().getNsds().get(0));
+    try {
+      composer.composeWith(composeRequest.getContexts());
+    } catch (NotExistingEntityException e) {
+      e.printStackTrace();
+    }
     //TODO
     return null;
   }
