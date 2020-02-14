@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -149,12 +150,15 @@ public class Composer {
     }
   }
 
-  public void composeWithConnect(CtxComposeInfo ctxR) throws NotExistingEntityException {
+  public void composeWithConnect(CtxComposeInfo ctxR) {
+    if (nsd == null) {
+      throw new IllegalStateException("Can not compose. Nsd has not been set.");
+    }
     if (ctxR.getStrat() != CompositionStrat.CONNECT) {
       throw new IllegalArgumentException("Composition strategy is not 'CONNECT'");
     }
-    if (nsd == null) {
-      throw new IllegalStateException("Can not compose. Nsd has not been set.");
+    if (ctxR.getConnections().isEmpty()) {
+      throw new IllegalArgumentException("Field 'connections' is empty");
     }
     // TODO handle other exceptions here
 
@@ -166,17 +170,35 @@ public class Composer {
 
       for (Map.Entry<String, String> connection : ctxR.getConnections().entrySet()) {
         // Create new vertices to add
-        VnfProfileVertex v1 = new VnfProfileVertex(
-            ctxR.getNsd().getNsDf().get(0).getVnfProfile(connection.getKey()));
-        VirtualLinkProfileVertex v2 = new VirtualLinkProfileVertex(
-            ctxR.getNsd().getNsDf().get(0).getVirtualLinkProfile(connection.getValue()));
-        // Add vertices
-        entry.getValue().addVertex(v1);
-        entry.getValue().addVertex(v2);
-        // Modify edges
-        entry.getValue().addEdge(v1, v2);
-      }
+        VnfProfileVertex contextVnf;
+        try {
+          contextVnf = new VnfProfileVertex(
+              ctxR.getNsd().getNsDf().get(0).getVnfProfile(connection.getKey()));
+        } catch (NotExistingEntityException e) {
+          // TODO fail composition since vnfid is wrong
+          // IllegalArgument? Or custom exception?
+          log.error("VnfProfile '{}' not found in '{}'. Abort composition.",
+              connection.getKey(), ctxR.getNsd().getNsdIdentifier());
+          return;
+        }
+        Optional<ProfileVertex> findVl = entry.getValue().vertexSet().stream()
+            .filter(v -> v.getElementId().equals(connection.getValue())).findAny();
+        ProfileVertex serviceVl;
+        if (findVl.isPresent()) {
+          serviceVl = findVl.get();
+        } else {
+          log.warn("Virtual Link '{}' not found in '{}' for nsDfId '{}' and nsLevelId '{}'",
+              connection.getValue(), nsd.getNsdIdentifier(), entry.getKey().nsDfId,
+              entry.getKey().nsIlId);
+          log.warn("Skip composition");
+          continue;
+        }
+        entry.getValue().addVertex(contextVnf);
+        entry.getValue().addEdge(contextVnf, serviceVl);
 
+        // TODO add vnf to nsd
+        // TODO verify edge
+      }
       log.debug("Export after:\n{}", export(entry.getKey()));
     }
   }

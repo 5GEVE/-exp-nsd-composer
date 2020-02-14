@@ -15,6 +15,8 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.BeforeClass;
@@ -76,7 +78,20 @@ public class ComposerTest {
   }
 
   @Test
-  public void composeWithConnect() {
+  public void composeWithConnect() throws NotExistingEntityException, IOException {
+    Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
+    Composer trackerComposer = new Composer(graphExporter);
+    trackerComposer.init(tracker);
+    assertNotEquals(0, trackerComposer.getGraphMapKeys());
+    Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
+    CtxComposeInfo ctxComposeInfo = new CtxComposeInfo();
+    ctxComposeInfo.setNsd(delayNsd);
+    Map<String, String> connections = new HashMap<>();
+    connections.put("vnfp_netem", "virtuallinkid");
+    ctxComposeInfo.setConnections(connections);
+    ctxComposeInfo.setStrat(CompositionStrat.CONNECT);
+    log.info("ctxComposeInfo dump:\n{}", OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
+    trackerComposer.composeWithConnect(ctxComposeInfo);
     // TODO
     // Check with ExpbNsd from the repo
   }
