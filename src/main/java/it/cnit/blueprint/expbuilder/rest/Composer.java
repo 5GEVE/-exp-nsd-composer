@@ -138,9 +138,9 @@ public class Composer {
     for (CtxComposeInfo ctxR : ctxRArray) {
       for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
         if (ctxR.getStrat() == CompositionStrat.CONNECT) {
-          this.composeWithConnect(ctxR);
+          composeWithConnect(ctxR);
         } else if (ctxR.getStrat() == CompositionStrat.PASSTHROUGH) {
-          this.composeWithPassthrough(ctxR);
+          composeWithPassthrough(ctxR);
         } else {
           throw new NotImplementedException(
               String.format("Composition strategy %s not implemented", ctxR.getStrat()));
@@ -151,8 +151,10 @@ public class Composer {
 
   public void composeWithConnect(CtxComposeInfo ctxR) throws NotExistingEntityException {
     if (ctxR.getStrat() != CompositionStrat.CONNECT) {
-      log.error("Composition strategy is not 'CONNECT'. Doing nothing.");
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException("Composition strategy is not 'CONNECT'");
+    }
+    if (nsd == null) {
+      throw new IllegalStateException("Can not compose. Nsd has not been set.");
     }
     // TODO handle other exceptions here
 
@@ -162,12 +164,12 @@ public class Composer {
           entry.getKey().nsIlId);
       log.debug("Export before:\n{}", export(entry.getKey()));
 
-      for (Map.Entry<String, String> vnfVl : ctxR.getVirtualLinkIds().entrySet()) {
+      for (Map.Entry<String, String> connection : ctxR.getConnections().entrySet()) {
         // Create new vertices to add
         VnfProfileVertex v1 = new VnfProfileVertex(
-            ctxR.getNsd().getNsDf().get(0).getVnfProfile(vnfVl.getKey()));
+            ctxR.getNsd().getNsDf().get(0).getVnfProfile(connection.getKey()));
         VirtualLinkProfileVertex v2 = new VirtualLinkProfileVertex(
-            ctxR.getNsd().getNsDf().get(0).getVirtualLinkProfile(vnfVl.getValue()));
+            ctxR.getNsd().getNsDf().get(0).getVirtualLinkProfile(connection.getValue()));
         // Add vertices
         entry.getValue().addVertex(v1);
         entry.getValue().addVertex(v2);

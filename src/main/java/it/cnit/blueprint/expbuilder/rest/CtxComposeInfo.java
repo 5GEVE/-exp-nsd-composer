@@ -11,7 +11,7 @@ public class CtxComposeInfo {
   private Nsd nsd;
   private CompositionStrat strat;
   private String SapId;
-  // Map<vnfProfileId, vlProfileId>
-  private Map<String, String> VirtualLinkIds;
+  // Map< ctxVnfProfileId, vsbVlProfileId>
+  private Map<String, String> connections;
 
 }
