@@ -16,14 +16,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class ComposerTest {
-
-  final static Logger LOG = LoggerFactory.getLogger(ComposerTest.class);
 
   private static ObjectMapper OBJECT_MAPPER;
   // Test input
@@ -49,7 +47,7 @@ public class ComposerTest {
     vCdnComposer.init(vCDN);
     assertNotEquals(0, vCdnComposer.getGraphMapKeys());
     for (DfIlKey k : vCdnComposer.getGraphMapKeys()) {
-      LOG.debug("GraphViz export for '{}':\n{}", k.toString(), vCdnComposer.export(k));
+      log.debug("GraphViz export for '{}':\n{}", k.toString(), vCdnComposer.export(k));
       String testFile = new Scanner(
           App.class.getResourceAsStream(String.format("/%s.dot", k.getNsIlId())), "UTF-8")
           .useDelimiter("\\A").next();
@@ -64,7 +62,7 @@ public class ComposerTest {
     trackerComposer.init(tracker);
     assertNotEquals(0, trackerComposer.getGraphMapKeys());
     for (DfIlKey k : trackerComposer.getGraphMapKeys()) {
-      LOG.debug("GraphViz export for '{}':\n{}", k.toString(), trackerComposer.export(k));
+      log.debug("GraphViz export for '{}':\n{}", k.toString(), trackerComposer.export(k));
       String testFile = new Scanner(
           App.class.getResourceAsStream(String.format("/%s.dot", k.getNsIlId())), "UTF-8")
           .useDelimiter("\\A").next();
@@ -94,7 +92,7 @@ public class ComposerTest {
     ctxComposeInfo.setNsd(delayNsd);
     ctxComposeInfo.setSapId("sap_tracking_mobile");
     ctxComposeInfo.setStrat(CompositionStrat.PASSTHROUGH);
-    LOG.info(OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
+    log.info(OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
     trackerComposer.composeWithPassthrough(ctxComposeInfo);
 
     // TODO

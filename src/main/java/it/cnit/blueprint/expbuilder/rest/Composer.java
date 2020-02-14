@@ -24,12 +24,11 @@ import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleGraph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -38,9 +37,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Slf4j
 public class Composer {
-
-  private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
   //TODO check for uninitialized Nsd.
   private Nsd nsd;
@@ -132,7 +130,7 @@ public class Composer {
         }
       }
     } catch (NotExistingEntityException e) {
-      LOG.error("Error: {}", e.getMessage());
+      log.error("Error: {}", e.getMessage());
     }
   }
 
@@ -153,16 +151,16 @@ public class Composer {
 
   public void composeWithConnect(CtxComposeInfo ctxR) throws NotExistingEntityException {
     if (ctxR.getStrat() != CompositionStrat.CONNECT) {
-      LOG.error("Composition strategy is not 'CONNECT'. Doing nothing.");
+      log.error("Composition strategy is not 'CONNECT'. Doing nothing.");
       throw new IllegalArgumentException();
     }
     // TODO handle other exceptions here
 
     for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
-      LOG.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using CONNECT",
+      log.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using CONNECT",
           nsd.getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
           entry.getKey().nsIlId);
-      LOG.debug("Export before:\n{}", export(entry.getKey()));
+      log.debug("Export before:\n{}", export(entry.getKey()));
 
       for (Map.Entry<String, String> vnfVl : ctxR.getVirtualLinkIds().entrySet()) {
         // Create new vertices to add
@@ -177,22 +175,22 @@ public class Composer {
         entry.getValue().addEdge(v1, v2);
       }
 
-      LOG.debug("Export after:\n{}", export(entry.getKey()));
+      log.debug("Export after:\n{}", export(entry.getKey()));
     }
   }
 
   public void composeWithPassthrough(CtxComposeInfo ctxR) throws NotExistingEntityException {
     if (ctxR.getStrat() != CompositionStrat.PASSTHROUGH) {
-      LOG.error("Composition strategy is not 'PASSTHROUGH'. Doing nothing.");
+      log.error("Composition strategy is not 'PASSTHROUGH'. Doing nothing.");
       throw new IllegalArgumentException();
     }
     // TODO handle other exceptions here
 
     for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
-      LOG.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using PASSTHROUGH",
+      log.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using PASSTHROUGH",
           nsd.getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
           entry.getKey().nsIlId);
-      LOG.debug("Export before:\n{}", export(entry.getKey()));
+      log.debug("Export before:\n{}", export(entry.getKey()));
 
       // TODO update Nsd model when modifying the graph.
 
@@ -226,13 +224,13 @@ public class Composer {
           String.format("cp_%s_out", contextV.getVnfProfile().getVnfProfileId()));
       entry.getValue().removeEdge(edgeOld);
 
-      LOG.debug("Export after:\n{}", export(entry.getKey()));
+      log.debug("Export after:\n{}", export(entry.getKey()));
     }
   }
 
   public String export(DfIlKey key) {
     if (!graphMap.containsKey(key)) {
-      LOG.error("Graph key '{}' not found.", key.toString());
+      log.error("Graph key '{}' not found.", key.toString());
       throw new IllegalArgumentException("");
     }
     return graphExporter.export(graphMap.get(key));
