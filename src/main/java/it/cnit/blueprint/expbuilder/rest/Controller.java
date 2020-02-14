@@ -25,7 +25,7 @@ public class Controller {
 
   @PostMapping("/experiment")
   // TODO return should be OnboardExpBlueprintRequest
-  public String composeExperiment(@RequestBody ComposeRequest composeRequest) {
+  public OnboardExpBlueprintRequest composeExperiment(@RequestBody ComposeRequest composeRequest) {
     composer.init(composeRequest.getVsbRequest().getNsds().get(0));
     try {
       composer.composeWith(composeRequest.getContexts());
@@ -33,7 +33,7 @@ public class Controller {
       e.printStackTrace();
     }
     //TODO
-    return "{\"state\": \"ok\"}";
+    return new OnboardExpBlueprintRequest();
   }
 
 }
