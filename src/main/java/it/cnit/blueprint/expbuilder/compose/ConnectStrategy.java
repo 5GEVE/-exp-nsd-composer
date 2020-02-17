@@ -25,92 +25,85 @@ import org.springframework.stereotype.Component;
 public class ConnectStrategy implements CompositionStrategy {
 
   @Override
-  public void compose(Nsd nsd, Map<DfIlKey, Graph<ProfileVertex, String>> graphMap,
-      CtxComposeInfo ctxR) throws InvalidCtxComposeInfo {
+  public void compose(Nsd nsd, String nsDfId, String nsLevelId, CtxComposeInfo composeInfo,
+      Graph<ProfileVertex, String> graph) throws InvalidCtxComposeInfo {
     if (nsd == null) {
       throw new IllegalStateException("Can not compose. Nsd has not been set.");
     }
-    if (ctxR.getStrat() != CompositionStrat.CONNECT) {
+    if (composeInfo.getStrat() != CompositionStrat.CONNECT) {
       throw new InvalidCtxComposeInfo("Composition strategy is not 'CONNECT'");
     }
-    if (ctxR.getConnections().isEmpty()) {
+    if (composeInfo.getConnections().isEmpty()) {
       throw new InvalidCtxComposeInfo("Field 'connections' is empty");
     }
 
-    for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
-      log.info("Compose '{}' with '{}' for nsDfId='{}' and nsLevelId='{}' using CONNECT",
-          nsd.getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().getNsDfId(),
-          entry.getKey().getNsIlId());
-//      log.debug("Graph export before:\n{}", export(entry.getKey()));
-
-      for (Map.Entry<String, String> connection : ctxR.getConnections().entrySet()) {
-        VnfProfile ctxVnfProfile;
-        try {
-          ctxVnfProfile = ctxR.getNsd().getNsDf().get(0).getVnfProfile(connection.getKey());
-        } catch (NotExistingEntityException e) {
-          String message = MessageFormatter
-              .format("VnfProfile='{}' not found in '{}'. Abort composition.",
-                  connection.getKey(), ctxR.getNsd().getNsdIdentifier()).getMessage();
-          log.error(message);
-          throw new InvalidCtxComposeInfo(message);
-        }
-        VnfToLevelMapping ctxVnfLvlMap;
-        try {
-          List<VnfToLevelMapping> mappings = ctxR.getNsd().getNsDf().get(0)
-              .getDefaultInstantiationLevel().getVnfToLevelMapping();
-          Optional<VnfToLevelMapping> findMap = mappings.stream()
-              .filter(m -> m.getVnfProfileId().equals(ctxVnfProfile.getVnfProfileId())).findFirst();
-          if (findMap.isPresent()) {
-            ctxVnfLvlMap = findMap.get();
-          } else {
-            throw new NotExistingEntityException();
-          }
-        } catch (NotExistingEntityException e) {
-          String message = MessageFormatter
-              .format("VnfToLevelMapping for VnfProfile='{}' not found in '{}'. Abort composition.",
-                  connection.getKey(), ctxR.getNsd().getNsdIdentifier()).getMessage();
-          log.error(message);
-          throw new InvalidCtxComposeInfo(message);
-        }
-        // Create new vertices to add
-        VnfProfileVertex ctxVnfVertex = new VnfProfileVertex(ctxVnfProfile);
-        Optional<ProfileVertex> findVl = entry.getValue().vertexSet().stream()
-            .filter(v -> v.getElementId().equals(connection.getValue())).findAny();
-        ProfileVertex serviceVl;
-        if (findVl.isPresent()) {
-          serviceVl = findVl.get();
+    log.info("Compose '{}' with '{}' for nsDfId='{}' and nsLevelId='{}' using CONNECT",
+        nsd.getNsdIdentifier(), composeInfo.getNsd().getNsdIdentifier(), nsDfId, nsLevelId);
+    for (Map.Entry<String, String> connection : composeInfo.getConnections().entrySet()) {
+      // Search and prepare components
+      VnfProfile ctxVnfProfile;
+      try {
+        ctxVnfProfile = composeInfo.getNsd().getNsDf().get(0).getVnfProfile(connection.getKey());
+      } catch (NotExistingEntityException e) {
+        String message = MessageFormatter
+            .format("VnfProfile='{}' not found in '{}'. Abort composition.",
+                connection.getKey(), composeInfo.getNsd().getNsdIdentifier()).getMessage();
+        log.error(message);
+        throw new InvalidCtxComposeInfo(message);
+      }
+      VnfToLevelMapping ctxVnfLvlMap;
+      try {
+        List<VnfToLevelMapping> mappings = composeInfo.getNsd().getNsDf().get(0)
+            .getDefaultInstantiationLevel().getVnfToLevelMapping();
+        Optional<VnfToLevelMapping> findMap = mappings.stream()
+            .filter(m -> m.getVnfProfileId().equals(ctxVnfProfile.getVnfProfileId())).findFirst();
+        if (findMap.isPresent()) {
+          ctxVnfLvlMap = findMap.get();
         } else {
-          String message = MessageFormatter.arrayFormat(
-              "Virtual Link '{}' not found in '{}' for nsDfId='{}' and nsLevelId='{}'. Abort composition.",
-              new String[]{connection.getValue(), nsd.getNsdIdentifier(),
-                  entry.getKey().getNsDfId(),
-                  entry.getKey().getNsIlId()}).getMessage();
-          log.error(message);
-          throw new InvalidCtxComposeInfo(message);
+          throw new NotExistingEntityException();
         }
-        entry.getValue().addVertex(ctxVnfVertex);
-        // TODO add vnf to nsd
+      } catch (NotExistingEntityException e) {
+        String message = MessageFormatter
+            .format("VnfToLevelMapping for VnfProfile='{}' not found in '{}'. Abort composition.",
+                connection.getKey(), composeInfo.getNsd().getNsdIdentifier()).getMessage();
+        log.error(message);
+        throw new InvalidCtxComposeInfo(message);
+      }
+
+      // Update Nsd
+      try {
         if (nsd.getVnfdId().stream().noneMatch(id -> id.equals(ctxVnfProfile.getVnfdId()))) {
           nsd.getVnfdId().add(ctxVnfProfile.getVnfdId());
         }
-        try {
-          if (nsd.getNsDeploymentFlavour(entry.getKey().getNsDfId()).getVnfProfile().stream()
-              .noneMatch(vp -> vp.getVnfProfileId().equals(ctxVnfProfile.getVnfProfileId()))) {
-            nsd.getNsDeploymentFlavour(entry.getKey().getNsDfId()).getVnfProfile()
-                .add(ctxVnfProfile);
-          }
-          nsd.getNsDeploymentFlavour(entry.getKey().getNsDfId())
-              .getNsLevel(entry.getKey().getNsIlId()).getVnfToLevelMapping().add(ctxVnfLvlMap);
-        } catch (NotExistingEntityException e) {
-          e.printStackTrace();
+        if (nsd.getNsDeploymentFlavour(nsDfId).getVnfProfile().stream()
+            .noneMatch(vp -> vp.getVnfProfileId().equals(ctxVnfProfile.getVnfProfileId()))) {
+          nsd.getNsDeploymentFlavour(nsDfId).getVnfProfile().add(ctxVnfProfile);
         }
-
-        entry.getValue().addEdge(ctxVnfVertex, serviceVl);
-        // TODO verify edge
-
+        nsd.getNsDeploymentFlavour(nsDfId).getNsLevel(nsLevelId).getVnfToLevelMapping()
+            .add(ctxVnfLvlMap);
+      } catch (NotExistingEntityException e) {
+        log.error("Error while updating Nsd. This should not happen.", e);
       }
-//      log.debug("Graph export after:\n{}", export(entry.getKey()));
-    }
+      //TODO check vnf connection to VL
 
+      // Update Graph
+      VnfProfileVertex ctxVnfVertex = new VnfProfileVertex(ctxVnfProfile);
+      Optional<ProfileVertex> findVl = graph.vertexSet().stream()
+          .filter(v -> v.getElementId().equals(connection.getValue())).findAny();
+      ProfileVertex serviceVl;
+      if (findVl.isPresent()) {
+        serviceVl = findVl.get();
+      } else {
+        String message = MessageFormatter.arrayFormat(
+            "Virtual Link '{}' not found in '{}' for nsDfId='{}' and nsLevelId='{}'. Abort composition.",
+            new String[]{connection.getValue(), nsd.getNsdIdentifier(), nsDfId, nsLevelId})
+            .getMessage();
+        log.error(message);
+        throw new InvalidCtxComposeInfo(message);
+      }
+      graph.addVertex(ctxVnfVertex);
+      graph.addEdge(ctxVnfVertex, serviceVl);
+    }
   }
+
 }

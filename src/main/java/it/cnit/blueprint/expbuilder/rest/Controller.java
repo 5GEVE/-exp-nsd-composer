@@ -29,8 +29,6 @@ public class Controller {
     composer.init(composeRequest.getVsbRequest().getNsds().get(0));
     try {
       composer.composeWith(composeRequest.getContexts());
-    } catch (NotExistingEntityException e) {
-      e.printStackTrace();
     } catch (InvalidCtxComposeInfo e) {
       //TODO create and return a 422 response.
       e.printStackTrace();

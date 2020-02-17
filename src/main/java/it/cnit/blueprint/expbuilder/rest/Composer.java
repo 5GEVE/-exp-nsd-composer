@@ -151,18 +151,21 @@ public class Composer {
     }
   }
 
-  public void composeWith(CtxComposeInfo[] ctxRArray)
-      throws NotExistingEntityException, InvalidCtxComposeInfo {
+  public void composeWith(CtxComposeInfo[] ctxRArray) throws InvalidCtxComposeInfo {
     for (CtxComposeInfo ctxR : ctxRArray) {
       for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
+        log.debug("Graph export before:\n{}", export(entry.getKey()));
         if (ctxR.getStrat() == CompositionStrat.CONNECT) {
-          connectStrategy.compose(nsd, graphMap, ctxR);
+          connectStrategy.compose(nsd, entry.getKey().getNsDfId(), entry.getKey().getNsIlId(),
+              ctxR, entry.getValue());
         } else if (ctxR.getStrat() == CompositionStrat.PASSTHROUGH) {
-          passThroughStrategy.compose(nsd, graphMap, ctxR);
+          passThroughStrategy.compose(nsd, entry.getKey().getNsDfId(), entry.getKey().getNsIlId(),
+              ctxR, entry.getValue());
         } else {
           throw new NotImplementedException(
               String.format("Composition strategy %s not implemented", ctxR.getStrat()));
         }
+        log.debug("Graph export after:\n{}", export(entry.getKey()));
       }
     }
   }
