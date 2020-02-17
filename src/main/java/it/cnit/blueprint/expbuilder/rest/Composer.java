@@ -170,55 +170,6 @@ public class Composer {
     }
   }
 
-  public void composeWithPassthrough(CtxComposeInfo ctxR) throws NotExistingEntityException {
-    if (ctxR.getStrat() != CompositionStrat.PASSTHROUGH) {
-      log.error("Composition strategy is not 'PASSTHROUGH'. Doing nothing.");
-      throw new IllegalArgumentException();
-    }
-    // TODO handle other exceptions here
-
-    for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
-      log.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using PASSTHROUGH",
-          nsd.getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
-          entry.getKey().nsIlId);
-      log.debug("Export before:\n{}", export(entry.getKey()));
-
-      // TODO update Nsd model when modifying the graph.
-
-      // Get information on vertices and edges
-      ProfileVertex sapV = entry.getValue().vertexSet().stream()
-          .filter(v -> v.getElementId().equals(ctxR.getSapId())).findAny().get();
-      ProfileVertex vlV = Graphs.neighborListOf(entry.getValue(), sapV).get(0);
-      String edgeOld = entry.getValue().getEdge(sapV, vlV);
-
-      // Create new vertices to add
-      // We assume only one Df and one InstantiationLevel for contexts (one graph)
-      VnfProfileVertex contextV = new VnfProfileVertex(
-          ctxR.getNsd().getNsDf().get(0).getVnfProfile().get(0));
-      VirtualLinkProfileVertex vlVnew = new VirtualLinkProfileVertex(
-          new VirtualLinkProfile(
-              nsd.getNsDeploymentFlavour(entry.getKey().nsDfId),
-              "vl_profile_" + contextV.getVnfProfile().getVnfProfileId(),
-              "vl_" + contextV.getVnfProfile().getVnfProfileId(),
-              "vl_df_" + contextV.getVnfProfile().getVnfProfileId(), null, null,
-              new LinkBitrateRequirements("1", "1"), new LinkBitrateRequirements("1", "1")));
-
-      // Add vertices
-      entry.getValue().addVertex(contextV);
-      entry.getValue().addVertex(vlVnew);
-
-      // Modify edges
-      entry.getValue().addEdge(sapV, vlVnew, edgeOld + "_new");
-      entry.getValue().addEdge(vlVnew, contextV,
-          String.format("cp_%s_in", contextV.getVnfProfile().getVnfProfileId()));
-      entry.getValue().addEdge(contextV, vlV,
-          String.format("cp_%s_out", contextV.getVnfProfile().getVnfProfileId()));
-      entry.getValue().removeEdge(edgeOld);
-
-      log.debug("Export after:\n{}", export(entry.getKey()));
-    }
-  }
-
   public String export(DfIlKey key) {
     if (!graphMap.containsKey(key)) {
       log.error("Graph key '{}' not found.", key.toString());

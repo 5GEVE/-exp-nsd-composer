@@ -12,7 +12,6 @@ import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.rest.Composer.CompositionStrat;
 import it.cnit.blueprint.expbuilder.rest.Composer.DfIlKey;
-import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -84,8 +83,7 @@ public class ComposerTest {
   }
 
   @Test
-  public void composeWithConnect()
-      throws IOException, InvalidCtxComposeInfo, NotExistingEntityException {
+  public void composeWithConnect() throws IOException, InvalidCtxComposeInfo {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
     Composer trackerComposer = new Composer(graphExporter, connectStrategy, passThroughStrategy);
     trackerComposer.init(tracker);
@@ -104,7 +102,7 @@ public class ComposerTest {
   }
 
   @Test
-  public void composeWithPassthrough() throws NotExistingEntityException, IOException {
+  public void composeWithPassthrough() throws IOException, InvalidCtxComposeInfo {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
     Composer trackerComposer = new Composer(graphExporter, connectStrategy, passThroughStrategy);
     trackerComposer.init(tracker);
@@ -115,7 +113,7 @@ public class ComposerTest {
     ctxComposeInfo.setSapId("sap_tracking_mobile");
     ctxComposeInfo.setStrat(CompositionStrat.PASSTHROUGH);
     log.info(OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
-    trackerComposer.composeWithPassthrough(ctxComposeInfo);
+    trackerComposer.composeWith(new CtxComposeInfo[]{ctxComposeInfo});
 
     // TODO
     // Check with ExpbNsd from the repo
