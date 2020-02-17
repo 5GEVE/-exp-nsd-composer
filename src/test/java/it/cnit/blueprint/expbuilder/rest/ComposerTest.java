@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.compose.ConnectStrategy;
 import it.cnit.blueprint.expbuilder.compose.PassThroughStrategy;
-import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
+import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.rest.Composer.CompositionStrat;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
@@ -24,9 +24,7 @@ public class ComposerTest {
   // Test input
   private static String vCDNPath;
   private static URL trackerURL, delayURL;
-  private static GraphExporter graphExporter;
-  private static ConnectStrategy connectStrategy;
-  private static PassThroughStrategy passThroughStrategy;
+  private static Composer composer;
 
   @BeforeClass
   public static void setUpClass() throws MalformedURLException {
@@ -36,9 +34,8 @@ public class ComposerTest {
         "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/vsb/vsb_ares2t_tracker/vsb_ares2t_tracker_nsds.yaml");
     delayURL = new URL(
         "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/ctx/ctx_delay/ctx_delay_nsds.yaml");
-    graphExporter = new GraphVizExporter();
-    connectStrategy = new ConnectStrategy();
-    passThroughStrategy = new PassThroughStrategy();
+    composer = new Composer(new NsdGraphService(new GraphVizExporter()),
+        new ConnectStrategy(), new PassThroughStrategy());
   }
 
   // TODO move to another test class
@@ -80,7 +77,6 @@ public class ComposerTest {
   @Test
   public void composeWithConnect() throws IOException, InvalidCtxComposeInfo {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
-    Composer trackerComposer = new Composer(graphExporter, nsdGraphService, connectStrategy, passThroughStrategy);
     Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
     Map<String, String> connections = new HashMap<>();
     connections.put("vnfp_netem", "vlp_vl_tracking_mobile");
@@ -89,7 +85,7 @@ public class ComposerTest {
     ctxComposeInfo.setConnections(connections);
     ctxComposeInfo.setStrat(CompositionStrat.CONNECT);
     log.debug("ctxComposeInfo dump:\n{}", OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
-    trackerComposer.composeWith(tracker, new CtxComposeInfo[]{ctxComposeInfo});
+    composer.composeWith(tracker, new CtxComposeInfo[]{ctxComposeInfo});
     // TODO
     // Check with ExpbNsd from the repo
   }
@@ -97,14 +93,13 @@ public class ComposerTest {
   @Test
   public void composeWithPassthrough() throws IOException, InvalidCtxComposeInfo {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
-    Composer trackerComposer = new Composer(graphExporter, nsdGraphService, connectStrategy, passThroughStrategy);
     Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo();
     ctxComposeInfo.setNsd(delayNsd);
     ctxComposeInfo.setSapId("sap_tracking_mobile");
     ctxComposeInfo.setStrat(CompositionStrat.PASSTHROUGH);
     log.info(OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
-    trackerComposer.composeWith(tracker, new CtxComposeInfo[]{ctxComposeInfo});
+    composer.composeWith(tracker, new CtxComposeInfo[]{ctxComposeInfo});
 
     // TODO
     // Check with ExpbNsd from the repo
