@@ -16,6 +16,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.PnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -167,14 +168,12 @@ public class Composer {
       log.info("Compose '{}' with '{}' for nsDfId='{}' and nsLevelId='{}' using CONNECT",
           nsd.getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
           entry.getKey().nsIlId);
-      log.debug("Export before:\n{}", export(entry.getKey()));
+      log.debug("Graph export before:\n{}", export(entry.getKey()));
 
       for (Map.Entry<String, String> connection : ctxR.getConnections().entrySet()) {
-        // Create new vertices to add
-        VnfProfileVertex contextVnf;
+        VnfProfile ctxVnfProfile;
         try {
-          contextVnf = new VnfProfileVertex(
-              ctxR.getNsd().getNsDf().get(0).getVnfProfile(connection.getKey()));
+          ctxVnfProfile = ctxR.getNsd().getNsDf().get(0).getVnfProfile(connection.getKey());
         } catch (NotExistingEntityException e) {
           String message = MessageFormatter
               .format("VnfProfile='{}' not found in '{}'. Abort composition.",
@@ -182,6 +181,26 @@ public class Composer {
           log.error(message);
           throw new InvalidCtxComposeInfo(message);
         }
+        VnfToLevelMapping ctxVnfLvlMap;
+        try {
+          List<VnfToLevelMapping> mappings = ctxR.getNsd().getNsDf().get(0)
+              .getDefaultInstantiationLevel().getVnfToLevelMapping();
+          Optional<VnfToLevelMapping> findMap = mappings.stream()
+              .filter(m -> m.getVnfProfileId().equals(ctxVnfProfile.getVnfProfileId())).findFirst();
+          if (findMap.isPresent()) {
+            ctxVnfLvlMap = findMap.get();
+          } else {
+            throw new NotExistingEntityException();
+          }
+        } catch (NotExistingEntityException e) {
+          String message = MessageFormatter
+              .format("VnfToLevelMapping for VnfProfile='{}' not found in '{}'. Abort composition.",
+                  connection.getKey(), ctxR.getNsd().getNsdIdentifier()).getMessage();
+          log.error(message);
+          throw new InvalidCtxComposeInfo(message);
+        }
+        // Create new vertices to add
+        VnfProfileVertex ctxVnfVertex = new VnfProfileVertex(ctxVnfProfile);
         Optional<ProfileVertex> findVl = entry.getValue().vertexSet().stream()
             .filter(v -> v.getElementId().equals(connection.getValue())).findAny();
         ProfileVertex serviceVl;
@@ -195,13 +214,27 @@ public class Composer {
           log.error(message);
           throw new InvalidCtxComposeInfo(message);
         }
-        entry.getValue().addVertex(contextVnf);
-        entry.getValue().addEdge(contextVnf, serviceVl);
-
+        entry.getValue().addVertex(ctxVnfVertex);
         // TODO add vnf to nsd
+        if (nsd.getVnfdId().stream().noneMatch(id -> id.equals(ctxVnfProfile.getVnfdId()))) {
+          nsd.getVnfdId().add(ctxVnfProfile.getVnfdId());
+        }
+        try {
+          if (nsd.getNsDeploymentFlavour(entry.getKey().nsDfId).getVnfProfile().stream()
+              .noneMatch(vp -> vp.getVnfProfileId().equals(ctxVnfProfile.getVnfProfileId()))) {
+            nsd.getNsDeploymentFlavour(entry.getKey().nsDfId).getVnfProfile().add(ctxVnfProfile);
+          }
+          nsd.getNsDeploymentFlavour(entry.getKey().nsDfId).getNsLevel(entry.getKey().nsIlId)
+              .getVnfToLevelMapping().add(ctxVnfLvlMap);
+        } catch (NotExistingEntityException e) {
+          e.printStackTrace();
+        }
+
+        entry.getValue().addEdge(ctxVnfVertex, serviceVl);
         // TODO verify edge
+
       }
-      log.debug("Export after:\n{}", export(entry.getKey()));
+      log.debug("Graph export after:\n{}", export(entry.getKey()));
     }
   }
 
