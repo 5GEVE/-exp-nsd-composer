@@ -1,5 +1,7 @@
 package it.cnit.blueprint.expbuilder.rest;
 
+import it.cnit.blueprint.expbuilder.compose.ConnectStrategy;
+import it.cnit.blueprint.expbuilder.compose.PassThroughStrategy;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.PnfProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -50,11 +53,18 @@ public class Composer {
   private Map<DfIlKey, Graph<ProfileVertex, String>> graphMap = new HashMap<>();
 
   @Setter
-  public GraphExporter graphExporter;
+  private GraphExporter graphExporter;
+
+  private ConnectStrategy connectStrategy;
+  private PassThroughStrategy passThroughStrategy;
 
   @Autowired
-  public Composer(GraphExporter graphExporter) {
+  public Composer(GraphExporter graphExporter,
+      ConnectStrategy connectStrategy,
+      PassThroughStrategy passThroughStrategy) {
     this.graphExporter = graphExporter;
+    this.connectStrategy = connectStrategy;
+    this.passThroughStrategy = passThroughStrategy;
   }
 
   public void init(Nsd nsd) {
@@ -142,7 +152,7 @@ public class Composer {
     for (CtxComposeInfo ctxR : ctxRArray) {
       for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
         if (ctxR.getStrat() == CompositionStrat.CONNECT) {
-          composeWithConnect(ctxR);
+          connectStrategy.compose(nsd, graphMap, ctxR);
         } else if (ctxR.getStrat() == CompositionStrat.PASSTHROUGH) {
           composeWithPassthrough(ctxR);
         } else {
@@ -150,91 +160,6 @@ public class Composer {
               String.format("Composition strategy %s not implemented", ctxR.getStrat()));
         }
       }
-    }
-  }
-
-  public void composeWithConnect(CtxComposeInfo ctxR) throws InvalidCtxComposeInfo {
-    if (nsd == null) {
-      throw new IllegalStateException("Can not compose. Nsd has not been set.");
-    }
-    if (ctxR.getStrat() != CompositionStrat.CONNECT) {
-      throw new InvalidCtxComposeInfo("Composition strategy is not 'CONNECT'");
-    }
-    if (ctxR.getConnections().isEmpty()) {
-      throw new InvalidCtxComposeInfo("Field 'connections' is empty");
-    }
-
-    for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
-      log.info("Compose '{}' with '{}' for nsDfId='{}' and nsLevelId='{}' using CONNECT",
-          nsd.getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
-          entry.getKey().nsIlId);
-      log.debug("Graph export before:\n{}", export(entry.getKey()));
-
-      for (Map.Entry<String, String> connection : ctxR.getConnections().entrySet()) {
-        VnfProfile ctxVnfProfile;
-        try {
-          ctxVnfProfile = ctxR.getNsd().getNsDf().get(0).getVnfProfile(connection.getKey());
-        } catch (NotExistingEntityException e) {
-          String message = MessageFormatter
-              .format("VnfProfile='{}' not found in '{}'. Abort composition.",
-                  connection.getKey(), ctxR.getNsd().getNsdIdentifier()).getMessage();
-          log.error(message);
-          throw new InvalidCtxComposeInfo(message);
-        }
-        VnfToLevelMapping ctxVnfLvlMap;
-        try {
-          List<VnfToLevelMapping> mappings = ctxR.getNsd().getNsDf().get(0)
-              .getDefaultInstantiationLevel().getVnfToLevelMapping();
-          Optional<VnfToLevelMapping> findMap = mappings.stream()
-              .filter(m -> m.getVnfProfileId().equals(ctxVnfProfile.getVnfProfileId())).findFirst();
-          if (findMap.isPresent()) {
-            ctxVnfLvlMap = findMap.get();
-          } else {
-            throw new NotExistingEntityException();
-          }
-        } catch (NotExistingEntityException e) {
-          String message = MessageFormatter
-              .format("VnfToLevelMapping for VnfProfile='{}' not found in '{}'. Abort composition.",
-                  connection.getKey(), ctxR.getNsd().getNsdIdentifier()).getMessage();
-          log.error(message);
-          throw new InvalidCtxComposeInfo(message);
-        }
-        // Create new vertices to add
-        VnfProfileVertex ctxVnfVertex = new VnfProfileVertex(ctxVnfProfile);
-        Optional<ProfileVertex> findVl = entry.getValue().vertexSet().stream()
-            .filter(v -> v.getElementId().equals(connection.getValue())).findAny();
-        ProfileVertex serviceVl;
-        if (findVl.isPresent()) {
-          serviceVl = findVl.get();
-        } else {
-          String message = MessageFormatter.arrayFormat(
-              "Virtual Link '{}' not found in '{}' for nsDfId='{}' and nsLevelId='{}'. Abort composition.",
-              new String[]{connection.getValue(), nsd.getNsdIdentifier(), entry.getKey().nsDfId,
-                  entry.getKey().nsIlId}).getMessage();
-          log.error(message);
-          throw new InvalidCtxComposeInfo(message);
-        }
-        entry.getValue().addVertex(ctxVnfVertex);
-        // TODO add vnf to nsd
-        if (nsd.getVnfdId().stream().noneMatch(id -> id.equals(ctxVnfProfile.getVnfdId()))) {
-          nsd.getVnfdId().add(ctxVnfProfile.getVnfdId());
-        }
-        try {
-          if (nsd.getNsDeploymentFlavour(entry.getKey().nsDfId).getVnfProfile().stream()
-              .noneMatch(vp -> vp.getVnfProfileId().equals(ctxVnfProfile.getVnfProfileId()))) {
-            nsd.getNsDeploymentFlavour(entry.getKey().nsDfId).getVnfProfile().add(ctxVnfProfile);
-          }
-          nsd.getNsDeploymentFlavour(entry.getKey().nsDfId).getNsLevel(entry.getKey().nsIlId)
-              .getVnfToLevelMapping().add(ctxVnfLvlMap);
-        } catch (NotExistingEntityException e) {
-          e.printStackTrace();
-        }
-
-        entry.getValue().addEdge(ctxVnfVertex, serviceVl);
-        // TODO verify edge
-
-      }
-      log.debug("Graph export after:\n{}", export(entry.getKey()));
     }
   }
 
@@ -299,28 +224,15 @@ public class Composer {
     return graphMap.keySet();
   }
 
+
+  @AllArgsConstructor
   public static class DfIlKey {
 
+    @Getter
     private final String nsDfId;
+    @Getter
     private final String nsIlId;
 
-    private DfIlKey(String nsDfId, String nsIlId) {
-      this.nsDfId = nsDfId;
-      this.nsIlId = nsIlId;
-    }
-
-    public String getNsDfId() {
-      return nsDfId;
-    }
-
-    public String getNsIlId() {
-      return nsIlId;
-    }
-
-    @Override
-    public String toString() {
-      return String.format("(%s,%s)", nsDfId, nsIlId);
-    }
   }
 
   public enum CompositionStrat {

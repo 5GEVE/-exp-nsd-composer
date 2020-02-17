@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotEquals;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.App;
+import it.cnit.blueprint.expbuilder.compose.ConnectStrategy;
+import it.cnit.blueprint.expbuilder.compose.PassThroughStrategy;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.rest.Composer.CompositionStrat;
@@ -30,6 +32,8 @@ public class ComposerTest {
   private static String vCDNPath;
   private static URL trackerURL, delayURL;
   private static GraphExporter graphExporter;
+  private static ConnectStrategy connectStrategy;
+  private static PassThroughStrategy passThroughStrategy;
 
   @BeforeClass
   public static void setUpClass() throws MalformedURLException {
@@ -40,12 +44,14 @@ public class ComposerTest {
     delayURL = new URL(
         "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/ctx/ctx_delay/ctx_delay_nsds.yaml");
     graphExporter = new GraphVizExporter();
+    connectStrategy = new ConnectStrategy();
+    passThroughStrategy = new PassThroughStrategy();
   }
 
   @Test
   public void buildGraphsExportVCdn() throws IOException {
     Nsd vCDN = OBJECT_MAPPER.readValue(App.class.getResourceAsStream(vCDNPath), Nsd[].class)[0];
-    Composer vCdnComposer = new Composer(graphExporter);
+    Composer vCdnComposer = new Composer(graphExporter, connectStrategy, passThroughStrategy);
     vCdnComposer.init(vCDN);
     assertNotEquals(0, vCdnComposer.getGraphMapKeys());
     for (DfIlKey k : vCdnComposer.getGraphMapKeys()) {
@@ -60,7 +66,7 @@ public class ComposerTest {
   @Test
   public void buildGraphsExportAres2tTracker() throws IOException {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
-    Composer trackerComposer = new Composer(graphExporter);
+    Composer trackerComposer = new Composer(graphExporter, connectStrategy, passThroughStrategy);
     trackerComposer.init(tracker);
     assertNotEquals(0, trackerComposer.getGraphMapKeys());
     for (DfIlKey k : trackerComposer.getGraphMapKeys()) {
@@ -79,9 +85,9 @@ public class ComposerTest {
 
   @Test
   public void composeWithConnect()
-      throws IOException, InvalidCtxComposeInfo {
+      throws IOException, InvalidCtxComposeInfo, NotExistingEntityException {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
-    Composer trackerComposer = new Composer(graphExporter);
+    Composer trackerComposer = new Composer(graphExporter, connectStrategy, passThroughStrategy);
     trackerComposer.init(tracker);
     assertNotEquals(0, trackerComposer.getGraphMapKeys());
     Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
@@ -92,7 +98,7 @@ public class ComposerTest {
     ctxComposeInfo.setConnections(connections);
     ctxComposeInfo.setStrat(CompositionStrat.CONNECT);
     log.debug("ctxComposeInfo dump:\n{}", OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
-    trackerComposer.composeWithConnect(ctxComposeInfo);
+    trackerComposer.composeWith(new CtxComposeInfo[]{ctxComposeInfo});
     // TODO
     // Check with ExpbNsd from the repo
   }
@@ -100,7 +106,7 @@ public class ComposerTest {
   @Test
   public void composeWithPassthrough() throws NotExistingEntityException, IOException {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
-    Composer trackerComposer = new Composer(graphExporter);
+    Composer trackerComposer = new Composer(graphExporter, connectStrategy, passThroughStrategy);
     trackerComposer.init(tracker);
     assertNotEquals(0, trackerComposer.getGraphMapKeys());
     Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
