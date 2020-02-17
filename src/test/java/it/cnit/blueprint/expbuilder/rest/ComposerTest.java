@@ -91,7 +91,7 @@ public class ComposerTest {
     connections.put("vnfp_netem", "virtuallinkid");
     ctxComposeInfo.setConnections(connections);
     ctxComposeInfo.setStrat(CompositionStrat.CONNECT);
-    log.info("ctxComposeInfo dump:\n{}", OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
+    log.debug("ctxComposeInfo dump:\n{}", OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
     trackerComposer.composeWithConnect(ctxComposeInfo);
     // TODO
     // Check with ExpbNsd from the repo
