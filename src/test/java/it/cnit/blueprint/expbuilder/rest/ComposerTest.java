@@ -85,10 +85,10 @@ public class ComposerTest {
     trackerComposer.init(tracker);
     assertNotEquals(0, trackerComposer.getGraphMapKeys());
     Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
+    Map<String, String> connections = new HashMap<>();
+    connections.put("vnfp_netem", "vlp_vl_tracking_mobile");
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo();
     ctxComposeInfo.setNsd(delayNsd);
-    Map<String, String> connections = new HashMap<>();
-    connections.put("vnfp_netem", "virtuallinkid");
     ctxComposeInfo.setConnections(connections);
     ctxComposeInfo.setStrat(CompositionStrat.CONNECT);
     log.debug("ctxComposeInfo dump:\n{}", OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
