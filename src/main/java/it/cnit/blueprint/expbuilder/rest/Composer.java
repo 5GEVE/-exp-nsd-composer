@@ -30,6 +30,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleGraph;
+import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -135,7 +136,8 @@ public class Composer {
     }
   }
 
-  public void composeWith(CtxComposeInfo[] ctxRArray) throws NotExistingEntityException {
+  public void composeWith(CtxComposeInfo[] ctxRArray)
+      throws NotExistingEntityException, InvalidCtxComposeInfo {
     for (CtxComposeInfo ctxR : ctxRArray) {
       for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
         if (ctxR.getStrat() == CompositionStrat.CONNECT) {
@@ -150,15 +152,15 @@ public class Composer {
     }
   }
 
-  public void composeWithConnect(CtxComposeInfo ctxR) {
+  public void composeWithConnect(CtxComposeInfo ctxR) throws InvalidCtxComposeInfo {
     if (nsd == null) {
       throw new IllegalStateException("Can not compose. Nsd has not been set.");
     }
     if (ctxR.getStrat() != CompositionStrat.CONNECT) {
-      throw new IllegalArgumentException("Composition strategy is not 'CONNECT'");
+      throw new InvalidCtxComposeInfo("Composition strategy is not 'CONNECT'");
     }
     if (ctxR.getConnections().isEmpty()) {
-      throw new IllegalArgumentException("Field 'connections' is empty");
+      throw new InvalidCtxComposeInfo("Field 'connections' is empty");
     }
     // TODO handle other exceptions here
 
@@ -175,11 +177,11 @@ public class Composer {
           contextVnf = new VnfProfileVertex(
               ctxR.getNsd().getNsDf().get(0).getVnfProfile(connection.getKey()));
         } catch (NotExistingEntityException e) {
-          // TODO fail composition since vnfid is wrong
-          // IllegalArgument? Or custom exception?
-          log.error("VnfProfile '{}' not found in '{}'. Abort composition.",
-              connection.getKey(), ctxR.getNsd().getNsdIdentifier());
-          return;
+          String message = MessageFormatter
+              .format("VnfProfile '{}' not found in '{}'. Abort composition.",
+                  connection.getKey(), ctxR.getNsd().getNsdIdentifier()).getMessage();
+          log.error(message);
+          throw new InvalidCtxComposeInfo(message);
         }
         Optional<ProfileVertex> findVl = entry.getValue().vertexSet().stream()
             .filter(v -> v.getElementId().equals(connection.getValue())).findAny();

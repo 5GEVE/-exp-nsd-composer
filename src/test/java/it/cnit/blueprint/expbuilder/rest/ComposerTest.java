@@ -78,7 +78,8 @@ public class ComposerTest {
   }
 
   @Test
-  public void composeWithConnect() throws NotExistingEntityException, IOException {
+  public void composeWithConnect()
+      throws IOException, InvalidCtxComposeInfo {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
     Composer trackerComposer = new Composer(graphExporter);
     trackerComposer.init(tracker);

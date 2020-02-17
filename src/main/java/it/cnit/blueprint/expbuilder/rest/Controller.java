@@ -31,6 +31,9 @@ public class Controller {
       composer.composeWith(composeRequest.getContexts());
     } catch (NotExistingEntityException e) {
       e.printStackTrace();
+    } catch (InvalidCtxComposeInfo e) {
+      //TODO create and return a 422 response.
+      e.printStackTrace();
     }
     //TODO
     return "{\"state\": \"ok\"}";
