@@ -1,5 +1,6 @@
 package it.cnit.blueprint.expbuilder.rest;
 
+import it.cnit.blueprint.expbuilder.compose.CompositionStrategy;
 import it.cnit.blueprint.expbuilder.compose.ConnectStrategy;
 import it.cnit.blueprint.expbuilder.compose.PassThroughStrategy;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphExporter;
@@ -36,6 +37,7 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleGraph;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
@@ -55,13 +57,15 @@ public class Composer {
   @Setter
   private GraphExporter graphExporter;
 
-  private ConnectStrategy connectStrategy;
-  private PassThroughStrategy passThroughStrategy;
+  @Qualifier("connect")
+  private CompositionStrategy connectStrategy;
 
-  @Autowired
+  @Qualifier("passthrough")
+  private CompositionStrategy passThroughStrategy;
+
   public Composer(GraphExporter graphExporter,
-      ConnectStrategy connectStrategy,
-      PassThroughStrategy passThroughStrategy) {
+      CompositionStrategy connectStrategy,
+      CompositionStrategy passThroughStrategy) {
     this.graphExporter = graphExporter;
     this.connectStrategy = connectStrategy;
     this.passThroughStrategy = passThroughStrategy;
@@ -154,7 +158,7 @@ public class Composer {
         if (ctxR.getStrat() == CompositionStrat.CONNECT) {
           connectStrategy.compose(nsd, graphMap, ctxR);
         } else if (ctxR.getStrat() == CompositionStrat.PASSTHROUGH) {
-          composeWithPassthrough(ctxR);
+          passThroughStrategy.compose(nsd, graphMap, ctxR);
         } else {
           throw new NotImplementedException(
               String.format("Composition strategy %s not implemented", ctxR.getStrat()));

@@ -16,9 +16,11 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
 import org.slf4j.helpers.MessageFormatter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
+@Qualifier("connect")
 @Slf4j
 public class ConnectStrategy implements CompositionStrategy {
 
