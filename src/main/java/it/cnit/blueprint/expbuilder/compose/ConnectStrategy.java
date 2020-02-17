@@ -3,7 +3,6 @@ package it.cnit.blueprint.expbuilder.compose;
 import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.nsdgraph.VnfProfileVertex;
 import it.cnit.blueprint.expbuilder.rest.Composer.CompositionStrat;
-import it.cnit.blueprint.expbuilder.rest.Composer.DfIlKey;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
