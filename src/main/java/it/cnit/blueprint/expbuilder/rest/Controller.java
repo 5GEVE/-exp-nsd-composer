@@ -26,9 +26,9 @@ public class Controller {
   @PostMapping("/experiment")
   // TODO return should be OnboardExpBlueprintRequest
   public String composeExperiment(@RequestBody ComposeRequest composeRequest) {
-    composer.init(composeRequest.getVsbRequest().getNsds().get(0));
     try {
-      composer.composeWith(composeRequest.getContexts());
+      composer.composeWith(composeRequest.getVsbRequest().getNsds().get(0),
+          composeRequest.getContexts());
     } catch (InvalidCtxComposeInfo e) {
       //TODO create and return a 422 response.
       e.printStackTrace();
