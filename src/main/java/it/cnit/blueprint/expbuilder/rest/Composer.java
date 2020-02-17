@@ -162,10 +162,9 @@ public class Composer {
     if (ctxR.getConnections().isEmpty()) {
       throw new InvalidCtxComposeInfo("Field 'connections' is empty");
     }
-    // TODO handle other exceptions here
 
     for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
-      log.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using CONNECT",
+      log.info("Compose '{}' with '{}' for nsDfId='{}' and nsLevelId='{}' using CONNECT",
           nsd.getNsdIdentifier(), ctxR.getNsd().getNsdIdentifier(), entry.getKey().nsDfId,
           entry.getKey().nsIlId);
       log.debug("Export before:\n{}", export(entry.getKey()));
@@ -178,7 +177,7 @@ public class Composer {
               ctxR.getNsd().getNsDf().get(0).getVnfProfile(connection.getKey()));
         } catch (NotExistingEntityException e) {
           String message = MessageFormatter
-              .format("VnfProfile '{}' not found in '{}'. Abort composition.",
+              .format("VnfProfile='{}' not found in '{}'. Abort composition.",
                   connection.getKey(), ctxR.getNsd().getNsdIdentifier()).getMessage();
           log.error(message);
           throw new InvalidCtxComposeInfo(message);
@@ -189,11 +188,12 @@ public class Composer {
         if (findVl.isPresent()) {
           serviceVl = findVl.get();
         } else {
-          log.warn("Virtual Link '{}' not found in '{}' for nsDfId '{}' and nsLevelId '{}'",
-              connection.getValue(), nsd.getNsdIdentifier(), entry.getKey().nsDfId,
-              entry.getKey().nsIlId);
-          log.warn("Skip composition");
-          continue;
+          String message = MessageFormatter.arrayFormat(
+              "Virtual Link '{}' not found in '{}' for nsDfId='{}' and nsLevelId='{}'. Abort composition.",
+              new String[]{connection.getValue(), nsd.getNsdIdentifier(), entry.getKey().nsDfId,
+                  entry.getKey().nsIlId}).getMessage();
+          log.error(message);
+          throw new InvalidCtxComposeInfo(message);
         }
         entry.getValue().addVertex(contextVnf);
         entry.getValue().addEdge(contextVnf, serviceVl);
