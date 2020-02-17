@@ -80,7 +80,7 @@ public class ComposerTest {
   @Test
   public void composeWithConnect() throws IOException, InvalidCtxComposeInfo {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
-    Composer trackerComposer = new Composer(graphExporter, connectStrategy, passThroughStrategy);
+    Composer trackerComposer = new Composer(graphExporter, nsdGraphService, connectStrategy, passThroughStrategy);
     Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
     Map<String, String> connections = new HashMap<>();
     connections.put("vnfp_netem", "vlp_vl_tracking_mobile");
@@ -97,7 +97,7 @@ public class ComposerTest {
   @Test
   public void composeWithPassthrough() throws IOException, InvalidCtxComposeInfo {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
-    Composer trackerComposer = new Composer(graphExporter, connectStrategy, passThroughStrategy);
+    Composer trackerComposer = new Composer(graphExporter, nsdGraphService, connectStrategy, passThroughStrategy);
     Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo();
     ctxComposeInfo.setNsd(delayNsd);
