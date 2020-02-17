@@ -32,6 +32,7 @@ public class NsdGraphService {
     this.graphExporter = graphExporter;
   }
 
+  // TODO Remove the map. Move the double for to Composer.
   public Map<DfIlKey, Graph<ProfileVertex, String>> buildGraphs(Nsd nsd) {
     Map<DfIlKey, Graph<ProfileVertex, String>> graphMap = new HashMap<>();
     try {
@@ -113,6 +114,7 @@ public class NsdGraphService {
     return graphExporter.export(graph);
   }
 
+  // TODO Move to composer
   @AllArgsConstructor
   public static class DfIlKey {
 

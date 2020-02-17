@@ -19,6 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 @Slf4j
 public class Composer {
+  //TODO rename to NsdComposer
 
   private NsdGraphService nsdGraphService;
 
@@ -27,6 +28,11 @@ public class Composer {
 
   @Qualifier("passthrough")
   private CompositionStrategy passThroughStrategy;
+
+  public enum CompositionStrat {
+    CONNECT,
+    PASSTHROUGH
+  }
 
   public Composer(NsdGraphService nsdGraphService,
       CompositionStrategy connectStrategy,
@@ -57,8 +63,4 @@ public class Composer {
     }
   }
 
-  public enum CompositionStrat {
-    CONNECT,
-    PASSTHROUGH
-  }
 }
