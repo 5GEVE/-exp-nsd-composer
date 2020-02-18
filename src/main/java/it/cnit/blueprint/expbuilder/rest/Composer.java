@@ -51,9 +51,9 @@ public class Composer {
           Graph<ProfileVertex, String> g = nsdGraphService.buildGraph(nsd.getSapd(), df, l);
           log.debug("Graph export before:\n{}", nsdGraphService.export(g));
           if (ctxR.getStrat() == CompositionStrat.CONNECT) {
-            connectStrategy.compose(nsd, df.getNsDfId(), l.getNsLevelId(), ctxR, g);
+            connectStrategy.compose(nsd, df, l, ctxR);
           } else if (ctxR.getStrat() == CompositionStrat.PASSTHROUGH) {
-            passThroughStrategy.compose(nsd, df.getNsDfId(), l.getNsLevelId(), ctxR, g);
+            passThroughStrategy.compose(nsd, df, l, ctxR);
           } else {
             throw new NotImplementedException(
                 String.format("Composition strategy %s not implemented", ctxR.getStrat()));
