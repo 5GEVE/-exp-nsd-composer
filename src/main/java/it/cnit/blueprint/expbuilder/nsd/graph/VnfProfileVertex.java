@@ -1,18 +1,14 @@
-package it.cnit.blueprint.expbuilder.nsdgraph;
+package it.cnit.blueprint.expbuilder.nsd.graph;
 
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@AllArgsConstructor
 public class VnfProfileVertex extends ProfileVertex {
 
+  @Getter
   private final VnfProfile vnfProfile;
-
-  public VnfProfileVertex(VnfProfile vnfProfile) {
-    this.vnfProfile = vnfProfile;
-  }
-
-  public VnfProfile getVnfProfile() {
-    return vnfProfile;
-  }
 
   @Override
   public String getElementId() {

@@ -1,6 +1,6 @@
 package it.cnit.blueprint.expbuilder.rest;
 
-import it.cnit.blueprint.expbuilder.rest.Composer.CompositionStrat;
+import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer.CompositionStrat;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.util.Map;
 import lombok.Data;
@@ -11,7 +11,7 @@ public class CtxComposeInfo {
   private Nsd nsd;
   private CompositionStrat strat;
   private String SapId;
-  // Map<vnfProfileId, vlProfileId>
-  private Map<String, String> VirtualLinkIds;
+  // Map< ctxVnfProfileId, vsbVlProfileId>
+  private Map<String, String> connections;
 
 }
