@@ -2,12 +2,12 @@ package it.cnit.blueprint.expbuilder.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import it.cnit.blueprint.expbuilder.nsdcompose.ConnectStrategy;
-import it.cnit.blueprint.expbuilder.nsdcompose.NsdComposer;
-import it.cnit.blueprint.expbuilder.nsdcompose.PassThroughStrategy;
-import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
-import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphService;
-import it.cnit.blueprint.expbuilder.nsdcompose.NsdComposer.CompositionStrat;
+import it.cnit.blueprint.expbuilder.nsd.compose.ConnectStrategy;
+import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer;
+import it.cnit.blueprint.expbuilder.nsd.compose.PassThroughStrategy;
+import it.cnit.blueprint.expbuilder.nsd.graph.GraphVizExporter;
+import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
+import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer.CompositionStrat;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
 import java.net.MalformedURLException;

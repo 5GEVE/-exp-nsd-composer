@@ -1,4 +1,4 @@
-package it.cnit.blueprint.expbuilder.nsdcompose;
+package it.cnit.blueprint.expbuilder.nsd.compose;
 
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;

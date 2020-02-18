@@ -1,4 +1,4 @@
-package it.cnit.blueprint.expbuilder.nsdgraph;
+package it.cnit.blueprint.expbuilder.nsd.graph;
 
 public abstract class ProfileVertex {
 

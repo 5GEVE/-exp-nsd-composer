@@ -1,4 +1,4 @@
-package it.cnit.blueprint.expbuilder.nsdgraph;
+package it.cnit.blueprint.expbuilder.nsd.graph;
 
 import org.jgrapht.Graph;
 import org.springframework.stereotype.Component;

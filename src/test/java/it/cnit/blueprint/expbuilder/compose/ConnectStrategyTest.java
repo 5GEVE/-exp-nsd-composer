@@ -1,17 +1,16 @@
-package it.cnit.blueprint.expbuilder.nsdcompose;
+package it.cnit.blueprint.expbuilder.compose;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import it.cnit.blueprint.expbuilder.nsdcompose.NsdComposer.CompositionStrat;
-import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
-import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphService;
-import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
+import it.cnit.blueprint.expbuilder.nsd.compose.ConnectStrategy;
+import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer.CompositionStrat;
+import it.cnit.blueprint.expbuilder.nsd.graph.GraphVizExporter;
+import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
+import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
-import java.io.File;
-import java.io.FileReader;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
@@ -21,12 +20,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.stereotype.Component;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 @Slf4j
 public class ConnectStrategyTest {

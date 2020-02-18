@@ -1,6 +1,6 @@
-package it.cnit.blueprint.expbuilder.nsdcompose;
+package it.cnit.blueprint.expbuilder.nsd.compose;
 
-import it.cnit.blueprint.expbuilder.nsdcompose.NsdComposer.CompositionStrat;
+import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer.CompositionStrat;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;

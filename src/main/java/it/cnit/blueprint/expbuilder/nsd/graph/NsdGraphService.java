@@ -1,4 +1,4 @@
-package it.cnit.blueprint.expbuilder.nsdgraph;
+package it.cnit.blueprint.expbuilder.nsd.graph;
 
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;

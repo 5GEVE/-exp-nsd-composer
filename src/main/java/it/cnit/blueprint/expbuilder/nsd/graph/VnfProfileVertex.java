@@ -1,4 +1,4 @@
-package it.cnit.blueprint.expbuilder.nsdgraph;
+package it.cnit.blueprint.expbuilder.nsd.graph;
 
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import lombok.AllArgsConstructor;

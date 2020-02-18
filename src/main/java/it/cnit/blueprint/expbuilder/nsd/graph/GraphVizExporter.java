@@ -1,4 +1,4 @@
-package it.cnit.blueprint.expbuilder.nsdgraph;
+package it.cnit.blueprint.expbuilder.nsd.graph;
 
 import java.io.StringWriter;
 import java.io.Writer;

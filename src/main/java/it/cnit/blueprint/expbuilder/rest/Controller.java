@@ -1,6 +1,6 @@
 package it.cnit.blueprint.expbuilder.rest;
 
-import it.cnit.blueprint.expbuilder.nsdcompose.NsdComposer;
+import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardExpBlueprintRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

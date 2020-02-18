@@ -1,6 +1,6 @@
 package it.cnit.blueprint.expbuilder.rest;
 
-import it.cnit.blueprint.expbuilder.nsdcompose.NsdComposer.CompositionStrat;
+import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer.CompositionStrat;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.util.Map;
 import lombok.Data;
