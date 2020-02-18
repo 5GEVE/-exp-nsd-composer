@@ -10,14 +10,14 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
 
 public abstract class CompositionStrategy {
 
-  void addVnf(Nsd nsd, NsDf nsDf, NsLevel nsLevel, VnfProfile ctxVnfProfile,
+  void addVnf(Nsd nsd, NsDf nsDf, NsLevel nsLevel, VnfProfile vnfProfile,
       VnfToLevelMapping vnfLvlMap) {
-    if (nsd.getVnfdId().stream().noneMatch(id -> id.equals(ctxVnfProfile.getVnfdId()))) {
-      nsd.getVnfdId().add(ctxVnfProfile.getVnfdId());
+    if (nsd.getVnfdId().stream().noneMatch(id -> id.equals(vnfProfile.getVnfdId()))) {
+      nsd.getVnfdId().add(vnfProfile.getVnfdId());
     }
     if (nsDf.getVnfProfile().stream()
-        .noneMatch(vp -> vp.getVnfProfileId().equals(ctxVnfProfile.getVnfProfileId()))) {
-      nsDf.getVnfProfile().add(ctxVnfProfile);
+        .noneMatch(vp -> vp.getVnfProfileId().equals(vnfProfile.getVnfProfileId()))) {
+      nsDf.getVnfProfile().add(vnfProfile);
     }
     nsLevel.getVnfToLevelMapping().add(vnfLvlMap);
   }
