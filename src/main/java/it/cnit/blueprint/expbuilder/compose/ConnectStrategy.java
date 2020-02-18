@@ -86,6 +86,7 @@ public class ConnectStrategy implements CompositionStrategy {
       //TODO check vnf connection to VL
 
       // Update Graph
+      // TODO remove this code
       VnfProfileVertex ctxVnfVertex = new VnfProfileVertex(ctxVnfProfile);
       Optional<ProfileVertex> findVl = graph.vertexSet().stream()
           .filter(v -> v.getElementId().equals(connection.getValue())).findAny();

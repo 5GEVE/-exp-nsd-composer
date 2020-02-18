@@ -35,6 +35,8 @@ public class PassThroughStrategy implements CompositionStrategy {
 
     // TODO update Nsd model when modifying the graph.
 
+
+    // TODO remove this code
     // Get information on vertices and edges
     ProfileVertex sapV = graph.vertexSet().stream()
         .filter(v -> v.getElementId().equals(composeInfo.getSapId())).findAny().get();
