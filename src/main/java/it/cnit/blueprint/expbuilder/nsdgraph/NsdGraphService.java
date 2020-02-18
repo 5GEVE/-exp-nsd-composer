@@ -11,8 +11,6 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
@@ -122,14 +120,4 @@ public class NsdGraphService {
     return graphExporter.export(graph);
   }
 
-  // TODO Move to composer
-  @AllArgsConstructor
-  public static class DfIlKey {
-
-    @Getter
-    private final String nsDfId;
-    @Getter
-    private final String nsIlId;
-
-  }
 }

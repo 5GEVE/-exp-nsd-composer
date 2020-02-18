@@ -2,13 +2,10 @@ package it.cnit.blueprint.expbuilder.rest;
 
 import it.cnit.blueprint.expbuilder.compose.CompositionStrategy;
 import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphService;
-import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphService.DfIlKey;
 import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jgrapht.Graph;
