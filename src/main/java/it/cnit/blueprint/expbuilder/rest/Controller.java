@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class Controller {
 
-  private final Composer composer;
+  private final NsdComposer nsdComposer;
 
   @GetMapping("/experiment")
   public OnboardExpBlueprintRequest retrieveExperiment() {
@@ -22,7 +22,7 @@ public class Controller {
   // TODO return should be OnboardExpBlueprintRequest
   public String composeExperiment(@RequestBody ComposeRequest composeRequest) {
     try {
-      composer.composeWith(composeRequest.getVsbRequest().getNsds().get(0),
+      nsdComposer.composeWith(composeRequest.getVsbRequest().getNsds().get(0),
           composeRequest.getContexts());
     } catch (InvalidCtxComposeInfo e) {
       //TODO create and return a 422 response.

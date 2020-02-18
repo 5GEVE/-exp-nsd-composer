@@ -20,8 +20,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 @Slf4j
 @AllArgsConstructor
-public class Composer {
-  //TODO rename to NsdComposer
+public class NsdComposer {
 
   private NsdGraphService nsdGraphService;
 

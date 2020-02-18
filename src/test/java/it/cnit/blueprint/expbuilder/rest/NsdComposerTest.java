@@ -6,7 +6,7 @@ import it.cnit.blueprint.expbuilder.compose.ConnectStrategy;
 import it.cnit.blueprint.expbuilder.compose.PassThroughStrategy;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphService;
-import it.cnit.blueprint.expbuilder.rest.Composer.CompositionStrat;
+import it.cnit.blueprint.expbuilder.rest.NsdComposer.CompositionStrat;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -18,13 +18,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 @Slf4j
-public class ComposerTest {
+public class NsdComposerTest {
 
   private static ObjectMapper OBJECT_MAPPER;
   // Test input
   private static String vCDNPath;
   private static URL trackerURL, delayURL;
-  private static Composer composer;
+  private static NsdComposer nsdComposer;
 
   @BeforeClass
   public static void setUpClass() throws MalformedURLException {
@@ -34,7 +34,7 @@ public class ComposerTest {
         "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/vsb/vsb_ares2t_tracker/vsb_ares2t_tracker_nsds.yaml");
     delayURL = new URL(
         "https://raw.githubusercontent.com/5GEVE/blueprint-yaml/master/ctx/ctx_delay/ctx_delay_nsds.yaml");
-    composer = new Composer(new NsdGraphService(new GraphVizExporter()),
+    nsdComposer = new NsdComposer(new NsdGraphService(new GraphVizExporter()),
         new ConnectStrategy(), new PassThroughStrategy());
   }
 
@@ -85,7 +85,7 @@ public class ComposerTest {
     ctxComposeInfo.setConnections(connections);
     ctxComposeInfo.setStrat(CompositionStrat.CONNECT);
     log.debug("ctxComposeInfo dump:\n{}", OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
-    composer.composeWith(tracker, new CtxComposeInfo[]{ctxComposeInfo});
+    nsdComposer.composeWith(tracker, new CtxComposeInfo[]{ctxComposeInfo});
     // TODO
     // Check with ExpbNsd from the repo
   }
@@ -99,7 +99,7 @@ public class ComposerTest {
     ctxComposeInfo.setSapId("sap_tracking_mobile");
     ctxComposeInfo.setStrat(CompositionStrat.PASSTHROUGH);
     log.info(OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
-    composer.composeWith(tracker, new CtxComposeInfo[]{ctxComposeInfo});
+    nsdComposer.composeWith(tracker, new CtxComposeInfo[]{ctxComposeInfo});
 
     // TODO
     // Check with ExpbNsd from the repo
