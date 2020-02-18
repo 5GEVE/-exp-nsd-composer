@@ -6,6 +6,7 @@ import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jgrapht.Graph;
@@ -18,6 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 @Slf4j
+@AllArgsConstructor
 public class Composer {
   //TODO rename to NsdComposer
 
@@ -33,15 +35,6 @@ public class Composer {
     CONNECT,
     PASSTHROUGH
   }
-
-  public Composer(NsdGraphService nsdGraphService,
-      CompositionStrategy connectStrategy,
-      CompositionStrategy passThroughStrategy) {
-    this.nsdGraphService = nsdGraphService;
-    this.connectStrategy = connectStrategy;
-    this.passThroughStrategy = passThroughStrategy;
-  }
-
 
   public void composeWith(Nsd nsd, CtxComposeInfo[] ctxRArray)
       throws InvalidCtxComposeInfo, InvalidNsd {
