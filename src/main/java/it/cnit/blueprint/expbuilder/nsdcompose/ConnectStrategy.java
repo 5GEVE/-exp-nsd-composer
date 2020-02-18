@@ -36,7 +36,7 @@ public class ConnectStrategy implements CompositionStrategy {
         nsd.getNsdIdentifier(), composeInfo.getNsd().getNsdIdentifier(), nsDf.getNsDfId(),
         nsLevel.getNsLevelId());
     for (Map.Entry<String, String> connection : composeInfo.getConnections().entrySet()) {
-      // Search and prepare components
+      // We assume only one DF for the context
       VnfProfile ctxVnfProfile;
       try {
         ctxVnfProfile = composeInfo.getNsd().getNsDf().get(0).getVnfProfile(connection.getKey());
@@ -47,6 +47,7 @@ public class ConnectStrategy implements CompositionStrategy {
         log.error(message);
         throw new InvalidCtxComposeInfo(message);
       }
+      // We assume only one IL for the context
       VnfToLevelMapping ctxVnfLvlMap;
       List<VnfToLevelMapping> mappings = composeInfo.getNsd().getNsDf().get(0)
           .getNsInstantiationLevel().get(0).getVnfToLevelMapping();
