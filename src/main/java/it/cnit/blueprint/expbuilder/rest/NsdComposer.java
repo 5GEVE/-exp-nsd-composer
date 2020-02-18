@@ -1,6 +1,6 @@
 package it.cnit.blueprint.expbuilder.rest;
 
-import it.cnit.blueprint.expbuilder.compose.CompositionStrategy;
+import it.cnit.blueprint.expbuilder.nsdcompose.CompositionStrategy;
 import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;

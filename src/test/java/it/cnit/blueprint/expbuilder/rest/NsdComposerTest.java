@@ -2,8 +2,8 @@ package it.cnit.blueprint.expbuilder.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import it.cnit.blueprint.expbuilder.compose.ConnectStrategy;
-import it.cnit.blueprint.expbuilder.compose.PassThroughStrategy;
+import it.cnit.blueprint.expbuilder.nsdcompose.ConnectStrategy;
+import it.cnit.blueprint.expbuilder.nsdcompose.PassThroughStrategy;
 import it.cnit.blueprint.expbuilder.nsdgraph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.rest.NsdComposer.CompositionStrat;

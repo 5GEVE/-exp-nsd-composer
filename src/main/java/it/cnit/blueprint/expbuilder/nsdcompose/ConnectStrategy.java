@@ -1,4 +1,4 @@
-package it.cnit.blueprint.expbuilder.compose;
+package it.cnit.blueprint.expbuilder.nsdcompose;
 
 import it.cnit.blueprint.expbuilder.rest.NsdComposer.CompositionStrat;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
