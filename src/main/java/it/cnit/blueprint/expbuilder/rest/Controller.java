@@ -32,6 +32,9 @@ public class Controller {
     } catch (InvalidCtxComposeInfo e) {
       //TODO create and return a 422 response.
       e.printStackTrace();
+    } catch (InvalidNsd e){
+      e.printStackTrace();
+      //TODO create and return a 422 response.
     }
     //TODO
     return "{\"state\": \"ok\"}";

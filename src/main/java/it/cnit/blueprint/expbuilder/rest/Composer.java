@@ -46,7 +46,8 @@ public class Composer {
   }
 
 
-  public void composeWith(Nsd nsd, CtxComposeInfo[] ctxRArray) throws InvalidCtxComposeInfo {
+  public void composeWith(Nsd nsd, CtxComposeInfo[] ctxRArray)
+      throws InvalidCtxComposeInfo, InvalidNsd {
     for (CtxComposeInfo ctxR : ctxRArray) {
       for (NsDf df : nsd.getNsDf()) {
         for (NsLevel l : df.getNsInstantiationLevel()) {

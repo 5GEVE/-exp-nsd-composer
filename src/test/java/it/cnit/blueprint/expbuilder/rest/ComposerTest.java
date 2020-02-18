@@ -75,7 +75,7 @@ public class ComposerTest {
   }
 
   @Test
-  public void composeWithConnect() throws IOException, InvalidCtxComposeInfo {
+  public void composeWithConnect() throws IOException, InvalidCtxComposeInfo, InvalidNsd {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
     Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
     Map<String, String> connections = new HashMap<>();
@@ -91,7 +91,7 @@ public class ComposerTest {
   }
 
   @Test
-  public void composeWithPassthrough() throws IOException, InvalidCtxComposeInfo {
+  public void composeWithPassthrough() throws IOException, InvalidCtxComposeInfo, InvalidNsd {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
     Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo();
