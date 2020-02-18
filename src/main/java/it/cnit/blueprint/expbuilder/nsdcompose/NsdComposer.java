@@ -1,8 +1,11 @@
-package it.cnit.blueprint.expbuilder.rest;
+package it.cnit.blueprint.expbuilder.nsdcompose;
 
 import it.cnit.blueprint.expbuilder.nsdcompose.CompositionStrategy;
 import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
+import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
+import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
+import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;

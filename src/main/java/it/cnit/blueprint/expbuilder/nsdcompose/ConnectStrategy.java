@@ -1,6 +1,6 @@
 package it.cnit.blueprint.expbuilder.nsdcompose;
 
-import it.cnit.blueprint.expbuilder.rest.NsdComposer.CompositionStrat;
+import it.cnit.blueprint.expbuilder.nsdcompose.NsdComposer.CompositionStrat;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
