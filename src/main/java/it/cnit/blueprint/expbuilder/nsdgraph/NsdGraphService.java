@@ -11,6 +11,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
@@ -20,14 +21,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class NsdGraphService {
 
   @Setter
   private GraphExporter graphExporter;
-
-  public NsdGraphService(GraphExporter graphExporter) {
-    this.graphExporter = graphExporter;
-  }
 
   public Graph<ProfileVertex, String> buildGraph(List<Sapd> sapdList, NsDf nsDf, NsLevel nsLevel)
       throws InvalidNsd {

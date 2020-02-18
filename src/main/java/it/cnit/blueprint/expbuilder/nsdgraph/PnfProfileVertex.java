@@ -1,18 +1,14 @@
 package it.cnit.blueprint.expbuilder.nsdgraph;
 
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.PnfProfile;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@AllArgsConstructor
 public class PnfProfileVertex extends ProfileVertex {
 
+  @Getter
   private final PnfProfile pnfProfile;
-
-  public PnfProfileVertex(PnfProfile pnfProfile) {
-    this.pnfProfile = pnfProfile;
-  }
-
-  public PnfProfile getPnfProfile() {
-    return pnfProfile;
-  }
 
   @Override
   public String getElementId() {

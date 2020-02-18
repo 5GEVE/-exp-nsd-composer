@@ -1,18 +1,14 @@
 package it.cnit.blueprint.expbuilder.nsdgraph;
 
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@AllArgsConstructor
 public class VirtualLinkProfileVertex extends ProfileVertex {
 
+  @Getter
   private final VirtualLinkProfile vlProfile;
-
-  public VirtualLinkProfileVertex(VirtualLinkProfile vlProfile) {
-    this.vlProfile = vlProfile;
-  }
-
-  public VirtualLinkProfile getVlProfile() {
-    return vlProfile;
-  }
 
   @Override
   public String getElementId() {
