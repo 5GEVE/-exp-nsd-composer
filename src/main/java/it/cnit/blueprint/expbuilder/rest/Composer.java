@@ -4,7 +4,10 @@ import it.cnit.blueprint.expbuilder.compose.CompositionStrategy;
 import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.nsdgraph.NsdGraphService.DfIlKey;
 import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
@@ -44,21 +47,22 @@ public class Composer {
 
 
   public void composeWith(Nsd nsd, CtxComposeInfo[] ctxRArray) throws InvalidCtxComposeInfo {
-    Map<DfIlKey, Graph<ProfileVertex, String>> graphMap = nsdGraphService.buildGraphs(nsd);
     for (CtxComposeInfo ctxR : ctxRArray) {
-      for (Map.Entry<DfIlKey, Graph<ProfileVertex, String>> entry : graphMap.entrySet()) {
-        log.debug("Graph export before:\n{}", nsdGraphService.export(entry.getValue()));
-        if (ctxR.getStrat() == CompositionStrat.CONNECT) {
-          connectStrategy.compose(nsd, entry.getKey().getNsDfId(), entry.getKey().getNsIlId(),
-              ctxR, entry.getValue());
-        } else if (ctxR.getStrat() == CompositionStrat.PASSTHROUGH) {
-          passThroughStrategy.compose(nsd, entry.getKey().getNsDfId(), entry.getKey().getNsIlId(),
-              ctxR, entry.getValue());
-        } else {
-          throw new NotImplementedException(
-              String.format("Composition strategy %s not implemented", ctxR.getStrat()));
+      for (NsDf df : nsd.getNsDf()) {
+        for (NsLevel l : df.getNsInstantiationLevel()) {
+          Graph<ProfileVertex, String> g = nsdGraphService.buildGraph(nsd.getSapd(), df, l);
+          log.debug("Graph export before:\n{}", nsdGraphService.export(g));
+          if (ctxR.getStrat() == CompositionStrat.CONNECT) {
+            connectStrategy.compose(nsd, df.getNsDfId(), l.getNsLevelId(), ctxR, g);
+          } else if (ctxR.getStrat() == CompositionStrat.PASSTHROUGH) {
+            passThroughStrategy.compose(nsd, df.getNsDfId(), l.getNsLevelId(), ctxR, g);
+          } else {
+            throw new NotImplementedException(
+                String.format("Composition strategy %s not implemented", ctxR.getStrat()));
+          }
+          g = nsdGraphService.buildGraph(nsd.getSapd(), df, l);
+          log.debug("Graph export after:\n{}", nsdGraphService.export(g));
         }
-        log.debug("Graph export after:\n{}", nsdGraphService.export(entry.getValue()));
       }
     }
   }
