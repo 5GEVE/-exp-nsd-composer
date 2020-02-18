@@ -9,6 +9,7 @@ import it.cnit.blueprint.expbuilder.nsdgraph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
@@ -17,6 +18,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jgrapht.Graph;
+import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -63,6 +65,13 @@ public class NsdComposer {
           log.debug("Nsd after:\n{}", objectMapper.writeValueAsString(nsd));
           g = nsdGraphService.buildGraph(nsd.getSapd(), df, l);
           log.debug("Graph export after:\n{}", nsdGraphService.export(g));
+          try {
+            nsd.isValid();
+          } catch (MalformattedElementException e) {
+            String message = "Nsd looks not valid after composition";
+            log.error(message, e);
+            throw new InvalidNsd(message);
+          }
         }
       }
     }
