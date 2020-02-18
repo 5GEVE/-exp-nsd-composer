@@ -4,11 +4,15 @@ import it.cnit.blueprint.expbuilder.nsdcompose.NsdComposer.CompositionStrat;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
+import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,22 +41,35 @@ public class ConnectStrategy implements CompositionStrategy {
         nsLevel.getNsLevelId());
     for (Map.Entry<String, String> connection : composeInfo.getConnections().entrySet()) {
       // We assume only one DF for the context
+      String ctxVnfProfileId = connection.getKey();
       VnfProfile ctxVnfProfile;
       try {
-        ctxVnfProfile = composeInfo.getNsd().getNsDf().get(0).getVnfProfile(connection.getKey());
+        ctxVnfProfile = composeInfo.getNsd().getNsDf().get(0).getVnfProfile(ctxVnfProfileId);
       } catch (NotExistingEntityException e) {
         String message = MessageFormatter
             .format("VnfProfile='{}' not found in '{}'. Abort composition.",
-                connection.getKey(), composeInfo.getNsd().getNsdIdentifier()).getMessage();
+                ctxVnfProfileId, composeInfo.getNsd().getNsdIdentifier()).getMessage();
         log.error(message);
         throw new InvalidCtxComposeInfo(message);
       }
+      String vertVLProfileId = connection.getValue();
+      try {
+        nsDf.getVirtualLinkProfile(vertVLProfileId);
+      } catch (NotExistingEntityException e) {
+        String message = MessageFormatter
+            .format("VirtualLinkProfile='{}' not found in '{}'. Abort composition.",
+                vertVLProfileId, nsd.getNsdIdentifier()).getMessage();
+        log.error(message);
+        throw new InvalidCtxComposeInfo(message);
+      }
+      // Assuming size of NsVirtualLinkConnectivity == 1
+      ctxVnfProfile.getNsVirtualLinkConnectivity().get(0).setVirtualLinkProfileId(vertVLProfileId);
       // We assume only one IL for the context
       VnfToLevelMapping ctxVnfLvlMap;
       List<VnfToLevelMapping> mappings = composeInfo.getNsd().getNsDf().get(0)
           .getNsInstantiationLevel().get(0).getVnfToLevelMapping();
       Optional<VnfToLevelMapping> findMap = mappings.stream()
-          .filter(m -> m.getVnfProfileId().equals(ctxVnfProfile.getVnfProfileId())).findFirst();
+          .filter(m -> m.getVnfProfileId().equals(ctxVnfProfileId)).findFirst();
       if (findMap.isPresent()) {
         ctxVnfLvlMap = findMap.get();
       } else {
