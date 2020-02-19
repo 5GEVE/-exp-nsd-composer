@@ -22,7 +22,7 @@ public class Controller {
   @PostMapping("/experiment")
   public OnboardExpBlueprintRequest composeExperiment(@RequestBody ComposeRequest composeRequest) {
     try {
-      nsdComposer.composeWith(composeRequest.getVsbRequest().getNsds().get(0),
+      nsdComposer.compose(composeRequest.getVsbRequest().getNsds().get(0),
           composeRequest.getContexts());
     } catch (InvalidCtxComposeInfo e) {
       //TODO create and return a 422 response.

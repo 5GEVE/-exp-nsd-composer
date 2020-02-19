@@ -3,7 +3,7 @@ package it.cnit.blueprint.expbuilder.rest;
 import lombok.Data;
 
 @Data
-public class Connection {
+public class VnfConnection {
 
   private String vnfProfileId;
   private String vlProfileId;

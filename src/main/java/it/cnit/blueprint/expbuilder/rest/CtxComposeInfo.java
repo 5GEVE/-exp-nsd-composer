@@ -7,6 +7,7 @@ import lombok.Data;
 public class CtxComposeInfo {
 
   private OnboardCtxBlueprintRequest ctxBReq;
-  private Connection[] connections;
+  private VnfConnection[] ctxConnections;
+  private VnfConnection[] vsConnections;
 
 }

@@ -7,7 +7,6 @@ import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer;
 import it.cnit.blueprint.expbuilder.nsd.compose.PassThroughStrategy;
 import it.cnit.blueprint.expbuilder.nsd.graph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
-import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer.CompositionStrat;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -86,7 +85,7 @@ public class NsdComposerTest {
 //    ctxComposeInfo.setConnections(connections);
 //    ctxComposeInfo.setStrat(CompositionStrat.CONNECT);
     log.debug("ctxComposeInfo dump:\n{}", OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
-    nsdComposer.composeWith(tracker, new CtxComposeInfo[]{ctxComposeInfo});
+    nsdComposer.compose(tracker, new CtxComposeInfo[]{ctxComposeInfo});
     // TODO
     // Check with ExpbNsd from the repo
   }
@@ -100,7 +99,7 @@ public class NsdComposerTest {
 //    ctxComposeInfo.setSapId("sap_tracking_mobile");
 //    ctxComposeInfo.setStrat(CompositionStrat.PASSTHROUGH);
     log.info(OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
-    nsdComposer.composeWith(tracker, new CtxComposeInfo[]{ctxComposeInfo});
+    nsdComposer.compose(tracker, new CtxComposeInfo[]{ctxComposeInfo});
 
     // TODO
     // Check with ExpbNsd from the repo
