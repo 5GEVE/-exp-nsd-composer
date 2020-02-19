@@ -3,9 +3,12 @@ package it.cnit.blueprint.expbuilder.nsd.compose;
 import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer.CompositionStrat;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
+import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.LinkBitrateRequirements;
+import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -13,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Qualifier("passthrough")
 @Slf4j
-public class PassThroughStrategy implements CompositionStrategy {
+public class PassThroughStrategy extends CompositionStrategy {
 
   @Override
   public void compose(Nsd nsd, NsDf nsDf, NsLevel nsLevel, CtxComposeInfo composeInfo)
@@ -29,6 +32,21 @@ public class PassThroughStrategy implements CompositionStrategy {
     log.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using PASSTHROUGH",
         nsd.getNsdIdentifier(), composeInfo.getNsd().getNsdIdentifier(), nsDf.getNsDfId(),
         nsLevel.getNsLevelId());
+
+    String sapId = composeInfo.getSapId();
+    // We assume only one DF for the context
+    VnfProfile ctxVnfProfile = composeInfo.getNsd().getNsDf().get(0).getVnfProfile().get(0);
+    VirtualLinkProfile newVlProfile = new VirtualLinkProfile(
+        nsDf,
+        "vl_profile_" + ctxVnfProfile.getVnfProfileId(),
+        "vl_" + ctxVnfProfile.getVnfProfileId(),
+        "vl_df_" + ctxVnfProfile.getVnfProfileId(), null, null,
+        new LinkBitrateRequirements("1", "1"), new LinkBitrateRequirements("1", "1")
+    );
+
+    // Update Nsd
+    addVnf(nsd, nsDf, nsLevel, ctxVnfProfile, null);
+
 
     // TODO update Nsd model when modifying the graph.
 

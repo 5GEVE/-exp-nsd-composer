@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Qualifier("connect")
 @Slf4j
-public class ConnectStrategy implements CompositionStrategy {
+public class ConnectStrategy extends CompositionStrategy {
 
   @Override
   public void compose(Nsd nsd, NsDf nsDf, NsLevel nsLevel, CtxComposeInfo composeInfo)
@@ -77,14 +77,7 @@ public class ConnectStrategy implements CompositionStrategy {
       }
 
       // Update Nsd
-      if (nsd.getVnfdId().stream().noneMatch(id -> id.equals(ctxVnfProfile.getVnfdId()))) {
-        nsd.getVnfdId().add(ctxVnfProfile.getVnfdId());
-      }
-      if (nsDf.getVnfProfile().stream()
-          .noneMatch(vp -> vp.getVnfProfileId().equals(ctxVnfProfile.getVnfProfileId()))) {
-        nsDf.getVnfProfile().add(ctxVnfProfile);
-      }
-      nsLevel.getVnfToLevelMapping().add(ctxVnfLvlMap);
+      addVnf(nsd, nsDf, nsLevel, ctxVnfProfile, ctxVnfLvlMap);
       //TODO check vnf connection to VL
 
       // Update Graph
