@@ -32,11 +32,11 @@ public class PassThroughStrategyTest {
     ObjectMapper oM = new ObjectMapper(new YAMLFactory());
     NsdGraphService nsdGraphService = new NsdGraphService(new GraphVizExporter());
 
-    Nsd trackerNsd = oM.readValue(new URL(prop.getProperty("tracker.url")), Nsd[].class)[0];
+    Nsd trackerNsd = oM.readValue(new URL(prop.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
     NsDf df = trackerNsd.getNsDf().get(0);
     NsLevel l = df.getNsInstantiationLevel().get(0);
 
-    Nsd delayNsd = oM.readValue(new URL(prop.getProperty("delay.url")), Nsd[].class)[0];
+    Nsd delayNsd = oM.readValue(new URL(prop.getProperty("ctx.delay.nsds")), Nsd[].class)[0];
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo();
     ctxComposeInfo.setNsd(delayNsd);
     ctxComposeInfo.setSapId("sap_tracking_mobile");
