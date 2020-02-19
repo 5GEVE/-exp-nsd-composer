@@ -45,34 +45,34 @@ public class NsdComposer {
   @SneakyThrows(JsonProcessingException.class)
   public void composeWith(Nsd nsd, CtxComposeInfo[] ctxRArray)
       throws InvalidCtxComposeInfo, InvalidNsd {
-    ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
-    for (CtxComposeInfo ctxR : ctxRArray) {
-      for (NsDf df : nsd.getNsDf()) {
-        for (NsLevel l : df.getNsInstantiationLevel()) {
-          log.debug("Nsd before:\n{}", objectMapper.writeValueAsString(nsd));
-          Graph<ProfileVertex, String> g = nsdGraphService.buildGraph(nsd.getSapd(), df, l);
-          log.debug("Graph export before:\n{}", nsdGraphService.export(g));
-          if (ctxR.getStrat() == CompositionStrat.CONNECT) {
-            connectStrategy.compose(nsd, df, l, ctxR);
-          } else if (ctxR.getStrat() == CompositionStrat.PASSTHROUGH) {
-            passThroughStrategy.compose(nsd, df, l, ctxR);
-          } else {
-            throw new NotImplementedException(
-                String.format("Composition strategy %s not implemented", ctxR.getStrat()));
-          }
-          log.debug("Nsd after:\n{}", objectMapper.writeValueAsString(nsd));
-          g = nsdGraphService.buildGraph(nsd.getSapd(), df, l);
-          log.debug("Graph export after:\n{}", nsdGraphService.export(g));
-          try {
-            nsd.isValid();
-          } catch (MalformattedElementException e) {
-            String message = "Nsd looks not valid after composition";
-            log.error(message, e);
-            throw new InvalidNsd(message);
-          }
-        }
-      }
-    }
+//    ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
+//    for (CtxComposeInfo ctxR : ctxRArray) {
+//      for (NsDf df : nsd.getNsDf()) {
+//        for (NsLevel l : df.getNsInstantiationLevel()) {
+//          log.debug("Nsd before:\n{}", objectMapper.writeValueAsString(nsd));
+//          Graph<ProfileVertex, String> g = nsdGraphService.buildGraph(nsd.getSapd(), df, l);
+//          log.debug("Graph export before:\n{}", nsdGraphService.export(g));
+//          if (ctxR.getStrat() == CompositionStrat.CONNECT) {
+//            connectStrategy.compose(nsd, df, l, ctxR);
+//          } else if (ctxR.getStrat() == CompositionStrat.PASSTHROUGH) {
+//            passThroughStrategy.compose(nsd, df, l, ctxR);
+//          } else {
+//            throw new NotImplementedException(
+//                String.format("Composition strategy %s not implemented", ctxR.getStrat()));
+//          }
+//          log.debug("Nsd after:\n{}", objectMapper.writeValueAsString(nsd));
+//          g = nsdGraphService.buildGraph(nsd.getSapd(), df, l);
+//          log.debug("Graph export after:\n{}", nsdGraphService.export(g));
+//          try {
+//            nsd.isValid();
+//          } catch (MalformattedElementException e) {
+//            String message = "Nsd looks not valid after composition";
+//            log.error(message, e);
+//            throw new InvalidNsd(message);
+//          }
+//        }
+//      }
+//    }
   }
 
 }

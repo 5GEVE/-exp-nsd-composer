@@ -21,31 +21,31 @@ public class PassThroughStrategy extends CompositionStrategy {
   @Override
   public void compose(Nsd nsd, NsDf nsDf, NsLevel nsLevel, CtxComposeInfo composeInfo)
       throws InvalidCtxComposeInfo {
-    if (composeInfo.getStrat() != CompositionStrat.PASSTHROUGH) {
-      throw new InvalidCtxComposeInfo("Composition strategy is not 'PASSTHROUGH'");
-    }
-    if (composeInfo.getSapId() == null) {
-      throw new InvalidCtxComposeInfo("Field 'sapId' is empty");
-    }
-    // TODO handle other exceptions here
-
-    log.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using PASSTHROUGH",
-        nsd.getNsdIdentifier(), composeInfo.getNsd().getNsdIdentifier(), nsDf.getNsDfId(),
-        nsLevel.getNsLevelId());
-
-    String sapId = composeInfo.getSapId();
-    // We assume only one DF for the context
-    VnfProfile ctxVnfProfile = composeInfo.getNsd().getNsDf().get(0).getVnfProfile().get(0);
-    VirtualLinkProfile newVlProfile = new VirtualLinkProfile(
-        nsDf,
-        "vl_profile_" + ctxVnfProfile.getVnfProfileId(),
-        "vl_" + ctxVnfProfile.getVnfProfileId(),
-        "vl_df_" + ctxVnfProfile.getVnfProfileId(), null, null,
-        new LinkBitrateRequirements("1", "1"), new LinkBitrateRequirements("1", "1")
-    );
-
-    // Update Nsd
-    addVnf(nsd, nsDf, nsLevel, ctxVnfProfile, null);
+//    if (composeInfo.getStrat() != CompositionStrat.PASSTHROUGH) {
+//      throw new InvalidCtxComposeInfo("Composition strategy is not 'PASSTHROUGH'");
+//    }
+//    if (composeInfo.getSapId() == null) {
+//      throw new InvalidCtxComposeInfo("Field 'sapId' is empty");
+//    }
+//    // TODO handle other exceptions here
+//
+//    log.info("Compose '{}' with '{}' for nsDfId '{}' and nsLevelId '{}' using PASSTHROUGH",
+//        nsd.getNsdIdentifier(), composeInfo.getNsd().getNsdIdentifier(), nsDf.getNsDfId(),
+//        nsLevel.getNsLevelId());
+//
+//    String sapId = composeInfo.getSapId();
+//    // We assume only one DF for the context
+//    VnfProfile ctxVnfProfile = composeInfo.getNsd().getNsDf().get(0).getVnfProfile().get(0);
+//    VirtualLinkProfile newVlProfile = new VirtualLinkProfile(
+//        nsDf,
+//        "vl_profile_" + ctxVnfProfile.getVnfProfileId(),
+//        "vl_" + ctxVnfProfile.getVnfProfileId(),
+//        "vl_df_" + ctxVnfProfile.getVnfProfileId(), null, null,
+//        new LinkBitrateRequirements("1", "1"), new LinkBitrateRequirements("1", "1")
+//    );
+//
+//    // Update Nsd
+//    addVnf(nsd, nsDf, nsLevel, ctxVnfProfile, null);
 
 
     // TODO update Nsd model when modifying the graph.

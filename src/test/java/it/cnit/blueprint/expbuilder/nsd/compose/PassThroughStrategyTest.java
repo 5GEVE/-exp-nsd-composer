@@ -38,9 +38,9 @@ public class PassThroughStrategyTest {
 
     Nsd delayNsd = oM.readValue(new URL(prop.getProperty("ctx.delay.nsds")), Nsd[].class)[0];
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo();
-    ctxComposeInfo.setNsd(delayNsd);
-    ctxComposeInfo.setSapId("sap_tracking_mobile");
-    ctxComposeInfo.setStrat(CompositionStrat.PASSTHROUGH);
+//    ctxComposeInfo.setNsd(delayNsd);
+//    ctxComposeInfo.setSapId("sap_tracking_mobile");
+//    ctxComposeInfo.setStrat(CompositionStrat.PASSTHROUGH);
     log.debug("ctxComposeInfo dump:\n{}", oM.writeValueAsString(ctxComposeInfo));
 
     log.debug("Nsd before:\n{}", oM.writeValueAsString(trackerNsd));
