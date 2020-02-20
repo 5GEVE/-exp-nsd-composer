@@ -69,17 +69,17 @@ public class NsdComposer {
   }
 
   private VirtualLinkProfile getVlProfile(String vlProfileId, NsDf nsDf)
-      throws InvalidCtxComposeInfo {
+      throws NotExistingEntityException {
     VirtualLinkProfile vlProfile;
-    try {
-      vlProfile = nsDf.getVirtualLinkProfile(vlProfileId);
-    } catch (NotExistingEntityException e) {
-      String message = MessageFormatter
-          .format("VirtualLinkProfile='{}' not found in nsDf='{}'", vlProfileId, nsDf.getNsDfId())
-          .getMessage();
-      log.error(message);
-      throw new InvalidCtxComposeInfo(message);
-    }
+//    try {
+    vlProfile = nsDf.getVirtualLinkProfile(vlProfileId);
+//    } catch (NotExistingEntityException e) {
+//      String message = MessageFormatter
+//          .format("VirtualLinkProfile='{}' not found in nsDf='{}'", vlProfileId, nsDf.getNsDfId())
+//          .getMessage();
+//      log.error(message);
+//      throw new InvalidCtxComposeInfo(message);
+//    }
     return vlProfile;
   }
 
@@ -125,6 +125,18 @@ public class NsdComposer {
     return vlDesc;
   }
 
+  private VirtualLinkToLevelMapping getVlLvlMapping(String vlProfileId, NsLevel nsLvl)
+      throws InvalidCtxComposeInfo {
+    VirtualLinkToLevelMapping vlLvlMap;
+    Optional<VirtualLinkToLevelMapping> optVlLvlMap = nsLvl.getVirtualLinkToLevelMapping().stream()
+        .filter(m -> m.getVirtualLinkProfileId().equals(vlProfileId)).findFirst();
+    if (optVlLvlMap.isPresent()) {
+      vlLvlMap = optVlLvlMap.get();
+    } else {
+      throw new InvalidCtxComposeInfo("a");
+    }
+    return vlLvlMap;
+  }
 
   private void addVnf(Nsd nsd, NsDf nsDf, NsLevel nsLevel, VnfProfile vnfProfile,
       VnfToLevelMapping vnfLvlMap) {
@@ -182,15 +194,19 @@ public class NsdComposer {
             NsVirtualLinkConnectivity vlC = getVlConnectivity(c.getCpdId(), vnfProfile);
             VirtualLinkProfile vlProfile;
             try {
-              vlProfile = vsNsDf.getVirtualLinkProfile(c.getVlProfileId());
+              vlProfile = getVlProfile(c.getVlProfileId(), vsNsDf);
             } catch (NotExistingEntityException e) {
               try {
-                vlProfile = ctxNsDf.getVirtualLinkProfile(c.getVlProfileId());
+                vlProfile = getVlProfile(c.getVlProfileId(), ctxNsDf);
                 NsVirtualLinkDesc vlDesc = getVlDescriptor(vlProfile.getVirtualLinkDescId(),
                     ctxNsd);
-                // TODO add VL because it comes from the context.
+                VirtualLinkToLevelMapping vlMap = getVlLvlMapping(
+                    vlProfile.getVirtualLinkProfileId(), ctxNsLvl);
+                addVirtualLink(vsNsd, vsNsDf, vsNsLvl, vlDesc, vlProfile, vlMap);
               } catch (NotExistingEntityException ex) {
-                continue;
+                // TODO check exception handling.
+                // The VL is not found somewhere in the Ctx. Fail here.
+                throw new InvalidCtxComposeInfo("fail message");
               }
             }
             vlC.setVirtualLinkProfileId(vlProfile.getVirtualLinkProfileId());
