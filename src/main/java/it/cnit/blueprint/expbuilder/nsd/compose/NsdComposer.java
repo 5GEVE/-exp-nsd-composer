@@ -71,15 +71,14 @@ public class NsdComposer {
   private VirtualLinkProfile getVlProfile(String vlProfileId, NsDf nsDf)
       throws NotExistingEntityException {
     VirtualLinkProfile vlProfile;
-//    try {
-    vlProfile = nsDf.getVirtualLinkProfile(vlProfileId);
-//    } catch (NotExistingEntityException e) {
-//      String message = MessageFormatter
-//          .format("VirtualLinkProfile='{}' not found in nsDf='{}'", vlProfileId, nsDf.getNsDfId())
-//          .getMessage();
-//      log.error(message);
-//      throw new InvalidCtxComposeInfo(message);
-//    }
+    try {
+      vlProfile = nsDf.getVirtualLinkProfile(vlProfileId);
+    } catch (NotExistingEntityException e) {
+      String message = MessageFormatter
+          .format("vlProfileId='{}' not found in nsDf='{}'.", vlProfileId, nsDf.getNsDfId())
+          .getMessage();
+      throw new NotExistingEntityException(message);
+    }
     return vlProfile;
   }
 
@@ -126,14 +125,15 @@ public class NsdComposer {
   }
 
   private VirtualLinkToLevelMapping getVlLvlMapping(String vlProfileId, NsLevel nsLvl)
-      throws InvalidCtxComposeInfo {
+      throws NotExistingEntityException {
     VirtualLinkToLevelMapping vlLvlMap;
     Optional<VirtualLinkToLevelMapping> optVlLvlMap = nsLvl.getVirtualLinkToLevelMapping().stream()
         .filter(m -> m.getVirtualLinkProfileId().equals(vlProfileId)).findFirst();
     if (optVlLvlMap.isPresent()) {
       vlLvlMap = optVlLvlMap.get();
     } else {
-      throw new InvalidCtxComposeInfo("a");
+      throw new NotExistingEntityException("vlProfileId='" + vlProfileId + "' not found in "
+          + "nsLevelId='" + nsLvl.getNsLevelId() + "'");
     }
     return vlLvlMap;
   }
@@ -189,25 +189,36 @@ public class NsdComposer {
           log.debug("Nsd after:\n{}", objectMapper.writeValueAsString(vsNsd));
           // TODO cycle through connections and modify the nsd
           for (VnfConnection ctxC : ctxComposeInfo.getCtxConnections()) {
+            // TODO check exceptions here.
             VnfProfile vnfProfile = getVnfProfile(ctxC.getVnfProfileId(), ctxNsDf);
             VnfToLevelMapping vnfLvlMap = getVnfLvlMapping(ctxC.getVnfProfileId(), ctxNsLvl);
             NsVirtualLinkConnectivity vlC = getVlConnectivity(ctxC.getCpdId(), vnfProfile);
-            VirtualLinkProfile vlProfile;
+            VirtualLinkProfile vlProfile = null;
             try {
-              vlProfile = getVlProfile(ctxC.getVlProfileId(), vsNsDf);
-            } catch (NotExistingEntityException e) {
+              getVlLvlMapping(ctxC.getVlProfileId(), vsNsLvl);
+              log.info("vlProfileId='{}' found in vertical NsLevelId='{}'.",
+                  ctxC.getVlProfileId(), vsNsLvl.getNsLevelId());
               try {
+                vlProfile = getVlProfile(ctxC.getVlProfileId(), vsNsDf);
+              } catch (NotExistingEntityException e) {
+                log.error(e.getMessage());
+                throw new InvalidNsd(e.getMessage());
+              }
+            } catch (NotExistingEntityException e) {
+              log.warn(e.getMessage() + " Trying in context.");
+            }
+            if (vlProfile == null) {
+              try {
+                VirtualLinkToLevelMapping vlMap = getVlLvlMapping(ctxC.getVlProfileId(), ctxNsLvl);
                 vlProfile = getVlProfile(ctxC.getVlProfileId(), ctxNsDf);
                 NsVirtualLinkDesc vlDesc = getVlDescriptor(vlProfile.getVirtualLinkDescId(),
                     ctxNsd);
-                VirtualLinkToLevelMapping vlMap = getVlLvlMapping(
-                    vlProfile.getVirtualLinkProfileId(), ctxNsLvl);
+                log.info("vlProfileId='{}' found in context. Adding to vertical Nsd.",
+                    ctxC.getVlProfileId());
                 addVirtualLink(vsNsd, vsNsDf, vsNsLvl, vlDesc, vlProfile, vlMap);
-              } catch (NotExistingEntityException ex) {
-                // TODO check exception handling.
-                // TODO the VLprofile could stay in another NsLvl of the service! We should not fail
-                // The VL is not found somewhere in the Ctx. Fail here.
-                throw new InvalidCtxComposeInfo("fail message");
+              } catch (NotExistingEntityException e) {
+                log.warn(e.getMessage() + " Skip.");
+                continue;
               }
             }
             vlC.setVirtualLinkProfileId(vlProfile.getVirtualLinkProfileId());
