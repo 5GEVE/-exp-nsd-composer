@@ -235,6 +235,48 @@ public class NsdComposer {
             addVnf(vsNsd, vsNsDf, vsNsLvl, vnfProfile, vnfLvlMap);
           }
           // TODO cycle on vsConnections()
+          for (VnfConnection vsC : ctxComposeInfo.getVsConnections()) {
+            VnfProfile vnfProfile;
+            NsVirtualLinkConnectivity vlC;
+            try {
+              getVnfLvlMapping(vsC.getVnfProfileId(), vsNsLvl);
+              try {
+                vnfProfile = getVnfProfile(vsC.getVnfProfileId(), vsNsDf);
+                vlC = getVlConnectivity(vsC.getCpdId(), vnfProfile);
+              } catch (NotExistingEntityException e){
+                log.error(e.getMessage());
+                throw new InvalidNsd(e.getMessage());
+              }
+            } catch (NotExistingEntityException e) {
+              log.warn(e.getMessage() + " Skip.");
+              continue;
+            }
+            VirtualLinkProfile vlProfile;
+            try {
+              getVlLvlMapping(vsC.getVlProfileId(), vsNsLvl);
+              log.info("vlProfileId='{}' found in vertical NsLevelId='{}'.",
+                  vsC.getVlProfileId(), vsNsLvl.getNsLevelId());
+              try {
+                vlProfile = getVlProfile(vsC.getVlProfileId(), vsNsDf);
+              } catch (NotExistingEntityException e) {
+                log.error(e.getMessage());
+                throw new InvalidNsd(e.getMessage());
+              }
+            } catch (NotExistingEntityException e) {
+              log.warn(e.getMessage() + " Trying in context.");
+              try {
+                VirtualLinkToLevelMapping vlMap = getVlLvlMapping(vsC.getVlProfileId(), ctxNsLvl);
+                vlProfile = getVlProfile(vsC.getVlProfileId(), ctxNsDf);
+                NsVirtualLinkDesc vlDesc = getVlDescriptor(vlProfile.getVirtualLinkDescId(),
+                    ctxNsd);
+                log.info("vlProfileId='{}' found in context.", vsC.getVlProfileId());
+              } catch (NotExistingEntityException ex) {
+                log.warn(ex.getMessage() + " Skip.");
+                continue;
+              }
+            }
+            vlC.setVirtualLinkProfileId(vlProfile.getVirtualLinkProfileId());
+          }
           g = nsdGraphService.buildGraph(vsNsd.getSapd(), vsNsDf, vsNsLvl);
           log.debug("Graph export after:\n{}", nsdGraphService.export(g));
           try {
