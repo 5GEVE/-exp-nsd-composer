@@ -188,16 +188,16 @@ public class NsdComposer {
           log.debug("Graph export before:\n{}", nsdGraphService.export(g));
           log.debug("Nsd after:\n{}", objectMapper.writeValueAsString(vsNsd));
           // TODO cycle through connections and modify the nsd
-          for (VnfConnection c : ctxComposeInfo.getCtxConnections()) {
-            VnfProfile vnfProfile = getVnfProfile(c.getVnfProfileId(), ctxNsDf);
-            VnfToLevelMapping vnfLvlMap = getVnfLvlMapping(c.getVnfProfileId(), ctxNsLvl);
-            NsVirtualLinkConnectivity vlC = getVlConnectivity(c.getCpdId(), vnfProfile);
+          for (VnfConnection ctxC : ctxComposeInfo.getCtxConnections()) {
+            VnfProfile vnfProfile = getVnfProfile(ctxC.getVnfProfileId(), ctxNsDf);
+            VnfToLevelMapping vnfLvlMap = getVnfLvlMapping(ctxC.getVnfProfileId(), ctxNsLvl);
+            NsVirtualLinkConnectivity vlC = getVlConnectivity(ctxC.getCpdId(), vnfProfile);
             VirtualLinkProfile vlProfile;
             try {
-              vlProfile = getVlProfile(c.getVlProfileId(), vsNsDf);
+              vlProfile = getVlProfile(ctxC.getVlProfileId(), vsNsDf);
             } catch (NotExistingEntityException e) {
               try {
-                vlProfile = getVlProfile(c.getVlProfileId(), ctxNsDf);
+                vlProfile = getVlProfile(ctxC.getVlProfileId(), ctxNsDf);
                 NsVirtualLinkDesc vlDesc = getVlDescriptor(vlProfile.getVirtualLinkDescId(),
                     ctxNsd);
                 VirtualLinkToLevelMapping vlMap = getVlLvlMapping(
@@ -205,6 +205,7 @@ public class NsdComposer {
                 addVirtualLink(vsNsd, vsNsDf, vsNsLvl, vlDesc, vlProfile, vlMap);
               } catch (NotExistingEntityException ex) {
                 // TODO check exception handling.
+                // TODO the VLprofile could stay in another NsLvl of the service! We should not fail
                 // The VL is not found somewhere in the Ctx. Fail here.
                 throw new InvalidCtxComposeInfo("fail message");
               }
