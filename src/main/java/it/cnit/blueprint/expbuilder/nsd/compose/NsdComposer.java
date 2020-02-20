@@ -54,7 +54,8 @@ public class NsdComposer {
 
   // TODO check exceptions of the private methods.
 
-  private VnfProfile getVnfProfile(String vnfProfileId, NsDf nsDf) throws InvalidCtxComposeInfo {
+  private VnfProfile getVnfProfile(String vnfProfileId, NsDf nsDf)
+      throws NotExistingEntityException {
     VnfProfile vnfProfile;
     try {
       vnfProfile = nsDf.getVnfProfile(vnfProfileId);
@@ -62,8 +63,7 @@ public class NsdComposer {
       String message = MessageFormatter
           .format("VnfProfile='{}' not found in nsDf='{}'", vnfProfileId, nsDf.getNsDfId())
           .getMessage();
-      log.error(message);
-      throw new InvalidCtxComposeInfo(message);
+      throw new NotExistingEntityException(message);
     }
     return vnfProfile;
   }
@@ -83,7 +83,7 @@ public class NsdComposer {
   }
 
   private NsVirtualLinkConnectivity getVlConnectivity(String cpdId, VnfProfile vnfProfile)
-      throws InvalidCtxComposeInfo {
+      throws NotExistingEntityException {
     NsVirtualLinkConnectivity nsVlC;
     Optional<NsVirtualLinkConnectivity> optVlC = vnfProfile.getNsVirtualLinkConnectivity()
         .stream().filter(vlc -> vlc.getCpdId().get(0).equals(cpdId)).findFirst();
@@ -94,20 +94,23 @@ public class NsdComposer {
           .format("NsVirtualLinkConnectivity for cpdId='{}' not found in vnfProfile='{}'",
               cpdId, vnfProfile.getVnfProfileId()).getMessage();
       log.error(message);
-      throw new InvalidCtxComposeInfo(message);
+      throw new NotExistingEntityException(message);
     }
     return nsVlC;
   }
 
   private VnfToLevelMapping getVnfLvlMapping(String vnfProfileId, NsLevel nsLvl)
-      throws InvalidCtxComposeInfo {
+      throws NotExistingEntityException {
     VnfToLevelMapping vnfLvlMap;
     Optional<VnfToLevelMapping> optVnfLvlMap = nsLvl.getVnfToLevelMapping().stream()
         .filter(m -> m.getVnfProfileId().equals(vnfProfileId)).findFirst();
     if (optVnfLvlMap.isPresent()) {
       vnfLvlMap = optVnfLvlMap.get();
     } else {
-      throw new InvalidCtxComposeInfo("a");
+      String message = MessageFormatter
+          .format("vnfProfileId='{}' not found in nsLvl='{}'.", vnfProfileId, nsLvl.getNsLevelId())
+          .getMessage();
+      throw new NotExistingEntityException(message);
     }
     return vnfLvlMap;
   }
@@ -189,10 +192,17 @@ public class NsdComposer {
           log.debug("Nsd after:\n{}", objectMapper.writeValueAsString(vsNsd));
           // TODO cycle through connections and modify the nsd
           for (VnfConnection ctxC : ctxComposeInfo.getCtxConnections()) {
-            // TODO check exceptions here.
-            VnfProfile vnfProfile = getVnfProfile(ctxC.getVnfProfileId(), ctxNsDf);
-            VnfToLevelMapping vnfLvlMap = getVnfLvlMapping(ctxC.getVnfProfileId(), ctxNsLvl);
-            NsVirtualLinkConnectivity vlC = getVlConnectivity(ctxC.getCpdId(), vnfProfile);
+            VnfProfile vnfProfile;
+            VnfToLevelMapping vnfLvlMap;
+            NsVirtualLinkConnectivity vlC;
+            try {
+              vnfProfile = getVnfProfile(ctxC.getVnfProfileId(), ctxNsDf);
+              vnfLvlMap = getVnfLvlMapping(ctxC.getVnfProfileId(), ctxNsLvl);
+              vlC = getVlConnectivity(ctxC.getCpdId(), vnfProfile);
+            } catch (NotExistingEntityException e) {
+              log.error(e.getMessage());
+              throw new InvalidCtxComposeInfo(e.getMessage());
+            }
             VirtualLinkProfile vlProfile = null;
             try {
               getVlLvlMapping(ctxC.getVlProfileId(), vsNsLvl);
