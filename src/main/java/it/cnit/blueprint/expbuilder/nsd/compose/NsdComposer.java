@@ -193,7 +193,6 @@ public class NsdComposer {
               .buildGraph(vsNsd.getSapd(), vsNsDf, vsNsLvl);
           log.debug("Graph export before:\n{}", nsdGraphService.export(g));
           log.debug("Nsd after:\n{}", objectMapper.writeValueAsString(vsNsd));
-          // TODO cycle through connections and modify the nsd
           for (VnfConnection ctxC : ctxComposeInfo.getCtxConnections()) {
             VnfProfile vnfProfile;
             VnfToLevelMapping vnfLvlMap;
@@ -206,7 +205,7 @@ public class NsdComposer {
               log.error(e.getMessage());
               throw new InvalidCtxComposeInfo(e.getMessage());
             }
-            VirtualLinkProfile vlProfile = null;
+            VirtualLinkProfile vlProfile;
             try {
               getVlLvlMapping(ctxC.getVlProfileId(), vsNsLvl);
               log.info("vlProfileId='{}' found in vertical NsLevelId='{}'.",
@@ -219,8 +218,6 @@ public class NsdComposer {
               }
             } catch (NotExistingEntityException e) {
               log.warn(e.getMessage() + " Trying in context.");
-            }
-            if (vlProfile == null) {
               try {
                 VirtualLinkToLevelMapping vlMap = getVlLvlMapping(ctxC.getVlProfileId(), ctxNsLvl);
                 vlProfile = getVlProfile(ctxC.getVlProfileId(), ctxNsDf);
