@@ -226,8 +226,8 @@ public class NsdComposer {
                 log.info("vlProfileId='{}' found in context. Adding to vertical Nsd.",
                     ctxC.getVlProfileId());
                 addVirtualLink(vsNsd, vsNsDf, vsNsLvl, vlDesc, vlProfile, vlMap);
-              } catch (NotExistingEntityException e) {
-                log.warn(e.getMessage() + " Skip.");
+              } catch (NotExistingEntityException ex) {
+                log.warn(ex.getMessage() + " Skip.");
                 continue;
               }
             }
