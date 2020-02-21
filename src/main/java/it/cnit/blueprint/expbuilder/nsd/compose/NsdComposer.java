@@ -159,31 +159,35 @@ public class NsdComposer {
     return vlLvlMap;
   }
 
-  private void addVnf(Nsd nsd, NsDf nsDf, NsLevel nsLevel, VnfProfile vnfProfile,
-      VnfToLevelMapping vnfLvlMap) {
-    if (nsd.getVnfdId().stream().noneMatch(id -> id.equals(vnfProfile.getVnfdId()))) {
-      nsd.getVnfdId().add(vnfProfile.getVnfdId());
+  private void addVnf(Nsd nsd, NsDf nsDf, NsLevel nsLevel, VnfWrapper vnfWrapper) {
+    String vnfdId = vnfWrapper.getVfndId();
+    if (nsd.getVnfdId().stream().noneMatch(id -> id.equals(vnfdId))) {
+      nsd.getVnfdId().add(vnfdId);
     }
+    VnfProfile vnfProfile = vnfWrapper.getVnfProfile();
     if (nsDf.getVnfProfile().stream()
         .noneMatch(vp -> vp.getVnfProfileId().equals(vnfProfile.getVnfProfileId()))) {
       nsDf.getVnfProfile().add(vnfProfile);
     }
+    VnfToLevelMapping vnfLvlMap = vnfWrapper.getVnfToLevelMapping();
     if (nsLevel.getVnfToLevelMapping().stream()
         .noneMatch(lm -> lm.getVnfProfileId().equals(vnfProfile.getVnfProfileId()))) {
       nsLevel.getVnfToLevelMapping().add(vnfLvlMap);
     }
   }
 
-  private void addVirtualLink(Nsd nsd, NsDf nsDf, NsLevel nsLevel, NsVirtualLinkDesc vlDesc,
-      VirtualLinkProfile vlProfile, VirtualLinkToLevelMapping vlMap) {
+  private void addVirtualLink(Nsd nsd, NsDf nsDf, NsLevel nsLevel, VlWrapper vlWrapper) {
+    NsVirtualLinkDesc vlDesc = vlWrapper.getVlDescriptor();
     if (nsd.getVirtualLinkDesc().stream()
         .noneMatch(nsdVld -> nsdVld.getVirtualLinkDescId().equals(vlDesc.getVirtualLinkDescId()))) {
       nsd.getVirtualLinkDesc().add(vlDesc);
     }
+    VirtualLinkProfile vlProfile = vlWrapper.getVlProfile();
     if (nsDf.getVirtualLinkProfile().stream().noneMatch(
         nsdfVlP -> nsdfVlP.getVirtualLinkProfileId().equals(vlProfile.getVirtualLinkProfileId()))) {
       nsDf.getVirtualLinkProfile().add(vlProfile);
     }
+    VirtualLinkToLevelMapping vlMap = vlWrapper.getVlToLevelMapping();
     if (nsLevel.getVirtualLinkToLevelMapping().stream().noneMatch(
         nslevelMap -> nslevelMap.getVirtualLinkProfileId()
             .equals(vlMap.getVirtualLinkProfileId()))) {
@@ -262,8 +266,10 @@ public class NsdComposer {
           log.debug("Graph export before:\n{}", nsdGraphService.export(g));
           log.debug("Nsd after:\n{}", objectMapper.writeValueAsString(vsNsd));
           for (VnfConnection ctxC : ctxComposeInfo.getCtxConnections()) {
-            // Retrieve the VNF from context Nsd
             VnfWrapper vnfWrapper;
+            VlWrapper vlWrapper;
+
+            // Retrieve the VNF from context Nsd
             try {
               vnfWrapper = retrieveVnfInfo(ctxC.getVnfProfileId(), ctxC.getCpdId(),
                   ctxNsd, ctxNsDf, ctxNsLvl);
@@ -275,16 +281,15 @@ public class NsdComposer {
               throw e;
             }
 
-            VlWrapper vlWrapper;
+            // Retrieve the VirtualLink from vertical Nsd
             try {
               vlWrapper = retrieveVlInfo(ctxC.getVlProfileId(), vsNsd, vsNsDf, vsNsLvl);
             } catch (VlNotFoundInLvlMapping e) {
               log.warn(e.getMessage() + " Trying in context.");
+              // Retrieve the VirtualLink from context Nsd (and add it)
               try {
                 vlWrapper = retrieveVlInfo(ctxC.getVlProfileId(), ctxNsd, ctxNsDf, ctxNsLvl);
-                // TODO change method to get a VlWrapper
-                addVirtualLink(vsNsd, vsNsDf, vsNsLvl, vlWrapper.getVlDescriptor(),
-                    vlWrapper.getVlProfile(), vlWrapper.getVlToLevelMapping());
+                addVirtualLink(vsNsd, vsNsDf, vsNsLvl, vlWrapper);
               } catch (VlNotFoundInLvlMapping vlNotFoundInLvlMapping) {
                 log.warn(e.getMessage());
                 String m = MessageFormatter
@@ -298,80 +303,10 @@ public class NsdComposer {
               throw e;
             }
 
-            // Retrieve the VirtualLink from context Nsd
-            VirtualLinkToLevelMapping vlMap;
-            try {
-              vlMap = getVlLvlMapping(ctxC.getVlProfileId(), ctxNsLvl);
-            } catch (NotExistingEntityException e) {
-              log.warn(e.getMessage() + " Skip.");
-              continue;
-            }
-            VirtualLinkProfile vlProfile;
-            try {
-              vlProfile = getVlProfile(ctxC.getVlProfileId(), ctxNsDf);
-            } catch (NotExistingEntityException e) {
-              log.error(e.getMessage());
-              throw new InvalidNsd(e.getMessage());
-            }
-            NsVirtualLinkDesc vlDesc;
-            try {
-              vlDesc = getVlDescriptor(vnfWrapper.getVnfProfile().getVnfdId(), ctxNsd);
-            } catch (NotExistingEntityException e) {
-              log.error(e.getMessage());
-              throw new InvalidNsd(e.getMessage());
-            }
-            addVirtualLink(vsNsd, vsNsDf, vsNsLvl, vlDesc, vlProfile, vlMap);
-
-            // Retrieve the VirtualLink from vertical service Nsd
-            try {
-              vlMap = getVlLvlMapping(ctxC.getVlProfileId(), vsNsLvl);
-            } catch (NotExistingEntityException e) {
-              log.warn(e.getMessage() + " Skip.");
-              continue;
-            }
-            try {
-              vlProfile = getVlProfile(ctxC.getVlProfileId(), vsNsDf);
-            } catch (NotExistingEntityException e) {
-              log.error(e.getMessage());
-              throw new InvalidNsd(e.getMessage());
-            }
-            try {
-              vlDesc = getVlDescriptor(vnfWrapper.getVnfProfile().getVnfdId(), vsNsd);
-            } catch (NotExistingEntityException e) {
-              log.error(e.getMessage());
-              throw new InvalidNsd(e.getMessage());
-            }
-            // All ok but no need to add virtual link.
-
-//            try {
-//              getVlLvlMapping(ctxC.getVlProfileId(), vsNsLvl);
-//              log.info("vlProfileId='{}' found in vertical NsLevelId='{}'.",
-//                  ctxC.getVlProfileId(), vsNsLvl.getNsLevelId());
-//              try {
-//                vlProfile = getVlProfile(ctxC.getVlProfileId(), vsNsDf);
-//              } catch (NotExistingEntityException e) {
-//                log.error(e.getMessage());
-//                throw new InvalidNsd(e.getMessage());
-//              }
-//            } catch (NotExistingEntityException e) {
-//              log.warn(e.getMessage() + " Trying in context.");
-//              try {
-//                VirtualLinkToLevelMapping vlMap = getVlLvlMapping(ctxC.getVlProfileId(), ctxNsLvl);
-//                vlProfile = getVlProfile(ctxC.getVlProfileId(), ctxNsDf);
-//                NsVirtualLinkDesc vlDesc = getVlDescriptor(vlProfile.getVirtualLinkDescId(),
-//                    ctxNsd);
-//                log.info("vlProfileId='{}' found in context. Adding to vertical Nsd.",
-//                    ctxC.getVlProfileId());
-//              } catch (NotExistingEntityException ex) {
-//                log.warn(ex.getMessage() + " Skip.");
-//                continue;
-//              }
-//            }
+            // Create connection between Vnf and VL
             vnfWrapper.getVlConnectivity()
-                .setVirtualLinkProfileId(vlProfile.getVirtualLinkProfileId());
-            // TODO change method to get a VnfWrapper
-            addVnf(vsNsd, vsNsDf, vsNsLvl, vnfWrapper.getVnfProfile(),
-                vnfWrapper.getVnfToLevelMapping());
+                .setVirtualLinkProfileId(vlWrapper.getVlProfile().getVirtualLinkProfileId());
+            addVnf(vsNsd, vsNsDf, vsNsLvl, vnfWrapper);
           }
           for (VnfConnection vsC : ctxComposeInfo.getVsConnections()) {
             // Retrieve the VNF from vertical service Nsd
@@ -421,7 +356,7 @@ public class NsdComposer {
             }
 
             // Update vertical service Nsd
-            addVirtualLink(vsNsd, vsNsDf, vsNsLvl, vlDesc, vlProfile, vlMap);
+//            addVirtualLink(vsNsd, vsNsDf, vsNsLvl, );
             vlC.setVirtualLinkProfileId(vlProfile.getVirtualLinkProfileId());
           }
           g = nsdGraphService.buildGraph(vsNsd.getSapd(), vsNsDf, vsNsLvl);
