@@ -57,10 +57,10 @@ public class NsdComposer {
     try {
       vnfProfile = nsDf.getVnfProfile(vnfProfileId);
     } catch (NotExistingEntityException e) {
-      String message = MessageFormatter
+      String m = MessageFormatter
           .format("VnfProfile='{}' not found in nsDf='{}'", vnfProfileId, nsDf.getNsDfId())
           .getMessage();
-      throw new NotExistingEntityException(message);
+      throw new NotExistingEntityException(m);
     }
     return vnfProfile;
   }
@@ -71,10 +71,10 @@ public class NsdComposer {
     try {
       vlProfile = nsDf.getVirtualLinkProfile(vlProfileId);
     } catch (NotExistingEntityException e) {
-      String message = MessageFormatter
+      String m = MessageFormatter
           .format("vlProfileId='{}' not found in nsDf='{}'.", vlProfileId, nsDf.getNsDfId())
           .getMessage();
-      throw new NotExistingEntityException(message);
+      throw new NotExistingEntityException(m);
     }
     return vlProfile;
   }
@@ -87,10 +87,11 @@ public class NsdComposer {
     if (optVlC.isPresent()) {
       nsVlC = optVlC.get();
     } else {
-      String message = MessageFormatter
+      String m = MessageFormatter
           .format("NsVirtualLinkConnectivity for cpdId='{}' not found in vnfProfile='{}'",
-              cpdId, vnfProfile.getVnfProfileId()).getMessage();
-      throw new NotExistingEntityException(message);
+              cpdId, vnfProfile.getVnfProfileId())
+          .getMessage();
+      throw new NotExistingEntityException(m);
     }
     return nsVlC;
   }
@@ -103,10 +104,10 @@ public class NsdComposer {
     if (optVnfLvlMap.isPresent()) {
       vnfLvlMap = optVnfLvlMap.get();
     } else {
-      String message = MessageFormatter
+      String m = MessageFormatter
           .format("vnfProfileId='{}' not found in nsLvl='{}'.", vnfProfileId, nsLvl.getNsLevelId())
           .getMessage();
-      throw new NotExistingEntityException(message);
+      throw new NotExistingEntityException(m);
     }
     return vnfLvlMap;
   }
@@ -118,10 +119,10 @@ public class NsdComposer {
     if (optVnfdId.isPresent()) {
       vnfdIdFound = optVnfdId.get();
     } else {
-      String message = MessageFormatter
+      String m = MessageFormatter
           .format("vnfdId='{}' not found in nsd='{}'.", vnfdId, nsd.getNsdIdentifier())
           .getMessage();
-      throw new NotExistingEntityException(message);
+      throw new NotExistingEntityException(m);
     }
     return vnfdIdFound;
 
@@ -135,10 +136,10 @@ public class NsdComposer {
     if (optVlDesc.isPresent()) {
       vlDesc = optVlDesc.get();
     } else {
-      String message = MessageFormatter
+      String m = MessageFormatter
           .format("vlDescId='{}' not found in nsd='{}'.", vlDescId, nsd.getNsdIdentifier())
           .getMessage();
-      throw new NotExistingEntityException(message);
+      throw new NotExistingEntityException(m);
     }
     return vlDesc;
   }
@@ -151,10 +152,10 @@ public class NsdComposer {
     if (optVlLvlMap.isPresent()) {
       vlLvlMap = optVlLvlMap.get();
     } else {
-      String message = MessageFormatter
+      String m = MessageFormatter
           .format("vlProfileId='{}' not found in nsLvl='{}'.", vlProfileId, nsLvl.getNsLevelId())
           .getMessage();
-      throw new NotExistingEntityException(message);
+      throw new NotExistingEntityException(m);
     }
     return vlLvlMap;
   }
@@ -348,9 +349,9 @@ public class NsdComposer {
           try {
             vsNsd.isValid();
           } catch (MalformattedElementException e) {
-            String message = "Nsd looks not valid after composition";
-            log.error(message, e);
-            throw new InvalidNsd(message);
+            String m = "Nsd looks not valid after composition";
+            log.error(m, e);
+            throw new InvalidNsd(m);
           }
         }
       }
