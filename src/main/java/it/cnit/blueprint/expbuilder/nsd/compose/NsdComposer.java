@@ -249,6 +249,7 @@ public class NsdComposer {
     return new VlWrapper(vlMap, vlProfile, vlDesc);
   }
 
+  @SuppressWarnings("DuplicatedCode")
   @SneakyThrows(JsonProcessingException.class)
   public void compose(Nsd vsNsd, CtxComposeInfo[] ctxComposeInfos)
       throws InvalidCtxComposeInfo, InvalidNsd {
