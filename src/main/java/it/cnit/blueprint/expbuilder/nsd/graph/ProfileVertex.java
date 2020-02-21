@@ -5,7 +5,7 @@ public abstract class ProfileVertex {
   public abstract String getElementId();
 
   public String toString() {
-    return "vertex_" + this.getElementId();
+    return this.getElementId();
   }
 
   public boolean equals(Object o) {
