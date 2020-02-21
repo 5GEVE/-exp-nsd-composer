@@ -49,7 +49,6 @@ public class NsdComposerTest {
     vsConnections[1] = new VnfConnection("vnfp_small_Ares2T_Tracker", "cp_tracker_ext_in",
         "vlp_vl_dg_out");
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo(onbCtxReq, ctxConnections, vsConnections);
-    log.debug("ctxComposeInfo dump:\n{}", oM.writeValueAsString(ctxComposeInfo));
 
     nsdComposer.compose(trackerNsd, new CtxComposeInfo[]{ctxComposeInfo});
   }
