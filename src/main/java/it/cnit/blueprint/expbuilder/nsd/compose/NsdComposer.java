@@ -264,7 +264,6 @@ public class NsdComposer {
           Graph<ProfileVertex, String> g = nsdGraphService
               .buildGraph(vsNsd.getSapd(), vsNsDf, vsNsLvl);
           log.debug("Graph export before:\n{}", nsdGraphService.export(g));
-          log.debug("Nsd after:\n{}", objectMapper.writeValueAsString(vsNsd));
           for (VnfConnection ctxC : ctxComposeInfo.getCtxConnections()) {
             VnfWrapper vnfWrapper;
             VlWrapper vlWrapper;
@@ -309,56 +308,41 @@ public class NsdComposer {
             addVnf(vsNsd, vsNsDf, vsNsLvl, vnfWrapper);
           }
           for (VnfConnection vsC : ctxComposeInfo.getVsConnections()) {
-            // Retrieve the VNF from vertical service Nsd
-            // TODO use VnfWrapper here.
+            VnfWrapper vnfWrapper;
+            VlWrapper vlWrapper;
+
+            // Retrieve the VNF from vertical Nsd
             try {
-              getVnfLvlMapping(vsC.getVnfProfileId(), vsNsLvl);
-            } catch (NotExistingEntityException e) {
+              vnfWrapper = retrieveVnfInfo(vsC.getVnfProfileId(), vsC.getCpdId(),
+                  vsNsd, vsNsDf, vsNsLvl);
+            } catch (VnfNotFoundInLvlMapping e) {
               log.warn(e.getMessage() + " Skip.");
               continue;
-            }
-            VnfProfile vnfProfile;
-            try {
-              vnfProfile = getVnfProfile(vsC.getVnfProfileId(), vsNsDf);
-            } catch (NotExistingEntityException e) {
+            } catch (InvalidNsd | InvalidCtxComposeInfo e) {
               log.error(e.getMessage());
-              throw new InvalidNsd(e.getMessage());
-            }
-            NsVirtualLinkConnectivity vlC;
-            try {
-              vlC = getVlConnectivity(vsC.getCpdId(), vnfProfile);
-            } catch (NotExistingEntityException e) {
-              log.error(e.getMessage());
-              throw new InvalidCtxComposeInfo(e.getMessage());
+              throw e;
             }
 
-            // Retrieve the VirtualLink from context Nsd
-            VirtualLinkToLevelMapping vlMap;
+            // Retrieve the VirtualLink from context Nsd (and add it)
             try {
-              vlMap = getVlLvlMapping(vsC.getVlProfileId(), ctxNsLvl);
-            } catch (NotExistingEntityException e) {
-              log.warn(e.getMessage() + " Skip.");
-              continue;
-            }
-            VirtualLinkProfile vlProfile;
-            try {
-              vlProfile = getVlProfile(vsC.getVlProfileId(), ctxNsDf);
-            } catch (NotExistingEntityException e) {
+              vlWrapper = retrieveVlInfo(vsC.getVlProfileId(), ctxNsd, ctxNsDf, ctxNsLvl);
+              addVirtualLink(vsNsd, vsNsDf, vsNsLvl, vlWrapper);
+            } catch (VlNotFoundInLvlMapping e) {
+              log.warn(e.getMessage());
+              String m = MessageFormatter
+                  .format("vlProfile='{}' not found in context.", vsC.getVlProfileId())
+                  .getMessage();
+              log.error(m);
+              throw new InvalidCtxComposeInfo(m);
+            } catch (InvalidNsd e) {
               log.error(e.getMessage());
-              throw new InvalidNsd(e.getMessage());
+              throw e;
             }
-            NsVirtualLinkDesc vlDesc;
-            try {
-              vlDesc = getVlDescriptor(vnfProfile.getVnfdId(), ctxNsd);
-            } catch (NotExistingEntityException e) {
-              log.error(e.getMessage());
-              throw new InvalidNsd(e.getMessage());
-            }
-
-            // Update vertical service Nsd
-//            addVirtualLink(vsNsd, vsNsDf, vsNsLvl, );
-            vlC.setVirtualLinkProfileId(vlProfile.getVirtualLinkProfileId());
+            // Create connection between Vnf and VL
+            vnfWrapper.getVlConnectivity()
+                .setVirtualLinkProfileId(vlWrapper.getVlProfile().getVirtualLinkProfileId());
           }
+          log.debug("Nsd after:\n{}", objectMapper.writeValueAsString(vsNsd));
           g = nsdGraphService.buildGraph(vsNsd.getSapd(), vsNsDf, vsNsLvl);
           log.debug("Graph export after:\n{}", nsdGraphService.export(g));
           try {
