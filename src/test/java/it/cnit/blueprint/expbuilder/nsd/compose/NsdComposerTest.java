@@ -1,5 +1,7 @@
 package it.cnit.blueprint.expbuilder.nsd.compose;
 
+import static org.junit.Assert.assertEquals;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.nsd.graph.GraphVizExporter;
@@ -13,6 +15,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.Scanner;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -51,5 +54,9 @@ public class NsdComposerTest {
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo(onbCtxReq, ctxConnections, vsConnections);
 
     nsdComposer.compose(trackerNsd, new CtxComposeInfo[]{ctxComposeInfo});
+
+    InputStream in = getClass().getResourceAsStream("/expb_ares2t_tracker_delay_nsds.yaml");
+    Nsd expNsd = oM.readValue(in, Nsd[].class)[0];
+    assertEquals(oM.writeValueAsString(expNsd), oM.writeValueAsString(trackerNsd));
   }
 }
