@@ -20,10 +20,9 @@ public class Controller {
   }
 
   @PostMapping("/experiment")
-  // TODO return should be OnboardExpBlueprintRequest
-  public String composeExperiment(@RequestBody ComposeRequest composeRequest) {
+  public OnboardExpBlueprintRequest composeExperiment(@RequestBody ComposeRequest composeRequest) {
     try {
-      nsdComposer.composeWith(composeRequest.getVsbRequest().getNsds().get(0),
+      nsdComposer.compose(composeRequest.getVsbRequest().getNsds().get(0),
           composeRequest.getContexts());
     } catch (InvalidCtxComposeInfo e) {
       //TODO create and return a 422 response.
@@ -33,7 +32,7 @@ public class Controller {
       //TODO create and return a 422 response.
     }
     //TODO
-    return "{\"state\": \"ok\"}";
+    return new OnboardExpBlueprintRequest();
   }
 
 }

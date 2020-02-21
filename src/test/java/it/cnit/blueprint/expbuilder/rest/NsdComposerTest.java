@@ -7,7 +7,6 @@ import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer;
 import it.cnit.blueprint.expbuilder.nsd.compose.PassThroughStrategy;
 import it.cnit.blueprint.expbuilder.nsd.graph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
-import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer.CompositionStrat;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -82,11 +81,11 @@ public class NsdComposerTest {
     Map<String, String> connections = new HashMap<>();
     connections.put("vnfp_netem", "vlp_vl_tracking_mobile");
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo();
-    ctxComposeInfo.setNsd(delayNsd);
-    ctxComposeInfo.setConnections(connections);
-    ctxComposeInfo.setStrat(CompositionStrat.CONNECT);
+//    ctxComposeInfo.setNsd(delayNsd);
+//    ctxComposeInfo.setConnections(connections);
+//    ctxComposeInfo.setStrat(CompositionStrat.CONNECT);
     log.debug("ctxComposeInfo dump:\n{}", OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
-    nsdComposer.composeWith(tracker, new CtxComposeInfo[]{ctxComposeInfo});
+    nsdComposer.compose(tracker, new CtxComposeInfo[]{ctxComposeInfo});
     // TODO
     // Check with ExpbNsd from the repo
   }
@@ -96,11 +95,11 @@ public class NsdComposerTest {
     Nsd tracker = OBJECT_MAPPER.readValue(trackerURL, Nsd[].class)[0];
     Nsd delayNsd = OBJECT_MAPPER.readValue(delayURL, Nsd[].class)[0];
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo();
-    ctxComposeInfo.setNsd(delayNsd);
-    ctxComposeInfo.setSapId("sap_tracking_mobile");
-    ctxComposeInfo.setStrat(CompositionStrat.PASSTHROUGH);
+//    ctxComposeInfo.setNsd(delayNsd);
+//    ctxComposeInfo.setSapId("sap_tracking_mobile");
+//    ctxComposeInfo.setStrat(CompositionStrat.PASSTHROUGH);
     log.info(OBJECT_MAPPER.writeValueAsString(ctxComposeInfo));
-    nsdComposer.composeWith(tracker, new CtxComposeInfo[]{ctxComposeInfo});
+    nsdComposer.compose(tracker, new CtxComposeInfo[]{ctxComposeInfo});
 
     // TODO
     // Check with ExpbNsd from the repo

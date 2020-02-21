@@ -40,9 +40,9 @@ public class ConnectStrategyTest {
     Map<String, String> connections = new HashMap<>();
     connections.put("vnfp_netem", "vlp_vl_tracking_mobile");
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo();
-    ctxComposeInfo.setNsd(delayNsd);
-    ctxComposeInfo.setConnections(connections);
-    ctxComposeInfo.setStrat(CompositionStrat.CONNECT);
+//    ctxComposeInfo.setNsd(delayNsd);
+//    ctxComposeInfo.setConnections(connections);
+//    ctxComposeInfo.setStrat(CompositionStrat.CONNECT);
     log.debug("ctxComposeInfo dump:\n{}", oM.writeValueAsString(ctxComposeInfo));
 
     log.debug("Nsd before:\n{}", oM.writeValueAsString(trackerNsd));
