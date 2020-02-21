@@ -40,17 +40,6 @@ public class NsdComposer {
 
   private NsdGraphService nsdGraphService;
 
-  @Qualifier("connect")
-  private CompositionStrategy connectStrategy;
-
-  @Qualifier("passthrough")
-  private CompositionStrategy passThroughStrategy;
-
-  public enum CompositionStrat {
-    CONNECT,
-    PASSTHROUGH
-  }
-
   private VnfProfile getVnfProfile(String vnfProfileId, NsDf nsDf)
       throws NotExistingEntityException {
     VnfProfile vnfProfile;
