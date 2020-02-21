@@ -221,6 +221,29 @@ public class NsdComposer {
     return new VnfWrapper(vnfLvlMap, vnfProfile, vlC, vnfdId);
   }
 
+  private VlWrapper retrieveVlInfo(String vlProfileId, Nsd nsd, NsDf nsDf, NsLevel nsLevel)
+      throws InvalidNsd, VlNotFoundInLvlMapping {
+    VirtualLinkToLevelMapping vlMap;
+    try {
+      vlMap = getVlLvlMapping(vlProfileId, nsLevel);
+    } catch (NotExistingEntityException e) {
+      throw new VlNotFoundInLvlMapping(e.getMessage());
+    }
+    VirtualLinkProfile vlProfile;
+    try {
+      vlProfile = getVlProfile(vlProfileId, nsDf);
+    } catch (NotExistingEntityException e) {
+      throw new InvalidNsd(e.getMessage());
+    }
+    NsVirtualLinkDesc vlDesc;
+    try {
+      vlDesc = getVlDescriptor(vlProfile.getVirtualLinkDescId(), nsd);
+    } catch (NotExistingEntityException e) {
+      throw new InvalidNsd(e.getMessage());
+    }
+    return new VlWrapper(vlMap, vlProfile, vlDesc);
+  }
+
   @SneakyThrows(JsonProcessingException.class)
   public void compose(Nsd vsNsd, CtxComposeInfo[] ctxComposeInfos)
       throws InvalidCtxComposeInfo, InvalidNsd {
@@ -243,11 +266,34 @@ public class NsdComposer {
             VnfWrapper vnfWrapper;
             try {
               vnfWrapper = retrieveVnfInfo(ctxC.getVnfProfileId(), ctxC.getCpdId(),
-                  ctxNsd, ctxNsDf,ctxNsLvl);
+                  ctxNsd, ctxNsDf, ctxNsLvl);
             } catch (VnfNotFoundInLvlMapping e) {
               log.warn(e.getMessage() + " Skip.");
               continue;
-            } catch (InvalidNsd | InvalidCtxComposeInfo e){
+            } catch (InvalidNsd | InvalidCtxComposeInfo e) {
+              log.error(e.getMessage());
+              throw e;
+            }
+
+            VlWrapper vlWrapper;
+            try {
+              vlWrapper = retrieveVlInfo(ctxC.getVlProfileId(), vsNsd, vsNsDf, vsNsLvl);
+            } catch (VlNotFoundInLvlMapping e) {
+              log.warn(e.getMessage() + " Trying in context.");
+              try {
+                vlWrapper = retrieveVlInfo(ctxC.getVlProfileId(), ctxNsd, ctxNsDf, ctxNsLvl);
+                // TODO change method to get a VlWrapper
+                addVirtualLink(vsNsd, vsNsDf, vsNsLvl, vlWrapper.getVlDescriptor(),
+                    vlWrapper.getVlProfile(), vlWrapper.getVlToLevelMapping());
+              } catch (VlNotFoundInLvlMapping vlNotFoundInLvlMapping) {
+                log.warn(e.getMessage());
+                String m = MessageFormatter
+                    .format("vlProfile='{}' not found neither in context or vertical service",
+                        ctxC.getVlProfileId()).getMessage();
+                log.error(m);
+                throw new InvalidCtxComposeInfo(m);
+              }
+            } catch (InvalidNsd e) {
               log.error(e.getMessage());
               throw e;
             }
@@ -321,9 +367,11 @@ public class NsdComposer {
 //                continue;
 //              }
 //            }
-            vnfWrapper.getVlConnectivity().setVirtualLinkProfileId(vlProfile.getVirtualLinkProfileId());
+            vnfWrapper.getVlConnectivity()
+                .setVirtualLinkProfileId(vlProfile.getVirtualLinkProfileId());
             // TODO change method to get a VnfWrapper
-            addVnf(vsNsd, vsNsDf, vsNsLvl, vnfWrapper.getVnfProfile(), vnfWrapper.getVnfToLevelMapping());
+            addVnf(vsNsd, vsNsDf, vsNsLvl, vnfWrapper.getVnfProfile(),
+                vnfWrapper.getVnfToLevelMapping());
           }
           for (VnfConnection vsC : ctxComposeInfo.getVsConnections()) {
             // Retrieve the VNF from vertical service Nsd
