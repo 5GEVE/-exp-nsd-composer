@@ -1,12 +1,12 @@
-FROM azul/zulu-openjdk-alpine:11.0.2 as copy
+FROM azul/zulu-openjdk-alpine:8 as copy
 
 # Copy files
 #COPY target/lib /usr/share/myservice/lib
-RUN mkdir /context-composer
+RUN mkdir /5geve-experiment-builder
 ARG JAR_FILE
 ENV JAR_FILE=${JAR_FILE}
-COPY target/${JAR_FILE} /context-composer
-WORKDIR /context-composer
+COPY target/${JAR_FILE} /5geve-experiment-builder
+WORKDIR /5geve-experiment-builder
 
 
 FROM copy as dev
@@ -15,7 +15,7 @@ LABEL target=DEV
 
 # Enable remote debugger
 EXPOSE 5005
-ENV JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+ENV JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
 
 CMD java -jar ${JAR_FILE}
 
