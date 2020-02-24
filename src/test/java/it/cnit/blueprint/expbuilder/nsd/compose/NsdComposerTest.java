@@ -26,6 +26,7 @@ public class NsdComposerTest {
   @SneakyThrows
   public void composeTrackerWithDelay() {
 
+    // Test Setup
     Properties prop = new Properties();
     InputStream input = ClassLoader.getSystemResourceAsStream("url.properties");
     prop.load(input);
@@ -33,6 +34,7 @@ public class NsdComposerTest {
     NsdGraphService nsdGraphService = new NsdGraphService(new GraphVizExporter());
     NsdComposer nsdComposer = new NsdComposer(nsdGraphService);
 
+    // Given
     Nsd trackerNsd = oM.readValue(new URL(prop.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
 
     List<Nsd> delayNsds = Arrays
@@ -52,8 +54,10 @@ public class NsdComposerTest {
         "vlp_vl_dg_out");
     CtxComposeInfo ctxComposeInfo = new CtxComposeInfo(onbCtxReq, ctxConnections, vsConnections);
 
+    // When
     nsdComposer.compose(trackerNsd, new CtxComposeInfo[]{ctxComposeInfo});
 
+    // Then
     InputStream in = getClass().getResourceAsStream("/expb_ares2t_tracker_delay_nsds.yaml");
     Nsd expNsd = oM.readValue(in, Nsd[].class)[0];
     assertEquals(oM.writeValueAsString(expNsd), oM.writeValueAsString(trackerNsd));
