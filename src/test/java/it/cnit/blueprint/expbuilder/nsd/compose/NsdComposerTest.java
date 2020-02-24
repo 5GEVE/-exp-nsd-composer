@@ -2,6 +2,8 @@ package it.cnit.blueprint.expbuilder.nsd.compose;
 
 import static org.junit.Assert.assertEquals;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.nsd.graph.GraphVizExporter;
@@ -16,23 +18,34 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class NsdComposerTest {
+
+  static Properties prop;
+  static ObjectMapper oM;
+  static NsdGraphService nsdGraphService;
+  static NsdComposer nsdComposer;
+
+  @BeforeClass
+  @SneakyThrows
+  public static void setUp() {
+    // Test Setup
+    prop = new Properties();
+    InputStream input = ClassLoader.getSystemResourceAsStream("url.properties");
+    prop.load(input);
+    oM = new ObjectMapper(new YAMLFactory());
+    nsdGraphService = new NsdGraphService(new GraphVizExporter());
+    nsdComposer = new NsdComposer(nsdGraphService);
+    Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    root.setLevel(Level.ERROR);
+  }
 
   @Test
   @SneakyThrows
   public void composeTrackerWithDelay() {
-
-    // Test Setup
-    Properties prop = new Properties();
-    InputStream input = ClassLoader.getSystemResourceAsStream("url.properties");
-    prop.load(input);
-    ObjectMapper oM = new ObjectMapper(new YAMLFactory());
-    NsdGraphService nsdGraphService = new NsdGraphService(new GraphVizExporter());
-    NsdComposer nsdComposer = new NsdComposer(nsdGraphService);
 
     // Given
     Nsd trackerNsd = oM.readValue(new URL(prop.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];

@@ -2,6 +2,8 @@ package it.cnit.blueprint.expbuilder.nsd.graph;
 
 import static org.junit.Assert.assertEquals;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
@@ -13,6 +15,7 @@ import java.util.Scanner;
 import lombok.SneakyThrows;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 public class NsdGraphServiceTest {
 
@@ -29,6 +32,8 @@ public class NsdGraphServiceTest {
     prop.load(input);
     oM = new ObjectMapper(new YAMLFactory());
     nsdGraphService = new NsdGraphService(new GraphVizExporter());
+    Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    root.setLevel(Level.ERROR);
   }
 
   @Test
