@@ -21,6 +21,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -251,6 +252,7 @@ public class NsdComposer {
           vsNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
           ctxNsLvl.getNsLevelId());
       log.debug("Nsd BEFORE composition:\n{}", objectMapper.writeValueAsString(vsNsd));
+      vsNsd.setNsdName(vsNsd.getNsdName() + " + " + ctxNsd.getNsdName());
       for (NsDf vsNsDf : vsNsd.getNsDf()) {
         for (NsLevel vsNsLvl : vsNsDf.getNsInstantiationLevel()) {
           log.info("Start composition for nsDf='{}' and nsLvl='{}'",
@@ -363,6 +365,8 @@ public class NsdComposer {
               vsNsDf.getNsDfId(), vsNsLvl.getNsLevelId());
         }
       }
+      vsNsd.setNsdIdentifier(UUID.randomUUID().toString());
+      vsNsd.setNsdInvariantId(UUID.randomUUID().toString());
       log.debug("Nsd AFTER composition with {}:\n{}",
           ctxNsd.getNsdIdentifier(), objectMapper.writeValueAsString(vsNsd));
       log.info("Completed composition of '{}' with <{}, {}, {}>.",

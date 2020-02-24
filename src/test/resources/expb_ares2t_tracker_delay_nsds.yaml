@@ -1,10 +1,10 @@
 # expb_ares2t_tracker_nsds.yaml
 ---
-- nsdIdentifier: ns_ares2t_tracker_delay_exp
+- nsdIdentifier: 58886b95-cd29-4b7b-aca0-e884caaa5c68
   designer: NXW
   version: '1.0'
-  nsdName: ARES2T Tracker experiment with artificial delay
-  nsdInvariantId: ns_ares2t_tracker_delay_exp_v1.0
+  nsdName: ARES2T Tracker Service @ 5GEVE + NETEM Traffic Delay Generator Service
+  nsdInvariantId: ae66294b-8dae-406c-af70-f8516e310965
   vnfdId:
     - c84b227e-520e-43c0-a75e-e52781dd54dd
     - 419b1884-aea1-4cad-8647-c2cec55287b9

@@ -56,6 +56,9 @@ public class NsdComposerTest {
 
     // When
     nsdComposer.compose(trackerNsd, new CtxComposeInfo[]{ctxComposeInfo});
+    // Setting ID manually for test purpose
+    trackerNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
+    trackerNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
 
     // Then
     InputStream in = getClass().getResourceAsStream("/expb_ares2t_tracker_delay_nsds.yaml");
