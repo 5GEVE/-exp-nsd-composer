@@ -12,7 +12,7 @@
   </parent>
   <groupId>it.cnit.blueprint</groupId>
   <artifactId>expbuilder</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.2-SNAPSHOT</version>
   <description>A REST API module to compose VSD and CDs.</description>
   <url>https://github.com/TheWall89/5geve-experiment-builder</url>
   <packaging>docker-build</packaging>
