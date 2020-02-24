@@ -38,6 +38,50 @@ public class NsdGraphServiceTest {
 
   @Test
   @SneakyThrows
+  public void buildGraphAres2TTrackerBig() {
+    // Given
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    String nsLevel = "ns_ares2t_tracker_il_big";
+
+    // When
+    String actual = nsdGraphService.export(nsdGraphService
+        .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0), nsd.getNsDf().get(0).getNsLevel(nsLevel)));
+
+    // Then
+    InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
+    String expected;
+    //noinspection ConstantConditions
+    try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
+        StandardCharsets.UTF_8.name())) {
+      expected = scanner.useDelimiter("\\A").next();
+    }
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  @SneakyThrows
+  public void buildGraphAres2TTrackerSmall() {
+    // Given
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    String nsLevel = "ns_ares2t_tracker_il_small";
+
+    // When
+    String actual = nsdGraphService.export(nsdGraphService
+        .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0), nsd.getNsDf().get(0).getNsLevel(nsLevel)));
+
+    // Then
+    InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
+    String expected;
+    //noinspection ConstantConditions
+    try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
+        StandardCharsets.UTF_8.name())) {
+      expected = scanner.useDelimiter("\\A").next();
+    }
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  @SneakyThrows
   public void buildGraphAres2TDelayExperimentBig() {
     // Given
     Nsd nsd = oM.readValue(new URL(prop.getProperty("expb.tracker.delay.nsds")), Nsd[].class)[0];
@@ -55,7 +99,6 @@ public class NsdGraphServiceTest {
         StandardCharsets.UTF_8.name())) {
       expected = scanner.useDelimiter("\\A").next();
     }
-
     assertEquals(expected, actual);
   }
 
@@ -78,7 +121,6 @@ public class NsdGraphServiceTest {
         StandardCharsets.UTF_8.name())) {
       expected = scanner.useDelimiter("\\A").next();
     }
-
     assertEquals(expected, actual);
   }
 
