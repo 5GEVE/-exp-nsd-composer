@@ -14,12 +14,12 @@ public class Controller {
 
   private final NsdComposer nsdComposer;
 
-  @GetMapping("/experiment")
+  @GetMapping("/experiments")
   public OnboardExpBlueprintRequest retrieveExperiment() {
     return null;
   }
 
-  @PostMapping("/experiment")
+  @PostMapping("/experiments")
   public OnboardExpBlueprintRequest composeExperiment(@RequestBody ComposeRequest composeRequest) {
     try {
       nsdComposer.compose(composeRequest.getVsbRequest().getNsds().get(0),
