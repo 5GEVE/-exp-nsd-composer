@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
-public class Controller {
+public class ExperimentsController {
 
   private final NsdComposer nsdComposer;
 
