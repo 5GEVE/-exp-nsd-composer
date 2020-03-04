@@ -39,6 +39,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class NsdComposer {
 
   private NsdGraphService nsdGraphService;
+  static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
   private VnfProfile getVnfProfile(String vnfProfileId, NsDf nsDf)
       throws NotExistingEntityException {
@@ -66,6 +67,23 @@ public class NsdComposer {
       throw new NotExistingEntityException(m);
     }
     return vlProfile;
+  }
+
+  private VirtualLinkProfile getVlProfile(NsVirtualLinkDesc vld, NsDf nsDf)
+      throws NotExistingEntityException {
+    VirtualLinkProfile resultVlp;
+    Optional<VirtualLinkProfile> optVlp = nsDf.getVirtualLinkProfile().stream()
+        .filter(vlp -> vlp.getVirtualLinkDescId().equals(vld.getVirtualLinkDescId())).findFirst();
+    if (optVlp.isPresent()) {
+      resultVlp = optVlp.get();
+    } else {
+      String m = MessageFormatter
+          .format("vlProfile with VirtualLinkDescId='{}' not found in nsDf='{}'.",
+              vld.getVirtualLinkDescId(), nsDf.getNsDfId())
+          .getMessage();
+      throw new NotExistingEntityException(m);
+    }
+    return resultVlp;
   }
 
   private NsVirtualLinkConnectivity getVlConnectivity(String cpdId, VnfProfile vnfProfile)
@@ -237,6 +255,23 @@ public class NsdComposer {
     return new VlWrapper(vlMap, vlProfile, vlDesc);
   }
 
+  private VlWrapper retrieveVlInfo(NsVirtualLinkDesc vld, NsDf nsDf, NsLevel nsLevel)
+      throws InvalidNsd, VlNotFoundInLvlMapping {
+    VirtualLinkProfile vlProfile;
+    try {
+      vlProfile = getVlProfile(vld, nsDf);
+    } catch (NotExistingEntityException e) {
+      throw new InvalidNsd(e.getMessage());
+    }
+    VirtualLinkToLevelMapping vlMap;
+    try {
+      vlMap = getVlLvlMapping(vlProfile.getVirtualLinkProfileId(), nsLevel);
+    } catch (NotExistingEntityException e) {
+      throw new VlNotFoundInLvlMapping(e.getMessage());
+    }
+    return new VlWrapper(vlMap, vlProfile, vld);
+  }
+
   @SuppressWarnings("DuplicatedCode")
   @SneakyThrows(JsonProcessingException.class)
   public void compose(Nsd vsNsd, CtxComposeInfo[] ctxComposeInfos)
@@ -372,6 +407,42 @@ public class NsdComposer {
       log.info("Completed composition of '{}' with <{}, {}, {}>.",
           vsNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
           ctxNsLvl.getNsLevelId());
+    }
+  }
+
+  @SneakyThrows(JsonProcessingException.class)
+  public void composePassThrough(NsVirtualLinkDesc ranVld, Nsd vsbNsd, Nsd ctxNsd)
+      throws InvalidNsd {
+    // We assume only one NsDf for the context
+    NsDf ctxNsDf = ctxNsd.getNsDf().get(0);
+    // We assume only one NsLevel for the context
+    NsLevel ctxNsLvl = ctxNsDf.getNsInstantiationLevel().get(0);
+    // We assume only one NsDf for the vertical service
+    NsDf vsbNsDf = vsbNsd.getNsDf().get(0);
+
+    log.info("Composing '{}' with <{}, {}, {}>.",
+        vsbNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
+        ctxNsLvl.getNsLevelId());
+    log.debug("Nsd BEFORE composition:\n{}", OBJECT_MAPPER.writeValueAsString(vsbNsd));
+
+    vsbNsd.setNsdName(vsbNsd.getNsdName() + " + " + ctxNsd.getNsdName());
+    for (NsLevel vsbNsLvl : vsbNsDf.getNsInstantiationLevel()) {
+      log.info("Start composition for nsDf='{}' and nsLvl='{}'",
+          vsbNsDf.getNsDfId(), vsbNsLvl.getNsLevelId());
+      Graph<ProfileVertex, String> g = nsdGraphService
+          .buildGraph(vsbNsd.getSapd(), vsbNsDf, vsbNsLvl);
+      log.debug("Graph BEFORE composition :\n{}", nsdGraphService.export(g));
+
+      VlWrapper ranVlWrapper;
+      try {
+        ranVlWrapper = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
+      } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
+        log.error(e.getMessage());
+        throw new InvalidNsd(e.getMessage());
+      }
+
+      // TODO retrieve one adjacent VNF to the ranVL.
+
     }
   }
 
