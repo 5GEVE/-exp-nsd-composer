@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertex;
+import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertexNotFoundException;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
@@ -468,15 +469,13 @@ public class NsdComposer {
       }
 
       ProfileVertex ranVlVertex;
-      Optional<ProfileVertex> optVertex = g.vertexSet().stream()
-          .filter(
-              v -> v.getElementId().equals(ranVlWrapper.getVlProfile().getVirtualLinkProfileId()))
-          .findFirst();
-      if (optVertex.isPresent()) {
-        ranVlVertex = optVertex.get();
+      try {
+        ranVlVertex = nsdGraphService
+            .getVertexById(ranVlWrapper.getVlProfile().getVirtualLinkProfileId(), g);
         log.debug("Found ProfileVertex for RAN VL.");
-      } else {
-        throw new InvalidNsd("VL not connected to any VnfProfile");
+      } catch (ProfileVertexNotFoundException e) {
+        log.error(e.getMessage());
+        throw new InvalidNsd(e.getMessage());
       }
       // Assumption: select the first VNF attached to the RAN VL
       ProfileVertex ranVnfVertex = Graphs.neighborListOf(g, ranVlVertex).get(0);
@@ -486,11 +485,11 @@ public class NsdComposer {
       try {
         ranVnfWrapper = retrieveVnfInfo(ranVnfVertex.getElementId(), cpdId, vsbNsd, vsbNsDf,
             vsbNsLvl);
+        log.debug("Retrieved VNF information for id: '{}'", ranVnfVertex.getElementId());
       } catch (InvalidNsd | VnfNotFoundInLvlMapping e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
-
 
     }
   }

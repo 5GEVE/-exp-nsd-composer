@@ -11,6 +11,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -116,6 +117,19 @@ public class NsdGraphService {
 
   public String export(Graph<ProfileVertex, String> graph) {
     return graphExporter.export(graph);
+  }
+
+  public ProfileVertex getVertexById(String vertexId, Graph<ProfileVertex, String> g)
+      throws ProfileVertexNotFoundException {
+    Optional<ProfileVertex> optVertex = g.vertexSet().stream()
+        .filter(v -> v.getElementId().equals(vertexId))
+        .findFirst();
+    if (optVertex.isPresent()) {
+      return optVertex.get();
+    } else {
+      throw new ProfileVertexNotFoundException(
+          "ProfileVertex with id='" + vertexId + "' not found.");
+    }
   }
 
 }
