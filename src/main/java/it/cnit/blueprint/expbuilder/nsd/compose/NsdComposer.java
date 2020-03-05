@@ -26,6 +26,7 @@ import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
+import org.jgrapht.Graphs;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -204,7 +205,7 @@ public class NsdComposer {
   }
 
   private VnfWrapper retrieveVnfInfo(String vnfProfileId, String cpdId, Nsd nsd, NsDf nsDf,
-      NsLevel nsLevel) throws InvalidNsd, InvalidCtxComposeInfo, VnfNotFoundInLvlMapping {
+      NsLevel nsLevel) throws InvalidNsd, VnfNotFoundInLvlMapping {
     VnfToLevelMapping vnfLvlMap;
     try {
       vnfLvlMap = getVnfLvlMapping(vnfProfileId, nsLevel);
@@ -221,7 +222,7 @@ public class NsdComposer {
     try {
       vlC = getVlConnectivity(cpdId, vnfProfile);
     } catch (NotExistingEntityException e) {
-      throw new InvalidCtxComposeInfo(e.getMessage());
+      throw new InvalidNsd(e.getMessage());
     }
     String vnfdId;
     try {
@@ -308,7 +309,7 @@ public class NsdComposer {
             } catch (VnfNotFoundInLvlMapping e) {
               log.warn(e.getMessage() + " Skip.");
               continue;
-            } catch (InvalidNsd | InvalidCtxComposeInfo e) {
+            } catch (InvalidNsd e) {
               log.error(e.getMessage());
               throw e;
             }
@@ -358,7 +359,7 @@ public class NsdComposer {
             } catch (VnfNotFoundInLvlMapping e) {
               log.warn(e.getMessage() + " Skip.");
               continue;
-            } catch (InvalidNsd | InvalidCtxComposeInfo e) {
+            } catch (InvalidNsd e) {
               log.error(e.getMessage());
               throw e;
             }
@@ -436,12 +437,36 @@ public class NsdComposer {
       VlWrapper ranVlWrapper;
       try {
         ranVlWrapper = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
+        log.debug("Retrieved VL information for RAN vld: '{}'", ranVld.getVirtualLinkDescId());
       } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
 
-      // TODO retrieve one adjacent VNF to the ranVL.
+      ProfileVertex ranVlVertex;
+      Optional<ProfileVertex> optVertex = g.vertexSet().stream()
+          .filter(
+              v -> v.getElementId().equals(ranVlWrapper.getVlProfile().getVirtualLinkProfileId()))
+          .findFirst();
+      if (optVertex.isPresent()) {
+        ranVlVertex = optVertex.get();
+        log.debug("Found ProfileVertex for RAN VL.");
+      } else {
+        throw new InvalidNsd("VL not connected to any VnfProfile");
+      }
+      // Assumption: select the first VNF attached to the RAN VL
+      ProfileVertex ranVnfVertex = Graphs.neighborListOf(g, ranVlVertex).get(0);
+      String cpdId = g.getEdge(ranVlVertex, ranVnfVertex);
+
+      VnfWrapper ranVnfWrapper;
+      try {
+        ranVnfWrapper = retrieveVnfInfo(ranVnfVertex.getElementId(), cpdId, vsbNsd, vsbNsDf,
+            vsbNsLvl);
+      } catch (InvalidNsd | VnfNotFoundInLvlMapping e) {
+        log.error(e.getMessage());
+        throw new InvalidNsd(e.getMessage());
+      }
+
 
     }
   }
