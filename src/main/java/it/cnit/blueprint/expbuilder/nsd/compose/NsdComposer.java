@@ -6,8 +6,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertexNotFoundException;
-import it.cnit.blueprint.expbuilder.nsd.graph.SapVertex;
 import it.cnit.blueprint.expbuilder.nsd.graph.VirtualLinkProfileVertex;
+import it.cnit.blueprint.expbuilder.nsd.graph.VnfProfileVertex;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
@@ -504,13 +504,13 @@ public class NsdComposer {
       // Assumption: select the first VNF attached to the RAN VL
       List<ProfileVertex> ranVlNeigh = Graphs.neighborListOf(vsbG, ranVlVertex);
       ProfileVertex ranVnfVertex;
-      Optional<ProfileVertex> optV = ranVlNeigh.stream().filter(v -> !(v instanceof SapVertex))
+      Optional<ProfileVertex> optV = ranVlNeigh.stream().filter(v -> v instanceof VnfProfileVertex)
           .findFirst();
       if (optV.isPresent()) {
         ranVnfVertex = optV.get();
       } else {
         throw new InvalidNsd(
-            "No neighbor of type VnfProfileVertex found for '" + ranVlVertex.getVertexId() +"'.");
+            "No neighbor of type VnfProfileVertex found for '" + ranVlVertex.getVertexId() + "'.");
       }
       String cpdId = vsbG.getEdge(ranVlVertex, ranVnfVertex);
 
