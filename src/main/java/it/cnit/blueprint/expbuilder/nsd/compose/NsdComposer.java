@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertexNotFoundException;
+import it.cnit.blueprint.expbuilder.nsd.graph.SapVertex;
 import it.cnit.blueprint.expbuilder.nsd.graph.VirtualLinkProfileVertex;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
@@ -501,8 +502,16 @@ public class NsdComposer {
         throw new InvalidNsd(e.getMessage());
       }
       // Assumption: select the first VNF attached to the RAN VL
-      // TODO this could be a SAP! Check it
-      ProfileVertex ranVnfVertex = Graphs.neighborListOf(vsbG, ranVlVertex).get(0);
+      List<ProfileVertex> ranVlNeigh = Graphs.neighborListOf(vsbG, ranVlVertex);
+      ProfileVertex ranVnfVertex;
+      Optional<ProfileVertex> optV = ranVlNeigh.stream().filter(v -> !(v instanceof SapVertex))
+          .findFirst();
+      if (optV.isPresent()) {
+        ranVnfVertex = optV.get();
+      } else {
+        throw new InvalidNsd(
+            "No neighbor of type VnfProfileVertex found for '" + ranVlVertex.getVertexId() +"'.");
+      }
       String cpdId = vsbG.getEdge(ranVlVertex, ranVnfVertex);
 
       VnfWrapper ranVnfWrapper;
