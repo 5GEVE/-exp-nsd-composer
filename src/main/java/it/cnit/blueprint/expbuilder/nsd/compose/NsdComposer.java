@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertexNotFoundException;
+import it.cnit.blueprint.expbuilder.nsd.graph.VirtualLinkProfileVertex;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
@@ -22,6 +23,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -44,7 +46,7 @@ public class NsdComposer {
   private NsdGraphService nsdGraphService;
   static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
-  private VnfProfile getVnfProfile(String vnfProfileId, NsDf nsDf)
+  private VnfProfile getVnfProfileById(String vnfProfileId, NsDf nsDf)
       throws NotExistingEntityException {
     VnfProfile vnfProfile;
     try {
@@ -52,6 +54,22 @@ public class NsdComposer {
     } catch (NotExistingEntityException e) {
       String m = MessageFormatter
           .format("VnfProfile='{}' not found in nsDf='{}'", vnfProfileId, nsDf.getNsDfId())
+          .getMessage();
+      throw new NotExistingEntityException(m);
+    }
+    return vnfProfile;
+  }
+
+  private VnfProfile getVnfProfileByDescId(String vnfdId, NsDf nsDf)
+      throws NotExistingEntityException {
+    VnfProfile vnfProfile;
+    Optional<VnfProfile> optVnfP = nsDf.getVnfProfile().stream()
+        .filter(p -> p.getVnfdId().equals(vnfdId)).findFirst();
+    if (optVnfP.isPresent()) {
+      vnfProfile = optVnfP.get();
+    } else {
+      String m = MessageFormatter
+          .format("No VnfProfile with vnfdId='{}' found in nsDf='{}'", vnfdId, nsDf.getNsDfId())
           .getMessage();
       throw new NotExistingEntityException(m);
     }
@@ -216,7 +234,7 @@ public class NsdComposer {
     }
     VnfProfile vnfProfile;
     try {
-      vnfProfile = getVnfProfile(vnfProfileId, nsDf);
+      vnfProfile = getVnfProfileById(vnfProfileId, nsDf);
     } catch (NotExistingEntityException e) {
       throw new InvalidNsd(e.getMessage());
     }
@@ -429,7 +447,8 @@ public class NsdComposer {
   }
 
   @SneakyThrows(JsonProcessingException.class)
-  public void composePassThrough(Sapd ranSapd, Nsd vsbNsd, Nsd ctxNsd)
+  public void composePassThrough(Sapd ranSapd, Nsd vsbNsd, String ctxVnfdId,
+      String ctxMgmtVldId, Nsd ctxNsd)
       throws InvalidNsd {
     NsVirtualLinkDesc ranVld;
     try {
@@ -445,6 +464,9 @@ public class NsdComposer {
     NsLevel ctxNsLvl = ctxNsDf.getNsInstantiationLevel().get(0);
     // We assume only one NsDf for the vertical service
     NsDf vsbNsDf = vsbNsd.getNsDf().get(0);
+    Graph<ProfileVertex, String> ctxG = nsdGraphService
+        .buildGraph(ctxNsd.getSapd(), ctxNsDf, ctxNsLvl);
+    log.debug("ctxG graph composition :\n{}", nsdGraphService.export(ctxG));
 
     log.info("Composing '{}' with <{}, {}, {}>.",
         vsbNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
@@ -457,8 +479,9 @@ public class NsdComposer {
           vsbNsDf.getNsDfId(), vsbNsLvl.getNsLevelId());
       Graph<ProfileVertex, String> vsbG = nsdGraphService
           .buildGraph(vsbNsd.getSapd(), vsbNsDf, vsbNsLvl);
-      log.debug("Graph BEFORE composition :\n{}", nsdGraphService.export(vsbG));
+      log.debug("vsbG BEFORE composition :\n{}", nsdGraphService.export(vsbG));
 
+      // Retrieve vsb info
       VlWrapper ranVlWrapper;
       try {
         ranVlWrapper = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
@@ -478,6 +501,7 @@ public class NsdComposer {
         throw new InvalidNsd(e.getMessage());
       }
       // Assumption: select the first VNF attached to the RAN VL
+      // TODO this could be a SAP! Check it
       ProfileVertex ranVnfVertex = Graphs.neighborListOf(vsbG, ranVlVertex).get(0);
       String cpdId = vsbG.getEdge(ranVlVertex, ranVnfVertex);
 
@@ -491,7 +515,33 @@ public class NsdComposer {
         throw new InvalidNsd(e.getMessage());
       }
 
-      // TODO retrieve ctx info
+      // Retrieve ctx info
+      VnfProfile ctxVnfProfile;
+      try {
+        ctxVnfProfile = getVnfProfileByDescId(ctxVnfdId, ctxNsDf);
+      } catch (NotExistingEntityException e) {
+        log.error(e.getMessage());
+        throw new InvalidNsd(e.getMessage());
+      }
+
+      ProfileVertex ctxVnfPVertex;
+      try {
+        ctxVnfPVertex = nsdGraphService.getVertexById(ctxVnfProfile.getVnfProfileId(), ctxG);
+      } catch (ProfileVertexNotFoundException e) {
+        log.error(e.getMessage());
+        throw new InvalidNsd(e.getMessage());
+      }
+      List<ProfileVertex> ctxVnfNeighbors = Graphs.neighborListOf(ctxG, ctxVnfPVertex);
+      // Assumption: select the first VL that is NOT management
+      VirtualLinkProfile ctxVlProfile;
+      for (ProfileVertex vlp : ctxVnfNeighbors) {
+        if (!((VirtualLinkProfileVertex) vlp).getVlProfile().getVirtualLinkDescId()
+            .equals(ctxMgmtVldId)) {
+          ctxVlProfile = ((VirtualLinkProfileVertex) vlp).getVlProfile();
+        }
+      }
+
+      // TODO make connections
 
       // TODO clear context vnf cpd for mgmt. Handled in another method.
 

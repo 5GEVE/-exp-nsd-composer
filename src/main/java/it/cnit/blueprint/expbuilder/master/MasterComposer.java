@@ -4,10 +4,10 @@ import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
-import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnBoardVsBlueprintRequest;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import lombok.AllArgsConstructor;
@@ -37,13 +37,22 @@ public class MasterComposer {
     for (CtxComposeInfo ctx : contexts) {
       // - The Ctx has only 1 Nsd.
       Nsd ctxNsd = ctx.getCtxBReq().getNsds().get(0);
+      CtxBlueprint ctxB = ctx.getCtxBReq().getCtxBlueprint();
       if (STRAT.equals(CompositionStrategy.CONNECT)) {
         log.info("connect");
       } else if (STRAT.equals(CompositionStrategy.PASS_THROUGH)) {
         log.info("pass_through");
         // compose Nsd
         Sapd ranSapd = findRanSapd(vsbRequest.getVsBlueprint(), vsbNsd);
-        nsdComposer.composePassThrough(ranSapd, vsbNsd, ctxNsd);
+        String ctxVnfdId;
+        if (ctxNsd.getVnfdId().size() == 1) {
+          ctxVnfdId = ctxNsd.getVnfdId().get(0);
+        } else {
+          throw new InvalidCtxComposeInfo("More than one VNF found in Ctx for PASS_THROUGH");
+        }
+        String ctxMgmtVldId = findMgmtVldId(ctxB, ctxNsd);
+        nsdComposer.composePassThrough(ranSapd, vsbNsd, ctxVnfdId, ctxMgmtVldId, ctxNsd);
+        // TODO prepare input for mgmt VL and cpdid
         // compose Exp blueprint
       } else {
         log.error("not supported");
@@ -53,8 +62,14 @@ public class MasterComposer {
     }
   }
 
-  private Sapd findRanSapd(VsBlueprint vsb, Nsd nsd) {
-    for (VsbEndpoint e : vsb.getEndPoints()) {
+  private String findMgmtVldId(Blueprint b, Nsd nsd) {
+    // TODO Visit vlDesc in nsd and check if mgmt in b.
+    // We need model modifications to make this work.
+    return "";
+  }
+
+  private Sapd findRanSapd(Blueprint b, Nsd nsd) {
+    for (VsbEndpoint e : b.getEndPoints()) {
       if (e.isRanConnection()) {
         for (Sapd sapd : nsd.getSapd()) {
           if (e.getEndPointId().equals(sapd.getCpdId())) {
