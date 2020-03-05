@@ -132,4 +132,6 @@ public class NsdGraphService {
     }
   }
 
+  // TODO implement constraint on coloring: no VL and Vnf directly connected.
+
 }
