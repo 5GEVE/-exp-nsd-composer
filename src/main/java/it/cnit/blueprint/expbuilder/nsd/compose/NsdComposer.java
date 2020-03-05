@@ -494,7 +494,7 @@ public class NsdComposer {
       ProfileVertex ranVlVertex;
       try {
         ranVlVertex = nsdGraphService
-            .getVertexById(ranVlWrapper.getVlProfile().getVirtualLinkProfileId(), vsbG);
+            .getVertexById(vsbG, ranVlWrapper.getVlProfile().getVirtualLinkProfileId());
         log.debug("Found ProfileVertex for RAN VL.");
       } catch (ProfileVertexNotFoundException e) {
         log.error(e.getMessage());
@@ -526,7 +526,7 @@ public class NsdComposer {
 
       ProfileVertex ctxVnfPVertex;
       try {
-        ctxVnfPVertex = nsdGraphService.getVertexById(ctxVnfProfile.getVnfProfileId(), ctxG);
+        ctxVnfPVertex = nsdGraphService.getVertexById(ctxG, ctxVnfProfile.getVnfProfileId());
       } catch (ProfileVertexNotFoundException e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());

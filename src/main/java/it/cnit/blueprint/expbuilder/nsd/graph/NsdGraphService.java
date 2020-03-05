@@ -119,7 +119,7 @@ public class NsdGraphService {
     return graphExporter.export(graph);
   }
 
-  public ProfileVertex getVertexById(String vertexId, Graph<ProfileVertex, String> g)
+  public ProfileVertex getVertexById(Graph<ProfileVertex, String> g, String vertexId)
       throws ProfileVertexNotFoundException {
     Optional<ProfileVertex> optVertex = g.vertexSet().stream()
         .filter(v -> v.getElementId().equals(vertexId))
