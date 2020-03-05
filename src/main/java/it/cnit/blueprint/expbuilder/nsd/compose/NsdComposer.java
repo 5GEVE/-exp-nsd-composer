@@ -455,9 +455,9 @@ public class NsdComposer {
     for (NsLevel vsbNsLvl : vsbNsDf.getNsInstantiationLevel()) {
       log.info("Start composition for nsDf='{}' and nsLvl='{}'",
           vsbNsDf.getNsDfId(), vsbNsLvl.getNsLevelId());
-      Graph<ProfileVertex, String> g = nsdGraphService
+      Graph<ProfileVertex, String> vsbG = nsdGraphService
           .buildGraph(vsbNsd.getSapd(), vsbNsDf, vsbNsLvl);
-      log.debug("Graph BEFORE composition :\n{}", nsdGraphService.export(g));
+      log.debug("Graph BEFORE composition :\n{}", nsdGraphService.export(vsbG));
 
       VlWrapper ranVlWrapper;
       try {
@@ -471,15 +471,15 @@ public class NsdComposer {
       ProfileVertex ranVlVertex;
       try {
         ranVlVertex = nsdGraphService
-            .getVertexById(ranVlWrapper.getVlProfile().getVirtualLinkProfileId(), g);
+            .getVertexById(ranVlWrapper.getVlProfile().getVirtualLinkProfileId(), vsbG);
         log.debug("Found ProfileVertex for RAN VL.");
       } catch (ProfileVertexNotFoundException e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
       // Assumption: select the first VNF attached to the RAN VL
-      ProfileVertex ranVnfVertex = Graphs.neighborListOf(g, ranVlVertex).get(0);
-      String cpdId = g.getEdge(ranVlVertex, ranVnfVertex);
+      ProfileVertex ranVnfVertex = Graphs.neighborListOf(vsbG, ranVlVertex).get(0);
+      String cpdId = vsbG.getEdge(ranVlVertex, ranVnfVertex);
 
       VnfWrapper ranVnfWrapper;
       try {
@@ -490,6 +490,10 @@ public class NsdComposer {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
+
+      // TODO retrieve ctx info
+
+      // TODO clear context vnf cpd for mgmt. Handled in another method.
 
     }
   }
