@@ -43,8 +43,7 @@ public class MasterComposer {
         log.info("pass_through");
         // compose Nsd
         Sapd ranSapd = findRanSapd(vsbRequest.getVsBlueprint(), vsbNsd);
-        NsVirtualLinkDesc ranVld = findSapVld(ranSapd, vsbNsd);
-        nsdComposer.composePassThrough(ranVld, vsbNsd, ctxNsd);
+        nsdComposer.composePassThrough(ranSapd, vsbNsd, ctxNsd);
         // compose Exp blueprint
       } else {
         log.error("not supported");
@@ -64,17 +63,7 @@ public class MasterComposer {
         }
       }
     }
-    // TODO exception
-    return null;
-  }
-
-  private NsVirtualLinkDesc findSapVld(Sapd sapd, Nsd nsd) {
-    for (NsVirtualLinkDesc vld : nsd.getVirtualLinkDesc()) {
-      if (vld.getVirtualLinkDescId().equals(sapd.getNsVirtualLinkDescId())) {
-        return vld;
-      }
-    }
-    // TODO exception
+    // TODO exception invalid blueprint or nsd
     return null;
   }
 

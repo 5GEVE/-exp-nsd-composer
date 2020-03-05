@@ -17,6 +17,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
@@ -273,6 +274,21 @@ public class NsdComposer {
     return new VlWrapper(vlMap, vlProfile, vld);
   }
 
+  private NsVirtualLinkDesc findSapVld(Sapd sapd, Nsd nsd) throws InvalidNsd {
+    NsVirtualLinkDesc vld;
+    Optional<NsVirtualLinkDesc> optVld = nsd.getVirtualLinkDesc().stream()
+        .filter(v -> v.getVirtualLinkDescId().equals(sapd.getNsVirtualLinkDescId())).findFirst();
+    if (optVld.isPresent()) {
+      vld = optVld.get();
+    } else {
+      String m = MessageFormatter
+          .format("Vld with id='{}' not found.", sapd.getNsVirtualLinkDescId())
+          .getMessage();
+      throw new InvalidNsd(m);
+    }
+    return vld;
+  }
+
   @SuppressWarnings("DuplicatedCode")
   @SneakyThrows(JsonProcessingException.class)
   public void compose(Nsd vsNsd, CtxComposeInfo[] ctxComposeInfos)
@@ -412,8 +428,16 @@ public class NsdComposer {
   }
 
   @SneakyThrows(JsonProcessingException.class)
-  public void composePassThrough(NsVirtualLinkDesc ranVld, Nsd vsbNsd, Nsd ctxNsd)
+  public void composePassThrough(Sapd ranSapd, Nsd vsbNsd, Nsd ctxNsd)
       throws InvalidNsd {
+    NsVirtualLinkDesc ranVld;
+    try {
+      ranVld = findSapVld(ranSapd, vsbNsd);
+    } catch (InvalidNsd e) {
+      log.error(e.getMessage());
+      throw e;
+    }
+
     // We assume only one NsDf for the context
     NsDf ctxNsDf = ctxNsd.getNsDf().get(0);
     // We assume only one NsLevel for the context
