@@ -541,7 +541,8 @@ public class NsdComposer {
         throw new InvalidNsd(e.getMessage());
       }
       List<ProfileVertex> ctxVnfNeighbors = Graphs.neighborListOf(ctxG, ctxVnfPVertex);
-      // Assumption: select the first VL that is NOT management
+      // Assumption: select all the VLs that are NOT management
+      // TODO
       VirtualLinkProfile ctxVlProfile;
       for (ProfileVertex vlp : ctxVnfNeighbors) {
         if (!((VirtualLinkProfileVertex) vlp).getVlProfile().getVirtualLinkDescId()
