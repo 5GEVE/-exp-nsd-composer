@@ -1,6 +1,6 @@
 package it.cnit.blueprint.expbuilder.rest;
 
-import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer;
+import it.cnit.blueprint.expbuilder.master.MasterComposer;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardExpBlueprintRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class ExperimentsController {
 
-  private final NsdComposer nsdComposer;
+  private final MasterComposer masterComposer;
 
   @GetMapping("/experiments")
   public OnboardExpBlueprintRequest retrieveExperiment() {
@@ -22,8 +22,7 @@ public class ExperimentsController {
   @PostMapping("/experiments")
   public OnboardExpBlueprintRequest composeExperiment(@RequestBody ComposeRequest composeRequest) {
     try {
-      nsdComposer.compose(composeRequest.getVsbRequest().getNsds().get(0),
-          composeRequest.getContexts());
+      masterComposer.compose(composeRequest.getVsbRequest(), composeRequest.getContexts());
     } catch (InvalidCtxComposeInfo e) {
       //TODO create and return a 422 response.
       e.printStackTrace();
