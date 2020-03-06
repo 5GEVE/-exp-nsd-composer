@@ -557,11 +557,11 @@ public class NsdComposer {
       String ranVnfCpd = vsbG.getEdge(ranVlVertex, ranVnfVertex);
 
       // Connect ranVnf to the new VL coming from ctx
-      Optional<NsVirtualLinkConnectivity> optVlc = ranVnfVertex.getVnfProfile()
+      Optional<NsVirtualLinkConnectivity> optRanVlc = ranVnfVertex.getVnfProfile()
           .getNsVirtualLinkConnectivity().stream()
           .filter(vlc -> vlc.getCpdId().get(0).equals(ranVnfCpd)).findFirst();
-      if (optVlc.isPresent()) {
-        optVlc.get().setVirtualLinkProfileId(
+      if (optRanVlc.isPresent()) {
+        optRanVlc.get().setVirtualLinkProfileId(
             ctxNonMgmtVls.get(ctxPrimaryConn.getKey()).getVlProfile().getVirtualLinkProfileId());
       } else {
         InvalidNsd e = new InvalidNsd("Could not find NsVirtualLinkConnectivity for cpdId:'"
@@ -572,8 +572,18 @@ public class NsdComposer {
 
       // Connect ctxVnf with RAN VL
       Entry<String, VlWrapper> ctxSecondaryConn = ctxNonMgmtVLIter.next();
-
-      // TODO make connections
+      Optional<NsVirtualLinkConnectivity> optCtxVlc = ctxVnfWrapper.getVnfProfile()
+          .getNsVirtualLinkConnectivity().stream()
+          .filter(vlc -> vlc.getCpdId().get(0).equals(ctxSecondaryConn.getKey())).findFirst();
+      if (optCtxVlc.isPresent()) {
+        optCtxVlc.get().setVirtualLinkProfileId(
+            ranVlWrapper.getVlProfile().getVirtualLinkProfileId());
+      } else {
+        InvalidNsd e = new InvalidNsd("Could not find NsVirtualLinkConnectivity for cpdId:'"
+            + ranVnfCpd + "'.");
+        log.error(e.getMessage());
+        throw e;
+      }
 
       // TODO clear context vnf cpd for mgmt. Handled in another method.
 
