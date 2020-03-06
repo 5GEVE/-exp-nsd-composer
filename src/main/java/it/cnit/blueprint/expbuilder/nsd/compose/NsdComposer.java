@@ -8,6 +8,7 @@ import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertexNotFoundException;
 import it.cnit.blueprint.expbuilder.nsd.graph.VirtualLinkProfileVertex;
 import it.cnit.blueprint.expbuilder.nsd.graph.VnfProfileVertex;
+import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
@@ -20,7 +21,9 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -439,7 +442,7 @@ public class NsdComposer {
   @SneakyThrows(JsonProcessingException.class)
   public void composePassThrough(Sapd ranSapd, Nsd vsbNsd, String ctxVnfdId,
       String ctxMgmtVldId, Nsd ctxNsd)
-      throws InvalidNsd {
+      throws InvalidNsd, InvalidCtxComposeInfo {
     NsVirtualLinkDesc ranVld;
     try {
       ranVld = findSapVld(ranSapd, vsbNsd);
@@ -471,7 +474,7 @@ public class NsdComposer {
           .buildGraph(vsbNsd.getSapd(), vsbNsDf, vsbNsLvl);
       log.debug("vsbG BEFORE composition :\n{}", nsdGraphService.export(vsbG));
 
-      // Retrieve ctx elements to insert
+      // Retrieve ctx VNF
       VnfProfile ctxVnfProfile;
       try {
         ctxVnfProfile = getVnfProfileByDescId(ctxVnfdId, ctxNsDf);
@@ -479,7 +482,17 @@ public class NsdComposer {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
+      VnfWrapper ctxVnfWrapper;
+      try {
+        ctxVnfWrapper = retrieveVnfInfo(ctxVnfProfile.getVnfProfileId(),
+            ctxNsd, ctxNsDf, ctxNsLvl);
+      } catch (VnfNotFoundInLvlMapping e) {
+        log.error(e.getMessage());
+        throw new InvalidNsd(e.getMessage());
+      }
+      addVnf(vsbNsd, vsbNsDf, vsbNsLvl, ctxVnfWrapper);
 
+      // Retrieve first non-management VLs from ctx
       ProfileVertex ctxVnfPVertex;
       try {
         ctxVnfPVertex = nsdGraphService.getVertexById(ctxG, ctxVnfProfile.getVnfProfileId());
@@ -488,15 +501,25 @@ public class NsdComposer {
         throw new InvalidNsd(e.getMessage());
       }
       List<ProfileVertex> ctxVnfNeighbors = Graphs.neighborListOf(ctxG, ctxVnfPVertex);
-      // Assumption: select all the VLs that are NOT management
-      // TODO
-      VirtualLinkProfile ctxVlProfile;
-      for (ProfileVertex vlp : ctxVnfNeighbors) {
-        if (!((VirtualLinkProfileVertex) vlp).getVlProfile().getVirtualLinkDescId()
-            .equals(ctxMgmtVldId)) {
-          ctxVlProfile = ((VirtualLinkProfileVertex) vlp).getVlProfile();
+      Map<String, VlWrapper> ctxNonMgmtVls = new HashMap<>();
+      try {
+        for (ProfileVertex vlpV : ctxVnfNeighbors) {
+          if (!((VirtualLinkProfileVertex) vlpV).getVlProfile().getVirtualLinkDescId()
+              .equals(ctxMgmtVldId)) {
+            VirtualLinkProfile vlProfile = ((VirtualLinkProfileVertex) vlpV).getVlProfile();
+            ctxNonMgmtVls.put(ctxG.getEdge(ctxVnfPVertex, vlpV),
+                retrieveVlInfo(vlProfile.getVirtualLinkProfileId(), ctxNsd, ctxNsDf, ctxNsLvl));
+          }
         }
+        if (ctxNonMgmtVls.isEmpty()) {
+          throw new InvalidNsd("Can't find a non-management VL in Ctx.");
+        }
+      } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
+        log.error(e.getMessage());
+        throw new InvalidNsd(e.getMessage());
       }
+      String selectedCp = ctxNonMgmtVls.keySet().iterator().next();
+      addVirtualLink(vsbNsd, vsbNsDf, vsbNsLvl, ctxNonMgmtVls.get(selectedCp));
 
       // Retrieve vsb info
       VlWrapper ranVlWrapper;
