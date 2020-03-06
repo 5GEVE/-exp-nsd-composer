@@ -518,8 +518,8 @@ public class NsdComposer {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
-      String selectedCp = ctxNonMgmtVls.keySet().iterator().next();
-      addVirtualLink(vsbNsd, vsbNsDf, vsbNsLvl, ctxNonMgmtVls.get(selectedCp));
+      String ctxVnfPrimaryCpd = ctxNonMgmtVls.keySet().iterator().next();
+      addVirtualLink(vsbNsd, vsbNsDf, vsbNsLvl, ctxNonMgmtVls.get(ctxVnfPrimaryCpd));
 
       // Retrieve vsb info
       VlWrapper ranVlWrapper;
@@ -531,6 +531,7 @@ public class NsdComposer {
         throw new InvalidNsd(e.getMessage());
       }
 
+      // Assumption: select the first VNF attached to the RAN VL
       ProfileVertex ranVlVertex;
       try {
         ranVlVertex = nsdGraphService
@@ -540,13 +541,12 @@ public class NsdComposer {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
-      // Assumption: select the first VNF attached to the RAN VL
       List<ProfileVertex> ranVlNeigh = Graphs.neighborListOf(vsbG, ranVlVertex);
-      ProfileVertex ranVnfVertex;
+      VnfProfileVertex ranVnfVertex;
       Optional<ProfileVertex> optV = ranVlNeigh.stream().filter(v -> v instanceof VnfProfileVertex)
           .findFirst();
       if (optV.isPresent()) {
-        ranVnfVertex = optV.get();
+        ranVnfVertex = (VnfProfileVertex) optV.get();
       } else {
         throw new InvalidNsd(
             "No neighbor of type VnfProfileVertex found for '" + ranVlVertex.getVertexId() + "'.");
@@ -555,9 +555,10 @@ public class NsdComposer {
 
       VnfWrapper ranVnfWrapper;
       try {
-        ranVnfWrapper = retrieveVnfInfo(ranVnfVertex.getElementId(), vsbNsd, vsbNsDf,
-            vsbNsLvl);
-        log.debug("Retrieved VNF information for id: '{}'", ranVnfVertex.getElementId());
+        ranVnfWrapper = retrieveVnfInfo(ranVnfVertex.getVnfProfile().getVnfProfileId(),
+            vsbNsd, vsbNsDf, vsbNsLvl);
+        log.debug("Retrieved VNF information for id: '{}'",
+            ranVnfVertex.getVnfProfile().getVnfProfileId());
       } catch (InvalidNsd | VnfNotFoundInLvlMapping e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
