@@ -188,7 +188,7 @@ public class NsdComposer {
     return vlLvlMap;
   }
 
-  private void addVnf(Nsd nsd, NsDf nsDf, NsLevel nsLevel, VnfWrapper vnfWrapper) {
+  private void addVnf(VnfWrapper vnfWrapper, Nsd nsd, NsDf nsDf, NsLevel nsLevel) {
     String vnfdId = vnfWrapper.getVfndId();
     if (nsd.getVnfdId().stream().noneMatch(id -> id.equals(vnfdId))) {
       nsd.getVnfdId().add(vnfdId);
@@ -205,7 +205,7 @@ public class NsdComposer {
     }
   }
 
-  private void addVirtualLink(Nsd nsd, NsDf nsDf, NsLevel nsLevel, VlWrapper vlWrapper) {
+  private void addVirtualLink(VlWrapper vlWrapper, Nsd nsd, NsDf nsDf, NsLevel nsLevel) {
     NsVirtualLinkDesc vlDesc = vlWrapper.getVlDescriptor();
     if (nsd.getVirtualLinkDesc().stream()
         .noneMatch(nsdVld -> nsdVld.getVirtualLinkDescId().equals(vlDesc.getVirtualLinkDescId()))) {
@@ -506,7 +506,7 @@ public class NsdComposer {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
-      addVnf(vsbNsd, vsbNsDf, vsbNsLvl, ctxVnfWrapper);
+      addVnf(ctxVnfWrapper, vsbNsd, vsbNsDf, vsbNsLvl);
 
       // Retrieve non-management VLs from ctx
       ProfileVertex ctxVnfPVertex;
@@ -536,7 +536,7 @@ public class NsdComposer {
       }
       Iterator<Entry<String, VlWrapper>> ctxNonMgmtVLIter = ctxNonMgmtVls.entrySet().iterator();
       Entry<String, VlWrapper> ctxPrimaryConn = ctxNonMgmtVLIter.next();
-      addVirtualLink(vsbNsd, vsbNsDf, vsbNsLvl, ctxPrimaryConn.getValue());
+      addVirtualLink(ctxPrimaryConn.getValue(), vsbNsd, vsbNsDf, vsbNsLvl);
 
       // Retrieve RAN VL information from vsb
       VlWrapper ranVlWrapper;
