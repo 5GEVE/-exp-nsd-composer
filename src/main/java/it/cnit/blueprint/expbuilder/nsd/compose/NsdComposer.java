@@ -21,10 +21,10 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -493,7 +493,7 @@ public class NsdComposer {
       }
       addVnf(vsbNsd, vsbNsDf, vsbNsLvl, ctxVnfWrapper);
 
-      // Retrieve first non-management VLs from ctx
+      // Retrieve non-management VLs from ctx
       ProfileVertex ctxVnfPVertex;
       try {
         ctxVnfPVertex = nsdGraphService.getVertexById(ctxG, ctxVnfProfile.getVnfProfileId());
@@ -519,10 +519,11 @@ public class NsdComposer {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
-      String ctxVnfPrimaryCpd = ctxNonMgmtVls.keySet().iterator().next();
-      addVirtualLink(vsbNsd, vsbNsDf, vsbNsLvl, ctxNonMgmtVls.get(ctxVnfPrimaryCpd));
+      Iterator<Entry<String, VlWrapper>> ctxNonMgmtVLIter = ctxNonMgmtVls.entrySet().iterator();
+      Entry<String, VlWrapper> ctxPrimaryConn = ctxNonMgmtVLIter.next();
+      addVirtualLink(vsbNsd, vsbNsDf, vsbNsLvl, ctxPrimaryConn.getValue());
 
-      // Retrieve vsb info
+      // Retrieve RAN VL information from vsb
       VlWrapper ranVlWrapper;
       try {
         ranVlWrapper = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
@@ -532,6 +533,7 @@ public class NsdComposer {
         throw new InvalidNsd(e.getMessage());
       }
 
+      // Retrieve RAN closest VNF information from vsb
       // Assumption: select the first VNF attached to the RAN VL
       ProfileVertex ranVlVertex;
       try {
@@ -560,13 +562,16 @@ public class NsdComposer {
           .filter(vlc -> vlc.getCpdId().get(0).equals(ranVnfCpd)).findFirst();
       if (optVlc.isPresent()) {
         optVlc.get().setVirtualLinkProfileId(
-            ctxNonMgmtVls.get(ctxVnfPrimaryCpd).getVlProfile().getVirtualLinkProfileId());
+            ctxNonMgmtVls.get(ctxPrimaryConn.getKey()).getVlProfile().getVirtualLinkProfileId());
       } else {
         InvalidNsd e = new InvalidNsd("Could not find NsVirtualLinkConnectivity for cpdId:'"
             + ranVnfCpd + "'.");
         log.error(e.getMessage());
         throw e;
       }
+
+      // Connect ctxVnf with RAN VL
+      Entry<String, VlWrapper> ctxSecondaryConn = ctxNonMgmtVLIter.next();
 
       // TODO make connections
 
