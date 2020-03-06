@@ -22,6 +22,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -501,7 +502,7 @@ public class NsdComposer {
         throw new InvalidNsd(e.getMessage());
       }
       List<ProfileVertex> ctxVnfNeighbors = Graphs.neighborListOf(ctxG, ctxVnfPVertex);
-      Map<String, VlWrapper> ctxNonMgmtVls = new HashMap<>();
+      LinkedHashMap<String, VlWrapper> ctxNonMgmtVls = new LinkedHashMap<>();
       try {
         for (ProfileVertex vlpV : ctxVnfNeighbors) {
           if (!((VirtualLinkProfileVertex) vlpV).getVlProfile().getVirtualLinkDescId()
