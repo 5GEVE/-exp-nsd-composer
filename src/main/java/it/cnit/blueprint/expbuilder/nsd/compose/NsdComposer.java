@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.swing.text.html.Option;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -492,7 +493,7 @@ public class NsdComposer {
       }
       addVnf(vsbNsd, vsbNsDf, vsbNsLvl, ctxVnfWrapper);
 
-      // Retrieve first non-management VLs from ctx
+      // Retrieve first non-management VL from ctx
       ProfileVertex ctxVnfPVertex;
       try {
         ctxVnfPVertex = nsdGraphService.getVertexById(ctxG, ctxVnfProfile.getVnfProfileId());
@@ -501,27 +502,30 @@ public class NsdComposer {
         throw new InvalidNsd(e.getMessage());
       }
       List<ProfileVertex> ctxVnfNeighbors = Graphs.neighborListOf(ctxG, ctxVnfPVertex);
-      Map<String, VlWrapper> ctxNonMgmtVls = new HashMap<>();
+      VlWrapper ctxNonMgmtVlWrap = null;
+      String ctxVnfCp;
       try {
-        for (ProfileVertex vlpV : ctxVnfNeighbors) {
-          if (!((VirtualLinkProfileVertex) vlpV).getVlProfile().getVirtualLinkDescId()
+        for (ProfileVertex n : ctxVnfNeighbors) {
+          if (n instanceof VirtualLinkProfileVertex
+              && !((VirtualLinkProfileVertex) n).getVlProfile().getVirtualLinkDescId()
               .equals(ctxMgmtVldId)) {
-            VirtualLinkProfile vlProfile = ((VirtualLinkProfileVertex) vlpV).getVlProfile();
-            ctxNonMgmtVls.put(ctxG.getEdge(ctxVnfPVertex, vlpV),
-                retrieveVlInfo(vlProfile.getVirtualLinkProfileId(), ctxNsd, ctxNsDf, ctxNsLvl));
+            ctxNonMgmtVlWrap = retrieveVlInfo(
+                ((VirtualLinkProfileVertex) n).getVlProfile().getVirtualLinkProfileId(),
+                ctxNsd, ctxNsDf, ctxNsLvl);
+            ctxVnfCp = ctxG.getEdge(ctxVnfPVertex, n);
+            break;
           }
         }
-        if (ctxNonMgmtVls.isEmpty()) {
+        if (ctxNonMgmtVlWrap == null) {
           throw new InvalidNsd("Can't find a non-management VL in Ctx.");
         }
       } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
-      String selectedCp = ctxNonMgmtVls.keySet().iterator().next();
-      addVirtualLink(vsbNsd, vsbNsDf, vsbNsLvl, ctxNonMgmtVls.get(selectedCp));
+      addVirtualLink(vsbNsd, vsbNsDf, vsbNsLvl, ctxNonMgmtVlWrap);
 
-      // Retrieve vsb info
+      // Retrieve VL closest to RAN from vsb
       VlWrapper ranVlWrapper;
       try {
         ranVlWrapper = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
