@@ -551,17 +551,20 @@ public class NsdComposer {
         throw new InvalidNsd(
             "No neighbor of type VnfProfileVertex found for '" + ranVlVertex.getVertexId() + "'.");
       }
-      String cpdId = vsbG.getEdge(ranVlVertex, ranVnfVertex);
+      String ranVnfCpd = vsbG.getEdge(ranVlVertex, ranVnfVertex);
 
-      VnfWrapper ranVnfWrapper;
-      try {
-        ranVnfWrapper = retrieveVnfInfo(ranVnfVertex.getVnfProfile().getVnfProfileId(),
-            vsbNsd, vsbNsDf, vsbNsLvl);
-        log.debug("Retrieved VNF information for id: '{}'",
-            ranVnfVertex.getVnfProfile().getVnfProfileId());
-      } catch (InvalidNsd | VnfNotFoundInLvlMapping e) {
+      // Connect ranVnf to the new VL coming from ctx
+      Optional<NsVirtualLinkConnectivity> optVlc = ranVnfVertex.getVnfProfile()
+          .getNsVirtualLinkConnectivity().stream()
+          .filter(vlc -> vlc.getCpdId().get(0).equals(ranVnfCpd)).findFirst();
+      if (optVlc.isPresent()) {
+        optVlc.get().setVirtualLinkProfileId(
+            ctxNonMgmtVls.get(ctxVnfPrimaryCpd).getVlProfile().getVirtualLinkProfileId());
+      } else {
+        InvalidNsd e = new InvalidNsd("Could not find NsVirtualLinkConnectivity for cpdId:'"
+            + ranVnfCpd + "'.");
         log.error(e.getMessage());
-        throw new InvalidNsd(e.getMessage());
+        throw e;
       }
 
       // TODO make connections
