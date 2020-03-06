@@ -302,6 +302,21 @@ public class NsdComposer {
     return vld;
   }
 
+  private void connectVnfToVL(VnfProfile vnfp, String cpdId, VirtualLinkProfile vlp)
+      throws NotExistingEntityException {
+    Optional<NsVirtualLinkConnectivity> optVlConn = vnfp.getNsVirtualLinkConnectivity().stream()
+        .filter(vlConn -> vlConn.getCpdId().get(0).equals(cpdId)).findFirst();
+    if (optVlConn.isPresent()) {
+      optVlConn.get().setVirtualLinkProfileId(vlp.getVirtualLinkProfileId());
+    } else {
+      String m = MessageFormatter
+          .format("cpdId='{}' not found in vnfProfile='{}'.", cpdId, vnfp.getVnfProfileId())
+          .getMessage();
+      throw new NotExistingEntityException(m);
+    }
+
+  }
+
 //  @SuppressWarnings("DuplicatedCode")
 //  @SneakyThrows(JsonProcessingException.class)
 //  public void compose(Nsd vsNsd, CtxComposeInfo[] ctxComposeInfos)
@@ -557,32 +572,22 @@ public class NsdComposer {
       String ranVnfCpd = vsbG.getEdge(ranVlVertex, ranVnfVertex);
 
       // Connect ranVnf to the new VL coming from ctx
-      Optional<NsVirtualLinkConnectivity> optRanVlc = ranVnfVertex.getVnfProfile()
-          .getNsVirtualLinkConnectivity().stream()
-          .filter(vlc -> vlc.getCpdId().get(0).equals(ranVnfCpd)).findFirst();
-      if (optRanVlc.isPresent()) {
-        optRanVlc.get().setVirtualLinkProfileId(
-            ctxNonMgmtVls.get(ctxPrimaryConn.getKey()).getVlProfile().getVirtualLinkProfileId());
-      } else {
-        InvalidNsd e = new InvalidNsd("Could not find NsVirtualLinkConnectivity for cpdId:'"
-            + ranVnfCpd + "'.");
+      try {
+        connectVnfToVL(ranVnfVertex.getVnfProfile(), ranVnfCpd,
+            ctxPrimaryConn.getValue().getVlProfile());
+      } catch (NotExistingEntityException e) {
         log.error(e.getMessage());
-        throw e;
+        throw new InvalidNsd(e.getMessage());
       }
 
       // Connect ctxVnf with RAN VL
       Entry<String, VlWrapper> ctxSecondaryConn = ctxNonMgmtVLIter.next();
-      Optional<NsVirtualLinkConnectivity> optCtxVlc = ctxVnfWrapper.getVnfProfile()
-          .getNsVirtualLinkConnectivity().stream()
-          .filter(vlc -> vlc.getCpdId().get(0).equals(ctxSecondaryConn.getKey())).findFirst();
-      if (optCtxVlc.isPresent()) {
-        optCtxVlc.get().setVirtualLinkProfileId(
-            ranVlWrapper.getVlProfile().getVirtualLinkProfileId());
-      } else {
-        InvalidNsd e = new InvalidNsd("Could not find NsVirtualLinkConnectivity for cpdId:'"
-            + ranVnfCpd + "'.");
+      try {
+        connectVnfToVL(ctxVnfWrapper.getVnfProfile(), ctxSecondaryConn.getKey(),
+            ranVlWrapper.getVlProfile());
+      } catch (NotExistingEntityException e) {
         log.error(e.getMessage());
-        throw e;
+        throw new InvalidNsd(e.getMessage());
       }
 
       // TODO clear context vnf cpd for mgmt. Handled in another method.
