@@ -523,14 +523,19 @@ public class NsdComposer {
       }
       List<ProfileVertex> ctxVnfNeigh = Graphs.neighborListOf(ctxG, ctxVnfPVertex);
       log.debug("ctxVnfPVertex neighbors: {}", ctxVnfNeigh.toString());
+      String ctxMgmtCpdId = null;
       LinkedHashMap<String, VlWrapper> ctxNonMgmtVls = new LinkedHashMap<>();
       try {
         for (ProfileVertex vlpV : ctxVnfNeigh) {
-          if (!((VirtualLinkProfileVertex) vlpV).getVlProfile().getVirtualLinkDescId()
-              .equals(ctxMgmtVldId)) {
-            VirtualLinkProfile vlProfile = ((VirtualLinkProfileVertex) vlpV).getVlProfile();
-            ctxNonMgmtVls.put(ctxG.getEdge(ctxVnfPVertex, vlpV),
-                retrieveVlInfo(vlProfile.getVirtualLinkProfileId(), ctxNsd, ctxNsDf, ctxNsLvl));
+          if (vlpV instanceof VirtualLinkProfileVertex) {
+            if (((VirtualLinkProfileVertex) vlpV).getVlProfile().getVirtualLinkDescId()
+                .equals(ctxMgmtVldId)) {
+              ctxMgmtCpdId = ctxG.getEdge(ctxVnfPVertex, vlpV);
+            } else {
+              VirtualLinkProfile vlProfile = ((VirtualLinkProfileVertex) vlpV).getVlProfile();
+              ctxNonMgmtVls.put(ctxG.getEdge(ctxVnfPVertex, vlpV),
+                  retrieveVlInfo(vlProfile.getVirtualLinkProfileId(), ctxNsd, ctxNsDf, ctxNsLvl));
+            }
           }
         }
         if (ctxNonMgmtVls.isEmpty()) {
@@ -606,7 +611,19 @@ public class NsdComposer {
         throw new InvalidNsd(e.getMessage());
       }
 
-      // TODO clear context vnf cpd for mgmt. Handled in another method.
+      // Connect ctxVnf to vsbNsd mgmt VL
+      NsVirtualLinkDesc vsbMgmtVld = null;
+      if (ctxMgmtCpdId != null) {
+        try {
+          connectVnfToVL(ctxVnfWrapper.getVnfProfile(), ctxMgmtCpdId,
+              retrieveVlInfo(vsbMgmtVld, vsbNsDf, vsbNsLvl));
+        } catch (VlNotFoundInLvlMapping | NotExistingEntityException e) {
+          log.error(e.getMessage());
+          throw new InvalidNsd(e.getMessage());
+        }
+      } else {
+        log.warn("Could not find a management Cp for ctxVnf. Skip.");
+      }
 
       try {
         vsbNsd.isValid();
