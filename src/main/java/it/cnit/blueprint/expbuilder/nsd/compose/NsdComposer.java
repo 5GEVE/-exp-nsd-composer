@@ -10,6 +10,7 @@ import it.cnit.blueprint.expbuilder.nsd.graph.VirtualLinkProfileVertex;
 import it.cnit.blueprint.expbuilder.nsd.graph.VnfProfileVertex;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
@@ -458,7 +459,7 @@ public class NsdComposer {
   @SneakyThrows(JsonProcessingException.class)
   public void composePassThrough(Sapd ranSapd, Nsd vsbNsd, String ctxVnfdId,
       String ctxMgmtVldId, Nsd ctxNsd)
-      throws InvalidNsd, InvalidCtxComposeInfo {
+      throws InvalidNsd {
     NsVirtualLinkDesc ranVld;
     try {
       ranVld = findSapVld(ranSapd, vsbNsd);
@@ -475,7 +476,7 @@ public class NsdComposer {
     NsDf vsbNsDf = vsbNsd.getNsDf().get(0);
     Graph<ProfileVertex, String> ctxG = nsdGraphService
         .buildGraph(ctxNsd.getSapd(), ctxNsDf, ctxNsLvl);
-    log.debug("ctxG graph composition :\n{}", nsdGraphService.export(ctxG));
+    log.debug("ctxG graph:\n{}", nsdGraphService.export(ctxG));
 
     log.info("Composing '{}' with <{}, {}, {}>.",
         vsbNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
@@ -494,6 +495,7 @@ public class NsdComposer {
       VnfProfile ctxVnfProfile;
       try {
         ctxVnfProfile = getVnfProfileByDescId(ctxVnfdId, ctxNsDf);
+        log.debug("Found vnfProfile='{}' in context.", ctxVnfProfile.getVnfProfileId());
       } catch (NotExistingEntityException e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
@@ -502,24 +504,28 @@ public class NsdComposer {
       try {
         ctxVnfWrapper = retrieveVnfInfo(ctxVnfProfile.getVnfProfileId(),
             ctxNsd, ctxNsDf, ctxNsLvl);
+        log.debug("Found VnfInfo for vnfProfile='{}' in context.", ctxVnfProfile.getVnfProfileId());
       } catch (VnfNotFoundInLvlMapping e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
       addVnf(ctxVnfWrapper, vsbNsd, vsbNsDf, vsbNsLvl);
+      log.debug("Added Vnfd='{}' in service (if not present).", ctxVnfdId);
 
       // Retrieve non-management VLs from ctx
       ProfileVertex ctxVnfPVertex;
       try {
         ctxVnfPVertex = nsdGraphService.getVertexById(ctxG, ctxVnfProfile.getVnfProfileId());
+        log.debug("ctxVnfPVertex: {}", ctxVnfPVertex.toString());
       } catch (ProfileVertexNotFoundException e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
-      List<ProfileVertex> ctxVnfNeighbors = Graphs.neighborListOf(ctxG, ctxVnfPVertex);
+      List<ProfileVertex> ctxVnfNeigh = Graphs.neighborListOf(ctxG, ctxVnfPVertex);
+      log.debug("ctxVnfPVertex neighbors: {}", ctxVnfNeigh.toString());
       LinkedHashMap<String, VlWrapper> ctxNonMgmtVls = new LinkedHashMap<>();
       try {
-        for (ProfileVertex vlpV : ctxVnfNeighbors) {
+        for (ProfileVertex vlpV : ctxVnfNeigh) {
           if (!((VirtualLinkProfileVertex) vlpV).getVlProfile().getVirtualLinkDescId()
               .equals(ctxMgmtVldId)) {
             VirtualLinkProfile vlProfile = ((VirtualLinkProfileVertex) vlpV).getVlProfile();
@@ -534,15 +540,18 @@ public class NsdComposer {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
+      log.debug("ctxNonMgmtVls: {}", ctxNonMgmtVls.toString());
       Iterator<Entry<String, VlWrapper>> ctxNonMgmtVLIter = ctxNonMgmtVls.entrySet().iterator();
       Entry<String, VlWrapper> ctxPrimaryConn = ctxNonMgmtVLIter.next();
       addVirtualLink(ctxPrimaryConn.getValue(), vsbNsd, vsbNsDf, vsbNsLvl);
+      log.debug("Added VirtualLinkDescriptor='{}' in service (if not present).",
+          ctxPrimaryConn.getValue().getVlDescriptor().getVirtualLinkDescId());
 
       // Retrieve RAN VL information from vsb
       VlWrapper ranVlWrapper;
       try {
         ranVlWrapper = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
-        log.debug("Retrieved VL information for RAN vld: '{}'", ranVld.getVirtualLinkDescId());
+        log.debug("Found VlInfo for ranVld='{}' in context.", ranVld.getVirtualLinkDescId());
       } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
@@ -554,27 +563,32 @@ public class NsdComposer {
       try {
         ranVlVertex = nsdGraphService
             .getVertexById(vsbG, ranVlWrapper.getVlProfile().getVirtualLinkProfileId());
-        log.debug("Found ProfileVertex for RAN VL.");
+        log.debug("ranVlVertex: {}", ranVlVertex.toString());
       } catch (ProfileVertexNotFoundException e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
       List<ProfileVertex> ranVlNeigh = Graphs.neighborListOf(vsbG, ranVlVertex);
+      log.debug("ranVlVertex neighbors: {}", ranVlNeigh.toString());
       VnfProfileVertex ranVnfVertex;
       Optional<ProfileVertex> optV = ranVlNeigh.stream().filter(v -> v instanceof VnfProfileVertex)
           .findFirst();
       if (optV.isPresent()) {
         ranVnfVertex = (VnfProfileVertex) optV.get();
+        log.debug("ranVnfVertex: {}", ranVnfVertex.toString());
       } else {
         throw new InvalidNsd(
             "No neighbor of type VnfProfileVertex found for '" + ranVlVertex.getVertexId() + "'.");
       }
       String ranVnfCpd = vsbG.getEdge(ranVlVertex, ranVnfVertex);
+      log.debug("ranVnfCpd: {}", ranVnfCpd);
 
       // Connect ranVnf to the new VL coming from ctx
       try {
         connectVnfToVL(ranVnfVertex.getVnfProfile(), ranVnfCpd,
             ctxPrimaryConn.getValue().getVlProfile());
+        log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
+            ranVnfVertex.getVnfProfile(), ctxPrimaryConn.getValue().getVlProfile());
       } catch (NotExistingEntityException e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
@@ -585,6 +599,8 @@ public class NsdComposer {
       try {
         connectVnfToVL(ctxVnfWrapper.getVnfProfile(), ctxSecondaryConn.getKey(),
             ranVlWrapper.getVlProfile());
+        log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
+            ctxVnfWrapper.getVnfProfile(), ranVlWrapper.getVlProfile());
       } catch (NotExistingEntityException e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
@@ -592,6 +608,23 @@ public class NsdComposer {
 
       // TODO clear context vnf cpd for mgmt. Handled in another method.
 
+      try {
+        vsbNsd.isValid();
+      } catch (MalformattedElementException e) {
+        String m = "Nsd looks not valid after composition";
+        log.error(m, e);
+        throw new InvalidNsd(m);
+      }
+      vsbG = nsdGraphService.buildGraph(vsbNsd.getSapd(), vsbNsDf, vsbNsLvl);
+      log.debug("Graph AFTER composition with {}:\n{}",
+          ctxNsd.getNsdIdentifier(), nsdGraphService.export(vsbG));
+      log.info("Completed composition for nsDf='{}' and nsLvl='{}'",
+          vsbNsDf.getNsDfId(), vsbNsLvl.getNsLevelId());
+      log.debug("Nsd AFTER composition with {}:\n{}",
+          ctxNsd.getNsdIdentifier(), OBJECT_MAPPER.writeValueAsString(vsbNsd));
+      log.info("Completed composition of '{}' with <{}, {}, {}>.",
+          vsbNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
+          ctxNsLvl.getNsLevelId());
     }
   }
 
