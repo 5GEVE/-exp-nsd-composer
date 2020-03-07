@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.nsd.graph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import java.io.InputStream;
@@ -55,13 +56,28 @@ public class NsdComposerTest {
     } else {
       throw new Exception();
     }
+    NsVirtualLinkDesc vsbMgmtVld;
+    Optional<NsVirtualLinkDesc> optVsbVld = vsbNsd.getVirtualLinkDesc().stream()
+        .filter(v->v.getVirtualLinkDescId().equals("vl_tracking_mgt")).findFirst();
+    if (optVsbVld.isPresent()){
+      vsbMgmtVld=optVsbVld.get();
+    } else {
+      throw new Exception();
+    }
     Nsd ctxNsd = Arrays
         .asList(oM.readValue(new URL(urlProp.getProperty("ctx.delay.nsds")), Nsd[].class)).get(0);
     String ctxVnfdId = "396d1b6b-331b-4dd7-b48e-376517d3654a";
-    String ctxMgmtVldId = "vl_dg_mgt";
+    NsVirtualLinkDesc ctxMgmtVld;
+    Optional<NsVirtualLinkDesc> optCtxVld = ctxNsd.getVirtualLinkDesc().stream()
+        .filter(v->v.getVirtualLinkDescId().equals("vl_dg_mgt")).findFirst();
+    if (optCtxVld.isPresent()){
+      ctxMgmtVld=optCtxVld.get();
+    } else {
+      throw new Exception();
+    }
 
     // When
-    nsdComposer.composePassThrough(ranSapd, vsbNsd, ctxVnfdId, ctxMgmtVldId, ctxNsd);
+    nsdComposer.composePassThrough(ranSapd, vsbMgmtVld, vsbNsd, ctxVnfdId, ctxMgmtVld, ctxNsd);
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
     vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
