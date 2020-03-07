@@ -153,7 +153,6 @@ public class NsdComposer {
       throw new NotExistingEntityException(m);
     }
     return vnfdIdFound;
-
   }
 
   private NsVirtualLinkDesc getVlDescriptor(String vlDescId, Nsd nsd)
