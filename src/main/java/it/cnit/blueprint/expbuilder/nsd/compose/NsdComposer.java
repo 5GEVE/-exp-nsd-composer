@@ -441,7 +441,7 @@ public class NsdComposer {
 
   @SneakyThrows(JsonProcessingException.class)
   public void composePassThrough(Sapd ranSapd, NsVirtualLinkDesc vsbMgmtVld, Nsd vsbNsd,
-      String ctxVnfdId, NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd)
+      NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd)
       throws InvalidNsd {
     NsVirtualLinkDesc ranVld;
     try {
@@ -450,6 +450,7 @@ public class NsdComposer {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
     }
+    String ctxVnfdId = ctxNsd.getVnfdId().get(0);
 
     // We assume only one NsDf for the context
     NsDf ctxNsDf = ctxNsd.getNsDf().get(0);
