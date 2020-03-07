@@ -37,7 +37,7 @@ public class NsdComposerTest {
     urlProp.load(input);
     oM = new ObjectMapper(new YAMLFactory());
     nsdGraphService = new NsdGraphService(new GraphVizExporter());
-    nsdComposer = new NsdComposer(nsdGraphService);
+    nsdComposer = new PassThroughComposer(nsdGraphService);
     Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     root.setLevel(Level.DEBUG);
   }
@@ -76,7 +76,7 @@ public class NsdComposerTest {
     }
 
     // When
-    nsdComposer.composePassThrough(ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+    nsdComposer.compose(ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
     vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
