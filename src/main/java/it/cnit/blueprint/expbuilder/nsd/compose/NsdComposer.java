@@ -596,19 +596,25 @@ public class NsdComposer {
       }
 
       // Connect ctxVnf to vsbNsd mgmt VL
-      VlWrapper vsbMgmtVlInfo = retrieveVlInfo(vsbMgmtVld, vsbNsDf, vsbNsLvl);
-      if (ctxMgmtCpdId != null) {
-        try {
-          connectVnfToVL(ctxVnfWrapper.getVnfProfile(), ctxMgmtCpdId,
-              vsbMgmtVlInfo.getVlProfile());
-        } catch (NotExistingEntityException e) {
-          log.error(e.getMessage());
-          throw new InvalidNsd(e.getMessage());
+      VlWrapper vsbMgmtVlInfo;
+      try {
+        vsbMgmtVlInfo = retrieveVlInfo(vsbMgmtVld, vsbNsDf, vsbNsLvl);
+        if (ctxMgmtCpdId != null) {
+          try {
+            connectVnfToVL(ctxVnfWrapper.getVnfProfile(), ctxMgmtCpdId,
+                vsbMgmtVlInfo.getVlProfile());
+          } catch (NotExistingEntityException e) {
+            log.error(e.getMessage());
+            throw new InvalidNsd(e.getMessage());
+          }
+        } else {
+          log.warn("Could not find a management Cp for ctxVnf. Skip.");
         }
-      } else {
-        log.warn("Could not find a management Cp for ctxVnf. Skip.");
+      } catch (VlNotFoundInLvlMapping e) {
+        log.warn(e.getMessage() + " Skip.");
       }
 
+      // Nsd validation and logging
       try {
         vsbNsd.isValid();
       } catch (MalformattedElementException e) {
