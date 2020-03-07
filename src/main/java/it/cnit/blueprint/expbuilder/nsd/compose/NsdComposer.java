@@ -8,7 +8,6 @@ import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertexNotFoundException;
 import it.cnit.blueprint.expbuilder.nsd.graph.VirtualLinkProfileVertex;
 import it.cnit.blueprint.expbuilder.nsd.graph.VnfProfileVertex;
-import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -288,21 +287,6 @@ public class NsdComposer {
     return new VlWrapper(vlMap, vlProfile, vld);
   }
 
-  private NsVirtualLinkDesc findSapVld(Sapd sapd, Nsd nsd) throws InvalidNsd {
-    NsVirtualLinkDesc vld;
-    Optional<NsVirtualLinkDesc> optVld = nsd.getVirtualLinkDesc().stream()
-        .filter(v -> v.getVirtualLinkDescId().equals(sapd.getNsVirtualLinkDescId())).findFirst();
-    if (optVld.isPresent()) {
-      vld = optVld.get();
-    } else {
-      String m = MessageFormatter
-          .format("Vld with id='{}' not found.", sapd.getNsVirtualLinkDescId())
-          .getMessage();
-      throw new InvalidNsd(m);
-    }
-    return vld;
-  }
-
   private void connectVnfToVL(VnfProfile vnfp, String cpdId, VirtualLinkProfile vlp)
       throws NotExistingEntityException {
     Optional<NsVirtualLinkConnectivity> optVlConn = vnfp.getNsVirtualLinkConnectivity().stream()
@@ -457,15 +441,15 @@ public class NsdComposer {
 //  }
 
   @SneakyThrows(JsonProcessingException.class)
-  public void composePassThrough(Sapd ranSapd, Nsd vsbNsd, String ctxVnfdId,
-      String ctxMgmtVldId, Nsd ctxNsd)
+  public void composePassThrough(Sapd ranSapd, NsVirtualLinkDesc vsbMgmtVld, Nsd vsbNsd,
+      String ctxVnfdId, NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd)
       throws InvalidNsd {
     NsVirtualLinkDesc ranVld;
     try {
-      ranVld = findSapVld(ranSapd, vsbNsd);
-    } catch (InvalidNsd e) {
+      ranVld = getVlDescriptor(ranSapd.getNsVirtualLinkDescId(), vsbNsd);
+    } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
-      throw e;
+      throw new InvalidNsd(e.getMessage());
     }
 
     // We assume only one NsDf for the context
@@ -529,7 +513,7 @@ public class NsdComposer {
         for (ProfileVertex vlpV : ctxVnfNeigh) {
           if (vlpV instanceof VirtualLinkProfileVertex) {
             if (((VirtualLinkProfileVertex) vlpV).getVlProfile().getVirtualLinkDescId()
-                .equals(ctxMgmtVldId)) {
+                .equals(ctxMgmtVld.getVirtualLinkDescId())) {
               ctxMgmtCpdId = ctxG.getEdge(ctxVnfPVertex, vlpV);
             } else {
               VirtualLinkProfile vlProfile = ((VirtualLinkProfileVertex) vlpV).getVlProfile();
@@ -612,12 +596,12 @@ public class NsdComposer {
       }
 
       // Connect ctxVnf to vsbNsd mgmt VL
-      NsVirtualLinkDesc vsbMgmtVld = null;
+      VlWrapper vsbMgmtVlInfo = retrieveVlInfo(vsbMgmtVld, vsbNsDf, vsbNsLvl);
       if (ctxMgmtCpdId != null) {
         try {
           connectVnfToVL(ctxVnfWrapper.getVnfProfile(), ctxMgmtCpdId,
-              retrieveVlInfo(vsbMgmtVld, vsbNsDf, vsbNsLvl));
-        } catch (VlNotFoundInLvlMapping | NotExistingEntityException e) {
+              vsbMgmtVlInfo.getVlProfile());
+        } catch (NotExistingEntityException e) {
           log.error(e.getMessage());
           throw new InvalidNsd(e.getMessage());
         }

@@ -8,6 +8,7 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnBoardVsBlueprintRequest;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import lombok.AllArgsConstructor;
@@ -44,15 +45,15 @@ public class MasterComposer {
         log.info("pass_through");
         // compose Nsd
         Sapd ranSapd = findRanSapd(vsbRequest.getVsBlueprint(), vsbNsd);
+        NsVirtualLinkDesc vsbMgmtVld = findMgmtVld(ctxB, ctxNsd);
         String ctxVnfdId;
         if (ctxNsd.getVnfdId().size() == 1) {
           ctxVnfdId = ctxNsd.getVnfdId().get(0);
         } else {
           throw new InvalidCtxComposeInfo("More than one VNF found in Ctx for PASS_THROUGH");
         }
-        String ctxMgmtVldId = findMgmtVldId(ctxB, ctxNsd);
-        nsdComposer.composePassThrough(ranSapd, vsbNsd, ctxVnfdId, ctxMgmtVldId, ctxNsd);
-        // TODO prepare input for mgmt VL and cpdid
+        NsVirtualLinkDesc ctxMgmtVld = findMgmtVld(ctxB, ctxNsd);
+        nsdComposer.composePassThrough(ranSapd, vsbMgmtVld, vsbNsd, ctxVnfdId, ctxMgmtVld, ctxNsd);
         // compose Exp blueprint
       } else {
         log.error("not supported");
@@ -62,10 +63,10 @@ public class MasterComposer {
     }
   }
 
-  private String findMgmtVldId(Blueprint b, Nsd nsd) {
+  private NsVirtualLinkDesc findMgmtVld(Blueprint b, Nsd nsd) {
     // TODO Visit vlDesc in nsd and check if mgmt in b.
     // We need model modifications to make this work.
-    return "";
+    return new NsVirtualLinkDesc();
   }
 
   private Sapd findRanSapd(Blueprint b, Nsd nsd) {
