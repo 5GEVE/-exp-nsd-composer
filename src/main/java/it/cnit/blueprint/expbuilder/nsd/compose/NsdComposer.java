@@ -627,12 +627,19 @@ public class NsdComposer {
           ctxNsd.getNsdIdentifier(), nsdGraphService.export(vsbG));
       log.info("Completed composition for nsDf='{}' and nsLvl='{}'",
           vsbNsDf.getNsDfId(), vsbNsLvl.getNsLevelId());
-      log.debug("Nsd AFTER composition with {}:\n{}",
-          ctxNsd.getNsdIdentifier(), OBJECT_MAPPER.writeValueAsString(vsbNsd));
-      log.info("Completed composition of '{}' with <{}, {}, {}>.",
-          vsbNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
-          ctxNsLvl.getNsLevelId());
     }
+    log.debug("Nsd AFTER composition with {}:\n{}",
+        ctxNsd.getNsdIdentifier(), OBJECT_MAPPER.writeValueAsString(vsbNsd));
+    log.info("Completed composition of '{}' with <{}, {}, {}>.",
+        vsbNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
+        ctxNsLvl.getNsLevelId());
   }
 
+  @SneakyThrows(JsonProcessingException.class)
+  public void composeConnectNoInput(Sapd ranSapd, NsVirtualLinkDesc vsbMgmtVld, Nsd vsbNsd,
+      NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd){}
+
+  @SneakyThrows(JsonProcessingException.class)
+  public void composeConnect(NsVirtualLinkDesc srcVl, NsVirtualLinkDesc dstVl, Nsd vsbNsd,
+      NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd){}
 }
