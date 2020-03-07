@@ -7,7 +7,8 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class VnfWrapper {
+public class VnfInfo
+{
 
   private String vfndId;
   private VnfProfile vnfProfile;
