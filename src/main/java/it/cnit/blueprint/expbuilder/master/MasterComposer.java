@@ -44,16 +44,15 @@ public class MasterComposer {
       } else if (STRAT.equals(CompositionStrategy.PASS_THROUGH)) {
         log.info("pass_through");
         // compose Nsd
-        Sapd ranSapd = findRanSapd(vsbRequest.getVsBlueprint(), vsbNsd);
-        NsVirtualLinkDesc vsbMgmtVld = findMgmtVld(ctxB, ctxNsd);
-        String ctxVnfdId;
         if (ctxNsd.getVnfdId().size() == 1) {
-          ctxVnfdId = ctxNsd.getVnfdId().get(0);
+          log.debug("ctxNsd has only one vnfdId.");
         } else {
           throw new InvalidCtxComposeInfo("More than one VNF found in Ctx for PASS_THROUGH");
         }
+        Sapd ranSapd = findRanSapd(vsbRequest.getVsBlueprint(), vsbNsd);
+        NsVirtualLinkDesc vsbMgmtVld = findMgmtVld(ctxB, ctxNsd);
         NsVirtualLinkDesc ctxMgmtVld = findMgmtVld(ctxB, ctxNsd);
-        nsdComposer.composePassThrough(ranSapd, vsbMgmtVld, vsbNsd, ctxVnfdId, ctxMgmtVld, ctxNsd);
+        nsdComposer.composePassThrough(ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
         // compose Exp blueprint
       } else {
         log.error("not supported");
