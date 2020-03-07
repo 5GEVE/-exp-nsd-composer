@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class VlWrapper {
+public class VlInfo {
 
   private VirtualLinkToLevelMapping vlToLevelMapping;
   private VirtualLinkProfile vlProfile;
