@@ -31,7 +31,7 @@ public class ConnectComposer extends NsdComposer {
 
   @Override
   public void composeWithStrategy(
-      NsVirtualLinkDesc ranVld, NsVirtualLinkDesc vsbMgmtVld, NsVirtualLinkDesc ctxMgmtVld,
+      VlInfo ranVlInfo, VlInfo vsbMgmtVlInfo, VlInfo ctxMgmtVlInfo,
       Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl, Graph<ProfileVertex, String> vsbG,
       Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl, Graph<ProfileVertex, String> ctxG)
       throws InvalidNsd {
@@ -53,7 +53,6 @@ public class ConnectComposer extends NsdComposer {
     addVnf(dstVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
     log.debug("Added Vnfd='{}' in service (if not present).", dstVnfInfo.getVfndId());
 
-    VlInfo ctxMgmtVlInfo = retrieveVlInfo(ctxMgmtVld, ctxNsDf, ctxNsLvl);
     // Retrieve CpdId for src VNF
     @SuppressWarnings("DuplicatedCode")
     Map<String, String> srcCpds;
@@ -76,18 +75,12 @@ public class ConnectComposer extends NsdComposer {
 
     // Retrieve src VL
     // Retrieve RAN VL information from vsb
-    VlInfo srcVlInfo;
-    try {
-      srcVlInfo = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
-      log.debug("Found VlInfo for ranVld='{}' in vsbNsd.", ranVld.getVirtualLinkDescId());
-    } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
-      log.error(e.getMessage());
-      throw new InvalidNsd(e.getMessage());
-    }
+    VlInfo srcVlInfo = ranVlInfo;
     // Retrieve dst VL
     VlInfo dstVlInfo;
     Optional<NsVirtualLinkDesc> optdstVld = vsbNsd.getVirtualLinkDesc().stream()
-        .filter(vld -> vld.getVirtualLinkDescId().equals(vsbMgmtVld.getVirtualLinkDescId()))
+        .filter(vld -> vld.getVirtualLinkDescId()
+            .equals(vsbMgmtVlInfo.getVlDescriptor().getVirtualLinkDescId()))
         .findFirst();
     try {
       if (optdstVld.isPresent()) {
@@ -107,11 +100,11 @@ public class ConnectComposer extends NsdComposer {
     connectVnfToVL(dstVnfInfo.getVnfProfile(), dstVnfDataCpdId, dstVlInfo.getVlProfile());
 
     // Connect VNFs to mgmt VL (if possible)
-    if (srcVnfMgmtCpdId != null){
-      connectVnfToVL(srcVnfInfo.getVnfProfile(), srcVnfMgmtCpdId, vsbMgmtVld.getVlProfile());
+    if (srcVnfMgmtCpdId != null) {
+      connectVnfToVL(srcVnfInfo.getVnfProfile(), srcVnfMgmtCpdId, vsbMgmtVlInfo.getVlProfile());
     }
-    if(dstVnfMgmtCpdId!=null){
-      connectVnfToVL(dstVnfInfo.getVnfProfile(), dstVnfMgmtCpdId, vsbMgmtVld.getVlProfile());
+    if (dstVnfMgmtCpdId != null) {
+      connectVnfToVL(dstVnfInfo.getVnfProfile(), dstVnfMgmtCpdId, vsbMgmtVlInfo.getVlProfile());
     }
 
   }
@@ -130,6 +123,7 @@ public class ConnectComposer extends NsdComposer {
       cpdIdMap.put("mgmt", null);
     }
     if (!cpdIdMap.containsKey("data")) {
+      // TODO add correct excetpion
       throw new Exception();
     }
     return cpdIdMap;

@@ -418,7 +418,21 @@ public abstract class NsdComposer {
           .buildGraph(vsbNsd.getSapd(), vsbNsDf, vsbNsLvl);
       log.debug("vsbG BEFORE composition :\n{}", nsdGraphService.export(vsbG));
 
-      composeWithStrategy(ranVld, vsbMgmtVld, ctxMgmtVld,
+      VlInfo ranVlInfo;
+      VlInfo vsbMgmtVlInfo;
+      VlInfo ctxMgmtVlInfo;
+      try {
+        ranVlInfo = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
+        log.debug("Found VlInfo for ranVld='{}' in vsbNsd.", ranVld.getVirtualLinkDescId());
+        vsbMgmtVlInfo = retrieveVlInfo(vsbMgmtVld, vsbNsDf, vsbNsLvl);
+        log.debug("Found VlInfo for vsbMgmtVld='{}' in vsbNsd.", vsbMgmtVld.getVirtualLinkDescId());
+        ctxMgmtVlInfo = retrieveVlInfo(ctxMgmtVld, ctxNsDf, ctxNsLvl);
+        log.debug("Found VlInfo for vsbMgmtVld='{}' in vsbNsd.", vsbMgmtVld.getVirtualLinkDescId());
+      } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
+        log.error(e.getMessage());
+        throw new InvalidNsd(e.getMessage());
+      }
+      composeWithStrategy(ranVlInfo, vsbMgmtVlInfo, ctxMgmtVlInfo,
           vsbNsd, vsbNsDf, vsbNsLvl, vsbG,
           ctxNsd, ctxNsDf, ctxNsLvl, ctxG);
 
@@ -444,7 +458,7 @@ public abstract class NsdComposer {
   }
 
   public abstract void composeWithStrategy(
-      NsVirtualLinkDesc ranVld, NsVirtualLinkDesc vsbMgmtVld, NsVirtualLinkDesc ctxMgmtVld,
+      VlInfo ranVlInfo, VlInfo vsbMgmtVlInfo, VlInfo ctxMgmtVlInfo,
       Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl, Graph<ProfileVertex, String> vsbG,
       Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl, Graph<ProfileVertex, String> ctxG
   ) throws InvalidNsd;

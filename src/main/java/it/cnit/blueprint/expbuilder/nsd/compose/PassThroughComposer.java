@@ -10,7 +10,6 @@ import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityExceptio
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -38,7 +37,7 @@ public class PassThroughComposer extends NsdComposer {
 
   @Override
   public void composeWithStrategy(
-      NsVirtualLinkDesc ranVld, NsVirtualLinkDesc vsbMgmtVld, NsVirtualLinkDesc ctxMgmtVld,
+      VlInfo ranVlInfo, VlInfo vsbMgmtVlInfo, VlInfo ctxMgmtVlInfo,
       Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl, Graph<ProfileVertex, String> vsbG,
       Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl, Graph<ProfileVertex, String> ctxG
   ) throws InvalidNsd {
@@ -73,7 +72,7 @@ public class PassThroughComposer extends NsdComposer {
       for (ProfileVertex vlpV : ctxVnfNeigh) {
         if (vlpV instanceof VirtualLinkProfileVertex) {
           if (((VirtualLinkProfileVertex) vlpV).getVlProfile().getVirtualLinkDescId()
-              .equals(ctxMgmtVld.getVirtualLinkDescId())) {
+              .equals(ctxMgmtVlInfo.getVlDescriptor().getVirtualLinkDescId())) {
             ctxMgmtCpdId = ctxG.getEdge(ctxVnfPVertex, vlpV);
           } else {
             VirtualLinkProfile vlProfile = ((VirtualLinkProfileVertex) vlpV).getVlProfile();
@@ -95,17 +94,6 @@ public class PassThroughComposer extends NsdComposer {
     addVirtualLink(ctxPrimaryConn.getValue(), vsbNsd, vsbNsDf, vsbNsLvl);
     log.debug("Added VirtualLinkDescriptor='{}' in service (if not present).",
         ctxPrimaryConn.getValue().getVlDescriptor().getVirtualLinkDescId());
-
-    // Retrieve RAN VL information from vsb
-    // TODO move to abstract class
-    VlInfo ranVlInfo;
-    try {
-      ranVlInfo = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
-      log.debug("Found VlInfo for ranVld='{}' in vsbNsd.", ranVld.getVirtualLinkDescId());
-    } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
-      log.error(e.getMessage());
-      throw new InvalidNsd(e.getMessage());
-    }
 
     // Retrieve RAN closest VNF information from vsb
     // Assumption: select the first VNF attached to the RAN VL
@@ -157,22 +145,16 @@ public class PassThroughComposer extends NsdComposer {
     }
 
     // Connect ctxVnf to vsbNsd mgmt VL
-    VlInfo vsbMgmtVlInfo;
-    try {
-      vsbMgmtVlInfo = retrieveVlInfo(vsbMgmtVld, vsbNsDf, vsbNsLvl);
-      if (ctxMgmtCpdId != null) {
-        try {
-          connectVnfToVL(ctxVnfInfo.getVnfProfile(), ctxMgmtCpdId,
-              vsbMgmtVlInfo.getVlProfile());
-        } catch (NotExistingEntityException e) {
-          log.error(e.getMessage());
-          throw new InvalidNsd(e.getMessage());
-        }
-      } else {
-        log.warn("Could not find a management Cp for ctxVnf. Skip.");
+    if (ctxMgmtCpdId != null) {
+      try {
+        connectVnfToVL(ctxVnfInfo.getVnfProfile(), ctxMgmtCpdId,
+            vsbMgmtVlInfo.getVlProfile());
+      } catch (NotExistingEntityException e) {
+        log.error(e.getMessage());
+        throw new InvalidNsd(e.getMessage());
       }
-    } catch (VlNotFoundInLvlMapping e) {
-      log.warn(e.getMessage() + " Skip.");
+    } else {
+      log.warn("Could not find a management Cp for ctxVnf. Skip.");
     }
 
   }
