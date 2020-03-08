@@ -3,6 +3,7 @@ package it.cnit.blueprint.expbuilder.nsd.compose;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
@@ -73,18 +74,18 @@ public class ConnectComposer extends NsdComposer {
     String dstVnfDataCpdId = dstCpds.get("data");
     String dstVnfMgmtCpdId = dstCpds.get("mgmt");
 
+    // TODO handle custom VL input
     // Retrieve src VL
-    // Retrieve RAN VL information from vsb
     VlInfo srcVlInfo = ranVlInfo;
     // Retrieve dst VL
     VlInfo dstVlInfo;
-    Optional<NsVirtualLinkDesc> optdstVld = vsbNsd.getVirtualLinkDesc().stream()
-        .filter(vld -> vld.getVirtualLinkDescId()
+    Optional<NsVirtualLinkDesc> optDstVld = vsbNsd.getVirtualLinkDesc().stream()
+        .filter(vld -> !vld.getVirtualLinkDescId()
             .equals(vsbMgmtVlInfo.getVlDescriptor().getVirtualLinkDescId()))
         .findFirst();
     try {
-      if (optdstVld.isPresent()) {
-        dstVlInfo = retrieveVlInfo(optdstVld.get(), vsbNsDf, vsbNsLvl);
+      if (optDstVld.isPresent()) {
+        dstVlInfo = retrieveVlInfo(optDstVld.get(), vsbNsDf, vsbNsLvl);
         log.debug("Found non-mgmt VlInfo.");
       } else {
         throw new InvalidNsd(
@@ -95,16 +96,26 @@ public class ConnectComposer extends NsdComposer {
       throw new InvalidNsd(e.getMessage());
     }
 
-    // Connect VNFs to src and dst VLs
-    connectVnfToVL(srcVnfInfo.getVnfProfile(), srcVnfDataCpdId, srcVlInfo.getVlProfile());
-    connectVnfToVL(dstVnfInfo.getVnfProfile(), dstVnfDataCpdId, dstVlInfo.getVlProfile());
-
-    // Connect VNFs to mgmt VL (if possible)
-    if (srcVnfMgmtCpdId != null) {
-      connectVnfToVL(srcVnfInfo.getVnfProfile(), srcVnfMgmtCpdId, vsbMgmtVlInfo.getVlProfile());
-    }
-    if (dstVnfMgmtCpdId != null) {
-      connectVnfToVL(dstVnfInfo.getVnfProfile(), dstVnfMgmtCpdId, vsbMgmtVlInfo.getVlProfile());
+    try {
+      // Connect VNFs to src and dst VLs
+      connectVnfToVL(srcVnfInfo.getVnfProfile(), srcVnfDataCpdId, srcVlInfo.getVlProfile());
+      log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
+          srcVnfInfo.getVnfProfile().getVnfProfileId(),
+          srcVlInfo.getVlProfile().getVirtualLinkProfileId());
+      connectVnfToVL(dstVnfInfo.getVnfProfile(), dstVnfDataCpdId, dstVlInfo.getVlProfile());
+      log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
+          dstVnfInfo.getVnfProfile().getVnfProfileId(),
+          dstVlInfo.getVlProfile().getVirtualLinkProfileId());
+      // Connect VNFs to mgmt VL (if possible)
+      if (srcVnfMgmtCpdId != null) {
+        connectVnfToVL(srcVnfInfo.getVnfProfile(), srcVnfMgmtCpdId, vsbMgmtVlInfo.getVlProfile());
+      }
+      if (dstVnfMgmtCpdId != null) {
+        connectVnfToVL(dstVnfInfo.getVnfProfile(), dstVnfMgmtCpdId, vsbMgmtVlInfo.getVlProfile());
+      }
+    } catch (NotExistingEntityException e) {
+      log.error(e.getMessage());
+      throw new InvalidNsd(e.getMessage());
     }
 
   }
