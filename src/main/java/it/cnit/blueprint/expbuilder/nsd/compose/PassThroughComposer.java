@@ -12,7 +12,6 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,19 +44,10 @@ public class PassThroughComposer extends NsdComposer {
   ) throws InvalidNsd {
     // Retrieve ctx VNF
     String ctxVnfdId = ctxNsd.getVnfdId().get(0);
-    VnfProfile ctxVnfProfile;
-    try {
-      ctxVnfProfile = getVnfProfileByDescId(ctxVnfdId, ctxNsDf);
-      log.debug("Found vnfProfile='{}' in context.", ctxVnfProfile.getVnfProfileId());
-    } catch (NotExistingEntityException e) {
-      log.error(e.getMessage());
-      throw new InvalidNsd(e.getMessage());
-    }
     VnfInfo ctxVnfInfo;
     try {
-      ctxVnfInfo = retrieveVnfInfo(ctxVnfProfile.getVnfProfileId(),
-          ctxNsd, ctxNsDf, ctxNsLvl);
-      log.debug("Found VnfInfo for vnfProfile='{}' in context.", ctxVnfProfile.getVnfProfileId());
+      ctxVnfInfo = retrieveVnfInfoByDescId(ctxVnfdId, ctxNsd, ctxNsDf, ctxNsLvl);
+      log.debug("Found VnfInfo for vnfdId='{}' in context.", ctxVnfdId);
     } catch (VnfNotFoundInLvlMapping e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
@@ -68,7 +58,8 @@ public class PassThroughComposer extends NsdComposer {
     // Retrieve non-management VLs from ctx
     ProfileVertex ctxVnfPVertex;
     try {
-      ctxVnfPVertex = nsdGraphService.getVertexById(ctxG, ctxVnfProfile.getVnfProfileId());
+      ctxVnfPVertex = nsdGraphService
+          .getVertexById(ctxG, ctxVnfInfo.getVnfProfile().getVnfProfileId());
       log.debug("ctxVnfPVertex: {}", ctxVnfPVertex.toString());
     } catch (ProfileVertexNotFoundException e) {
       log.error(e.getMessage());

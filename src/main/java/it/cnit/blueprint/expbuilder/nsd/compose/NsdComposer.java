@@ -33,20 +33,6 @@ public abstract class NsdComposer {
 
   protected NsdGraphService nsdGraphService;
 
-  protected VnfProfile getVnfProfileById(String vnfProfileId, NsDf nsDf)
-      throws NotExistingEntityException {
-    VnfProfile vnfProfile;
-    try {
-      vnfProfile = nsDf.getVnfProfile(vnfProfileId);
-    } catch (NotExistingEntityException e) {
-      String m = MessageFormatter
-          .format("VnfProfile='{}' not found in nsDf='{}'", vnfProfileId, nsDf.getNsDfId())
-          .getMessage();
-      throw new NotExistingEntityException(m);
-    }
-    return vnfProfile;
-  }
-
   protected VnfProfile getVnfProfileByDescId(String vnfdId, NsDf nsDf)
       throws NotExistingEntityException {
     VnfProfile vnfProfile;
@@ -94,23 +80,6 @@ public abstract class NsdComposer {
     return resultVlp;
   }
 
-  protected NsVirtualLinkConnectivity getVlConnectivity(String cpdId, VnfProfile vnfProfile)
-      throws NotExistingEntityException {
-    NsVirtualLinkConnectivity nsVlC;
-    Optional<NsVirtualLinkConnectivity> optVlC = vnfProfile.getNsVirtualLinkConnectivity()
-        .stream().filter(vlc -> vlc.getCpdId().get(0).equals(cpdId)).findFirst();
-    if (optVlC.isPresent()) {
-      nsVlC = optVlC.get();
-    } else {
-      String m = MessageFormatter
-          .format("NsVirtualLinkConnectivity for cpdId='{}' not found in vnfProfile='{}'",
-              cpdId, vnfProfile.getVnfProfileId())
-          .getMessage();
-      throw new NotExistingEntityException(m);
-    }
-    return nsVlC;
-  }
-
   protected VnfToLevelMapping getVnfLvlMapping(String vnfProfileId, NsLevel nsLvl)
       throws NotExistingEntityException {
     VnfToLevelMapping vnfLvlMap;
@@ -125,21 +94,6 @@ public abstract class NsdComposer {
       throw new NotExistingEntityException(m);
     }
     return vnfLvlMap;
-  }
-
-  protected String getVnfdId(String vnfdId, Nsd nsd) throws NotExistingEntityException {
-    String vnfdIdFound;
-    Optional<String> optVnfdId = nsd.getVnfdId().stream()
-        .filter(id -> id.equals(vnfdId)).findFirst();
-    if (optVnfdId.isPresent()) {
-      vnfdIdFound = optVnfdId.get();
-    } else {
-      String m = MessageFormatter
-          .format("vnfdId='{}' not found in nsd='{}'.", vnfdId, nsd.getNsdIdentifier())
-          .getMessage();
-      throw new NotExistingEntityException(m);
-    }
-    return vnfdIdFound;
   }
 
   protected NsVirtualLinkDesc getVlDescriptor(String vlDescId, Nsd nsd)
@@ -210,25 +164,28 @@ public abstract class NsdComposer {
     }
   }
 
-  protected VnfInfo retrieveVnfInfo(String vnfProfileId, Nsd nsd, NsDf nsDf, NsLevel nsLevel)
+  protected VnfInfo retrieveVnfInfoByDescId(String vnfdId, Nsd nsd, NsDf nsDf,
+      NsLevel nsLevel)
       throws InvalidNsd, VnfNotFoundInLvlMapping {
-    VnfToLevelMapping vnfLvlMap;
-    try {
-      vnfLvlMap = getVnfLvlMapping(vnfProfileId, nsLevel);
-    } catch (NotExistingEntityException e) {
-      throw new VnfNotFoundInLvlMapping(e.getMessage());
+    Optional<String> optVnfdId = nsd.getVnfdId().stream()
+        .filter(id -> id.equals(vnfdId)).findFirst();
+    if (!optVnfdId.isPresent()) {
+      String m = MessageFormatter
+          .format("vnfdId='{}' not found in nsd='{}'.", vnfdId, nsd.getNsdIdentifier())
+          .getMessage();
+      throw new InvalidNsd(m);
     }
     VnfProfile vnfProfile;
     try {
-      vnfProfile = getVnfProfileById(vnfProfileId, nsDf);
+      vnfProfile = getVnfProfileByDescId(vnfdId, nsDf);
     } catch (NotExistingEntityException e) {
       throw new InvalidNsd(e.getMessage());
     }
-    String vnfdId;
+    VnfToLevelMapping vnfLvlMap;
     try {
-      vnfdId = getVnfdId(vnfProfile.getVnfdId(), nsd);
+      vnfLvlMap = getVnfLvlMapping(vnfProfile.getVnfProfileId(), nsLevel);
     } catch (NotExistingEntityException e) {
-      throw new InvalidNsd(e.getMessage());
+      throw new VnfNotFoundInLvlMapping(e.getMessage());
     }
     return new VnfInfo(vnfdId, vnfProfile, vnfLvlMap);
   }
