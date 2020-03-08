@@ -55,15 +55,12 @@ public class ConnectComposer extends NsdComposer {
     log.debug("Added Vnfd='{}' in service (if not present).", dstVnfInfo.getVfndId());
 
     // Retrieve CpdId for src VNF
-    @SuppressWarnings("DuplicatedCode")
     Map<String, String> srcCpds;
     try {
       srcCpds = getMgmtDataCpds(srcVnfInfo, ctxMgmtVlInfo);
     } catch (Exception e) {
       throw new InvalidNsd(e.getMessage());
     }
-    String srcVnfDataCpdId = srcCpds.get("data");
-    String srcVnfMgmtCpdId = srcCpds.get("mgmt");
     // Retrieve CpdId for dst VNF
     Map<String, String> dstCpds;
     try {
@@ -71,8 +68,6 @@ public class ConnectComposer extends NsdComposer {
     } catch (Exception e) {
       throw new InvalidNsd(e.getMessage());
     }
-    String dstVnfDataCpdId = dstCpds.get("data");
-    String dstVnfMgmtCpdId = dstCpds.get("mgmt");
 
     // TODO handle custom VL input
     // Retrieve src VL
@@ -98,20 +93,22 @@ public class ConnectComposer extends NsdComposer {
 
     try {
       // Connect VNFs to src and dst VLs
-      connectVnfToVL(srcVnfInfo.getVnfProfile(), srcVnfDataCpdId, srcVlInfo.getVlProfile());
+      connectVnfToVL(srcVnfInfo.getVnfProfile(), srcCpds.get("data"), srcVlInfo.getVlProfile());
       log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
           srcVnfInfo.getVnfProfile().getVnfProfileId(),
           srcVlInfo.getVlProfile().getVirtualLinkProfileId());
-      connectVnfToVL(dstVnfInfo.getVnfProfile(), dstVnfDataCpdId, dstVlInfo.getVlProfile());
+      connectVnfToVL(dstVnfInfo.getVnfProfile(), dstCpds.get("data"), dstVlInfo.getVlProfile());
       log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
           dstVnfInfo.getVnfProfile().getVnfProfileId(),
           dstVlInfo.getVlProfile().getVirtualLinkProfileId());
       // Connect VNFs to mgmt VL (if possible)
-      if (srcVnfMgmtCpdId != null) {
-        connectVnfToVL(srcVnfInfo.getVnfProfile(), srcVnfMgmtCpdId, vsbMgmtVlInfo.getVlProfile());
+      if (srcCpds.get("mgmt") != null) {
+        connectVnfToVL(srcVnfInfo.getVnfProfile(), srcCpds.get("mgmt"),
+            vsbMgmtVlInfo.getVlProfile());
       }
-      if (dstVnfMgmtCpdId != null) {
-        connectVnfToVL(dstVnfInfo.getVnfProfile(), dstVnfMgmtCpdId, vsbMgmtVlInfo.getVlProfile());
+      if (dstCpds.get("mgmt") != null) {
+        connectVnfToVL(dstVnfInfo.getVnfProfile(), dstCpds.get("mgmt"),
+            vsbMgmtVlInfo.getVlProfile());
       }
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
