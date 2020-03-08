@@ -97,6 +97,7 @@ public class PassThroughComposer extends NsdComposer {
         ctxPrimaryConn.getValue().getVlDescriptor().getVirtualLinkDescId());
 
     // Retrieve RAN VL information from vsb
+    // TODO move to abstract class
     VlInfo ranVlInfo;
     try {
       ranVlInfo = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
