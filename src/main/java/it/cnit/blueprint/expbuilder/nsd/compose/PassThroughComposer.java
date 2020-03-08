@@ -100,7 +100,7 @@ public class PassThroughComposer extends NsdComposer {
     VlInfo ranVlInfo;
     try {
       ranVlInfo = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
-      log.debug("Found VlInfo for ranVld='{}' in context.", ranVld.getVirtualLinkDescId());
+      log.debug("Found VlInfo for ranVld='{}' in vsbNsd.", ranVld.getVirtualLinkDescId());
     } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
