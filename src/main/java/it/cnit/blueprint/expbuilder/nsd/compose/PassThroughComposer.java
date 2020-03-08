@@ -126,7 +126,8 @@ public class PassThroughComposer extends NsdComposer {
       connectVnfToVL(ranVnfVertex.getVnfProfile(), ranVnfCpd,
           ctxPrimaryConn.getValue().getVlProfile());
       log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
-          ranVnfVertex.getVnfProfile(), ctxPrimaryConn.getValue().getVlProfile());
+          ranVnfVertex.getVnfProfile().getVnfProfileId(),
+          ctxPrimaryConn.getValue().getVlProfile().getVirtualLinkProfileId());
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
@@ -138,7 +139,8 @@ public class PassThroughComposer extends NsdComposer {
       connectVnfToVL(ctxVnfInfo.getVnfProfile(), ctxSecondaryConn.getKey(),
           ranVlInfo.getVlProfile());
       log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
-          ctxVnfInfo.getVnfProfile(), ranVlInfo.getVlProfile());
+          ctxVnfInfo.getVnfProfile().getVnfProfileId(),
+          ranVlInfo.getVlProfile().getVirtualLinkProfileId());
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
