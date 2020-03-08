@@ -3,18 +3,15 @@ package it.cnit.blueprint.expbuilder.nsd.compose;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertexNotFoundException;
-import it.cnit.blueprint.expbuilder.nsd.graph.VirtualLinkProfileVertex;
 import it.cnit.blueprint.expbuilder.nsd.graph.VnfProfileVertex;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
-import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
@@ -55,45 +52,19 @@ public class PassThroughComposer extends NsdComposer {
     log.debug("Added Vnfd='{}' in service (if not present).", ctxVnfdId);
 
     // Retrieve non-management VLs from ctx
-    ProfileVertex ctxVnfPVertex;
+    Map<String, NsVirtualLinkConnectivity> ctxVnfCpds;
+    VlInfo ctxNonMgmtVl;
     try {
-      ctxVnfPVertex = nsdGraphService
-          .getVertexById(ctxG, ctxVnfInfo.getVnfProfile().getVnfProfileId());
-      log.debug("ctxVnfPVertex: {}", ctxVnfPVertex.toString());
-    } catch (ProfileVertexNotFoundException e) {
-      log.error(e.getMessage());
-      throw new InvalidNsd(e.getMessage());
-    }
-    List<ProfileVertex> ctxVnfNeigh = Graphs.neighborListOf(ctxG, ctxVnfPVertex);
-    log.debug("ctxVnfPVertex neighbors: {}", ctxVnfNeigh.toString());
-    String ctxMgmtCpdId = null;
-    LinkedHashMap<String, VlInfo> ctxNonMgmtVls = new LinkedHashMap<>();
-    try {
-      for (ProfileVertex vlpV : ctxVnfNeigh) {
-        if (vlpV instanceof VirtualLinkProfileVertex) {
-          if (((VirtualLinkProfileVertex) vlpV).getVlProfile().getVirtualLinkDescId()
-              .equals(ctxMgmtVlInfo.getVlDescriptor().getVirtualLinkDescId())) {
-            ctxMgmtCpdId = ctxG.getEdge(ctxVnfPVertex, vlpV);
-          } else {
-            VirtualLinkProfile vlProfile = ((VirtualLinkProfileVertex) vlpV).getVlProfile();
-            ctxNonMgmtVls.put(ctxG.getEdge(ctxVnfPVertex, vlpV),
-                retrieveVlInfo(vlProfile.getVirtualLinkProfileId(), ctxNsd, ctxNsDf, ctxNsLvl));
-          }
-        }
-      }
-      if (ctxNonMgmtVls.isEmpty()) {
-        throw new InvalidNsd("Can't find a non-management VL in Ctx.");
-      }
+      ctxVnfCpds = getMgmtDataCpds(ctxVnfInfo, vsbMgmtVlInfo, ctxMgmtVlInfo);
+      ctxNonMgmtVl = retrieveVlInfo(ctxVnfCpds.get("data0").getVirtualLinkProfileId(),
+          ctxNsd, ctxNsDf, ctxNsLvl);
     } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
     }
-    log.debug("ctxNonMgmtVls: {}", ctxNonMgmtVls.toString());
-    Iterator<Entry<String, VlInfo>> ctxNonMgmtVLIter = ctxNonMgmtVls.entrySet().iterator();
-    Entry<String, VlInfo> ctxPrimaryConn = ctxNonMgmtVLIter.next();
-    addVirtualLink(ctxPrimaryConn.getValue(), vsbNsd, vsbNsDf, vsbNsLvl);
+    addVirtualLink(ctxNonMgmtVl, vsbNsd, vsbNsDf, vsbNsLvl);
     log.debug("Added VirtualLinkDescriptor='{}' in service (if not present).",
-        ctxPrimaryConn.getValue().getVlDescriptor().getVirtualLinkDescId());
+        ctxNonMgmtVl.getVlDescriptor().getVirtualLinkDescId());
 
     // Retrieve RAN closest VNF information from vsb
     // Assumption: select the first VNF attached to the RAN VL
@@ -123,40 +94,37 @@ public class PassThroughComposer extends NsdComposer {
 
     // Connect ranVnf to the new VL coming from ctx
     try {
-      connectVnfToVL(ranVnfVertex.getVnfProfile(), ranVnfCpd,
-          ctxPrimaryConn.getValue().getVlProfile());
+      connectVnfToVL(ranVnfVertex.getVnfProfile(), ranVnfCpd, ctxNonMgmtVl.getVlProfile());
       log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
           ranVnfVertex.getVnfProfile().getVnfProfileId(),
-          ctxPrimaryConn.getValue().getVlProfile().getVirtualLinkProfileId());
+          ctxNonMgmtVl.getVlProfile().getVirtualLinkProfileId());
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
     }
 
-    // Connect ctxVnf with RAN VL
-    Entry<String, VlInfo> ctxSecondaryConn = ctxNonMgmtVLIter.next();
     try {
-      connectVnfToVL(ctxVnfInfo.getVnfProfile(), ctxSecondaryConn.getKey(),
+      // Connect ctxVnf with RAN VL
+      connectVnfToVL(ctxVnfInfo.getVnfProfile(), ctxVnfCpds.get("data1").getCpdId().get(0),
           ranVlInfo.getVlProfile());
       log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
           ctxVnfInfo.getVnfProfile().getVnfProfileId(),
           ranVlInfo.getVlProfile().getVirtualLinkProfileId());
+      // Connect ctxVnf to vsbNsd mgmt VL
+      if (ctxVnfCpds.get("mgmt") != null) {
+        connectVnfToVL(ctxVnfInfo.getVnfProfile(), ctxVnfCpds.get("mgmt").getCpdId().get(0),
+            vsbMgmtVlInfo.getVlProfile());
+        log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
+            ctxVnfInfo.getVnfProfile().getVnfProfileId(),
+            vsbMgmtVlInfo.getVlProfile().getVirtualLinkProfileId());
+        log.debug("qui");
+      } else {
+        log.warn("Could not find a management Cp for ctxVnf. Skip.");
+      }
+
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
-    }
-
-    // Connect ctxVnf to vsbNsd mgmt VL
-    if (ctxMgmtCpdId != null) {
-      try {
-        connectVnfToVL(ctxVnfInfo.getVnfProfile(), ctxMgmtCpdId,
-            vsbMgmtVlInfo.getVlProfile());
-      } catch (NotExistingEntityException e) {
-        log.error(e.getMessage());
-        throw new InvalidNsd(e.getMessage());
-      }
-    } else {
-      log.warn("Could not find a management Cp for ctxVnf. Skip.");
     }
 
   }

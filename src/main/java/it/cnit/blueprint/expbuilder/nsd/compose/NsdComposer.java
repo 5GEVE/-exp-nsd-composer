@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertex;
+import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -18,6 +19,8 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -245,6 +248,34 @@ public abstract class NsdComposer {
 
   }
 
+  protected Map<String, NsVirtualLinkConnectivity> getMgmtDataCpds(VnfInfo vnfInfo,
+      VlInfo vsbMgmtVlinfo, VlInfo ctxMgmtVlInfo)
+      throws InvalidNsd {
+    Map<String, NsVirtualLinkConnectivity> cpdIdMap = new HashMap<>();
+    int dataCount = 0;
+    for (NsVirtualLinkConnectivity vlc : vnfInfo.getVnfProfile().getNsVirtualLinkConnectivity()) {
+      if (vlc.getVirtualLinkProfileId()
+          .equals(vsbMgmtVlinfo.getVlProfile().getVirtualLinkProfileId())
+          || vlc.getVirtualLinkProfileId()
+          .equals(ctxMgmtVlInfo.getVlProfile().getVirtualLinkProfileId())) {
+        cpdIdMap.put("mgmt", vlc);
+      } else {
+        cpdIdMap.put("data" + dataCount, vlc);
+        dataCount++;
+      }
+    }
+    if (!cpdIdMap.containsKey("mgmt")) {
+      cpdIdMap.put("mgmt", null);
+    }
+    Optional<String> dataKey = cpdIdMap.keySet().stream().filter(k -> k.startsWith("data"))
+        .findFirst();
+    if (!dataKey.isPresent()) {
+      throw new InvalidNsd(
+          "No data cpd found for vnfProfile: '" + vnfInfo.getVnfProfile().getVnfProfileId() + "'.");
+    }
+    return cpdIdMap;
+  }
+
 //  @SuppressWarnings("DuplicatedCode")
 //  @SneakyThrows(JsonProcessingException.class)
 //  public void compose(Nsd vsNsd, CtxComposeInfo[] ctxComposeInfos)
@@ -427,7 +458,7 @@ public abstract class NsdComposer {
         vsbMgmtVlInfo = retrieveVlInfo(vsbMgmtVld, vsbNsDf, vsbNsLvl);
         log.debug("Found VlInfo for vsbMgmtVld='{}' in vsbNsd.", vsbMgmtVld.getVirtualLinkDescId());
         ctxMgmtVlInfo = retrieveVlInfo(ctxMgmtVld, ctxNsDf, ctxNsLvl);
-        log.debug("Found VlInfo for vsbMgmtVld='{}' in vsbNsd.", vsbMgmtVld.getVirtualLinkDescId());
+        log.debug("Found VlInfo for ctxMgmtVld='{}' in ctxNsd.", ctxMgmtVld.getVirtualLinkDescId());
       } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());

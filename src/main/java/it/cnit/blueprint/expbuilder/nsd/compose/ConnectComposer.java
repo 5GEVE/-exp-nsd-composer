@@ -9,7 +9,6 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -55,16 +54,16 @@ public class ConnectComposer extends NsdComposer {
     log.debug("Added Vnfd='{}' in service (if not present).", dstVnfInfo.getVfndId());
 
     // Retrieve CpdId for src VNF
-    Map<String, String> srcCpds;
+    Map<String, NsVirtualLinkConnectivity> srcCpds;
     try {
-      srcCpds = getMgmtDataCpds(srcVnfInfo, ctxMgmtVlInfo);
+      srcCpds = getMgmtDataCpds(srcVnfInfo, vsbMgmtVlInfo, ctxMgmtVlInfo);
     } catch (Exception e) {
       throw new InvalidNsd(e.getMessage());
     }
     // Retrieve CpdId for dst VNF
-    Map<String, String> dstCpds;
+    Map<String, NsVirtualLinkConnectivity> dstCpds;
     try {
-      dstCpds = getMgmtDataCpds(srcVnfInfo, ctxMgmtVlInfo);
+      dstCpds = getMgmtDataCpds(srcVnfInfo, vsbMgmtVlInfo, ctxMgmtVlInfo);
     } catch (Exception e) {
       throw new InvalidNsd(e.getMessage());
     }
@@ -93,47 +92,33 @@ public class ConnectComposer extends NsdComposer {
 
     try {
       // Connect VNFs to src and dst VLs
-      connectVnfToVL(srcVnfInfo.getVnfProfile(), srcCpds.get("data"), srcVlInfo.getVlProfile());
+      connectVnfToVL(srcVnfInfo.getVnfProfile(), srcCpds.get("data0").getCpdId().get(0),
+          srcVlInfo.getVlProfile());
       log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
           srcVnfInfo.getVnfProfile().getVnfProfileId(),
           srcVlInfo.getVlProfile().getVirtualLinkProfileId());
-      connectVnfToVL(dstVnfInfo.getVnfProfile(), dstCpds.get("data"), dstVlInfo.getVlProfile());
+      connectVnfToVL(dstVnfInfo.getVnfProfile(), dstCpds.get("data0").getCpdId().get(0),
+          dstVlInfo.getVlProfile());
       log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
           dstVnfInfo.getVnfProfile().getVnfProfileId(),
           dstVlInfo.getVlProfile().getVirtualLinkProfileId());
       // Connect VNFs to mgmt VL (if possible)
       if (srcCpds.get("mgmt") != null) {
-        connectVnfToVL(srcVnfInfo.getVnfProfile(), srcCpds.get("mgmt"),
+        connectVnfToVL(srcVnfInfo.getVnfProfile(), srcCpds.get("mgmt").getCpdId().get(0),
             vsbMgmtVlInfo.getVlProfile());
+      } else {
+        log.warn("Could not find a management Cp for srcVnf. Skip.");
       }
       if (dstCpds.get("mgmt") != null) {
-        connectVnfToVL(dstVnfInfo.getVnfProfile(), dstCpds.get("mgmt"),
+        connectVnfToVL(dstVnfInfo.getVnfProfile(), dstCpds.get("mgmt").getCpdId().get(0),
             vsbMgmtVlInfo.getVlProfile());
+      } else {
+        log.warn("Could not find a management Cp for dstVnf. Skip.");
       }
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
     }
-
   }
 
-  private Map<String, String> getMgmtDataCpds(VnfInfo vnfInfo, VlInfo mgmtVlinfo) throws Exception {
-    Map<String, String> cpdIdMap = new HashMap<>();
-    for (NsVirtualLinkConnectivity vlc : vnfInfo.getVnfProfile().getNsVirtualLinkConnectivity()) {
-      if (vlc.getVirtualLinkProfileId()
-          .equals(mgmtVlinfo.getVlProfile().getVirtualLinkProfileId())) {
-        cpdIdMap.put("mgmt", vlc.getCpdId().get(0));
-      } else {
-        cpdIdMap.put("data", vlc.getCpdId().get(0));
-      }
-    }
-    if (!cpdIdMap.containsKey("mgmt")) {
-      cpdIdMap.put("mgmt", null);
-    }
-    if (!cpdIdMap.containsKey("data")) {
-      // TODO add correct excetpion
-      throw new Exception();
-    }
-    return cpdIdMap;
-  }
 }
