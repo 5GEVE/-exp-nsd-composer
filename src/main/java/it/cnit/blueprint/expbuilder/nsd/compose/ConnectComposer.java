@@ -31,6 +31,22 @@ public class ConnectComposer extends NsdComposer {
       Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl, Graph<ProfileVertex, String> vsbG,
       Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl, Graph<ProfileVertex, String> ctxG)
       throws InvalidNsd {
+    // Retrieve ctx VNFs
+    VnfInfo srcVnfInfo;
+    VnfInfo dstVnfInfo;
+    try {
+      String srcVnfdId = ctxNsd.getVnfdId().get(0);
+      srcVnfInfo = retrieveVnfInfoByDescId(srcVnfdId, ctxNsd, ctxNsDf, ctxNsLvl);
+      String dstVnfdId = ctxNsd.getVnfdId().get(1);
+      dstVnfInfo = retrieveVnfInfoByDescId(dstVnfdId, ctxNsd, ctxNsDf, ctxNsLvl);
+    } catch (VnfNotFoundInLvlMapping e) {
+      log.error(e.getMessage());
+      throw new InvalidNsd(e.getMessage());
+    }
+    addVnf(srcVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
+    log.debug("Added Vnfd='{}' in service (if not present).", srcVnfInfo.getVfndId());
+    addVnf(dstVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
+    log.debug("Added Vnfd='{}' in service (if not present).", dstVnfInfo.getVfndId());
 
   }
 }
