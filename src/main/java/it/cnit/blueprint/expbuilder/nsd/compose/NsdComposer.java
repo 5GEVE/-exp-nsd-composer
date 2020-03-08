@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertex;
-import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -35,6 +34,20 @@ public abstract class NsdComposer {
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
   protected NsdGraphService nsdGraphService;
+
+  protected VnfProfile getVnfProfileById(String vnfProfileId, NsDf nsDf)
+      throws NotExistingEntityException {
+    VnfProfile vnfProfile;
+    try {
+      vnfProfile = nsDf.getVnfProfile(vnfProfileId);
+    } catch (NotExistingEntityException e) {
+      String m = MessageFormatter
+          .format("VnfProfile='{}' not found in nsDf='{}'", vnfProfileId, nsDf.getNsDfId())
+          .getMessage();
+      throw new NotExistingEntityException(m);
+    }
+    return vnfProfile;
+  }
 
   protected VnfProfile getVnfProfileByDescId(String vnfdId, NsDf nsDf)
       throws NotExistingEntityException {
@@ -165,6 +178,33 @@ public abstract class NsdComposer {
             .equals(vlMap.getVirtualLinkProfileId()))) {
       nsLevel.getVirtualLinkToLevelMapping().add(vlMap);
     }
+  }
+
+  protected VnfInfo retrieveVnfInfoByProfileId(String vnfProfileId, Nsd nsd, NsDf nsDf,
+      NsLevel nsLevel)
+      throws InvalidNsd, VnfNotFoundInLvlMapping {
+    VnfToLevelMapping vnfLvlMap;
+    try {
+      vnfLvlMap = getVnfLvlMapping(vnfProfileId, nsLevel);
+    } catch (NotExistingEntityException e) {
+      throw new VnfNotFoundInLvlMapping(e.getMessage());
+    }
+    VnfProfile vnfProfile;
+    try {
+      vnfProfile = getVnfProfileById(vnfProfileId, nsDf);
+    } catch (NotExistingEntityException e) {
+      throw new InvalidNsd(e.getMessage());
+    }
+    Optional<String> optVnfdId = nsd.getVnfdId().stream()
+        .filter(id -> id.equals(vnfProfile.getVnfdId())).findFirst();
+    if (!optVnfdId.isPresent()) {
+      String m = MessageFormatter
+          .format("vnfdId='{}' not found in nsd='{}'.", vnfProfile.getVnfdId(),
+              nsd.getNsdIdentifier())
+          .getMessage();
+      throw new InvalidNsd(m);
+    }
+    return new VnfInfo(vnfProfile.getVnfdId(), vnfProfile, vnfLvlMap);
   }
 
   protected VnfInfo retrieveVnfInfoByDescId(String vnfdId, Nsd nsd, NsDf nsDf,
