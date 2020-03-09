@@ -1,7 +1,6 @@
 package it.cnit.blueprint.expbuilder.nsd.compose;
 
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
-import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
@@ -12,7 +11,6 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.jgrapht.Graph;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -32,8 +30,8 @@ public class ConnectComposer extends NsdComposer {
   @Override
   public void composeWithStrategy(
       VlInfo ranVlInfo, VlInfo vsbMgmtVlInfo, VlInfo ctxMgmtVlInfo,
-      Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl, Graph<ProfileVertex, String> vsbG,
-      Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl, Graph<ProfileVertex, String> ctxG)
+      Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl,
+      Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl)
       throws InvalidNsd {
     // Retrieve ctx VNFs
     VnfInfo srcVnfInfo;

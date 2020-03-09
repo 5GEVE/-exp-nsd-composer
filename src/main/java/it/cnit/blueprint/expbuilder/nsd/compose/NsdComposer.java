@@ -504,8 +504,8 @@ public abstract class NsdComposer {
         throw new InvalidNsd(e.getMessage());
       }
       composeWithStrategy(ranVlInfo, vsbMgmtVlInfo, ctxMgmtVlInfo,
-          vsbNsd, vsbNsDf, vsbNsLvl, vsbG,
-          ctxNsd, ctxNsDf, ctxNsLvl, ctxG);
+          vsbNsd, vsbNsDf, vsbNsLvl,
+          ctxNsd, ctxNsDf, ctxNsLvl);
 
       // Nsd validation and logging
       try {
@@ -530,17 +530,8 @@ public abstract class NsdComposer {
 
   public abstract void composeWithStrategy(
       VlInfo ranVlInfo, VlInfo vsbMgmtVlInfo, VlInfo ctxMgmtVlInfo,
-      Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl, Graph<ProfileVertex, String> vsbG,
-      Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl, Graph<ProfileVertex, String> ctxG
+      Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl,
+      Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl
   ) throws InvalidNsd;
 
-  @SneakyThrows(JsonProcessingException.class)
-  public void composeConnectNoInput(Sapd ranSapd, NsVirtualLinkDesc vsbMgmtVld, Nsd vsbNsd,
-      NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd) {
-  }
-
-  @SneakyThrows(JsonProcessingException.class)
-  public void composeConnect(NsVirtualLinkDesc srcVl, NsVirtualLinkDesc dstVl, Nsd vsbNsd,
-      NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd) {
-  }
 }
