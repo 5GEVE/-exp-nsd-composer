@@ -6,8 +6,8 @@ import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityExceptio
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -38,10 +38,10 @@ public class ConnectComposer extends NsdComposer {
     VnfInfo dstVnfInfo;
     // Assumption: src is 0 and dst is 1
     try {
-      String srcVnfdId = ctxNsd.getVnfdId().get(0);
-      srcVnfInfo = retrieveVnfInfoByDescId(srcVnfdId, ctxNsd, ctxNsDf, ctxNsLvl);
-      String dstVnfdId = ctxNsd.getVnfdId().get(1);
-      dstVnfInfo = retrieveVnfInfoByDescId(dstVnfdId, ctxNsd, ctxNsDf, ctxNsLvl);
+      String srcVnfpId = ctxNsLvl.getVnfToLevelMapping().get(0).getVnfProfileId();
+      srcVnfInfo = retrieveVnfInfoByProfileId(srcVnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
+      String dstVnfpId = ctxNsLvl.getVnfToLevelMapping().get(1).getVnfProfileId();
+      dstVnfInfo = retrieveVnfInfoByProfileId(dstVnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
     } catch (VnfNotFoundInLvlMapping e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
@@ -57,7 +57,7 @@ public class ConnectComposer extends NsdComposer {
     // Retrieve CpdId for dst VNF
     Map<String, NsVirtualLinkConnectivity> dstCpds;
     try {
-      dstCpds = getMgmtDataCpds(srcVnfInfo, vsbMgmtVlInfo, ctxMgmtVlInfo);
+      dstCpds = getMgmtDataCpds(dstVnfInfo, vsbMgmtVlInfo, ctxMgmtVlInfo);
     } catch (Exception e) {
       throw new InvalidNsd(e.getMessage());
     }
@@ -67,14 +67,19 @@ public class ConnectComposer extends NsdComposer {
     VlInfo srcVlInfo = ranVlInfo;
     // Retrieve dst VL
     VlInfo dstVlInfo;
-    Optional<NsVirtualLinkDesc> optDstVld = vsbNsd.getVirtualLinkDesc().stream()
-        .filter(vld -> !vld.getVirtualLinkDescId()
-            .equals(vsbMgmtVlInfo.getVlDescriptor().getVirtualLinkDescId()))
+    Optional<VirtualLinkToLevelMapping> optDstLvlMap = vsbNsLvl.getVirtualLinkToLevelMapping()
+        .stream()
+        .filter(m -> !m.getVirtualLinkProfileId()
+            .equals(vsbMgmtVlInfo.getVlProfile().getVirtualLinkProfileId())
+            && !m.getVirtualLinkProfileId()
+            .equals(ranVlInfo.getVlProfile().getVirtualLinkProfileId()))
         .findFirst();
     try {
-      if (optDstVld.isPresent()) {
-        dstVlInfo = retrieveVlInfo(optDstVld.get(), vsbNsDf, vsbNsLvl);
-        log.debug("Found non-mgmt VlInfo.");
+      if (optDstLvlMap.isPresent()) {
+        dstVlInfo = retrieveVlInfo(optDstLvlMap.get().getVirtualLinkProfileId(),
+            vsbNsd, vsbNsDf, vsbNsLvl);
+        log.debug("Found non-mgmt VlInfo='{}'.",
+            dstVlInfo.getVlProfile().getVirtualLinkProfileId());
       } else {
         throw new InvalidNsd(
             "Can't find a non-mgmt VlInfo in vsbNsd: '" + vsbNsd.getNsdIdentifier() + "'");
@@ -86,9 +91,11 @@ public class ConnectComposer extends NsdComposer {
 
     // Modify vsbNsd
     addVnf(srcVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
-    log.debug("Added Vnfd='{}' in service (if not present).", srcVnfInfo.getVfndId());
+    log.debug("Added VnfProfile='{}' in service (if not present).",
+        srcVnfInfo.getVnfProfile().getVnfProfileId());
     addVnf(dstVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
-    log.debug("Added Vnfd='{}' in service (if not present).", dstVnfInfo.getVfndId());
+    log.debug("Added VnfProfile='{}' in service (if not present).",
+        dstVnfInfo.getVnfProfile().getVnfProfileId());
     try {
       // Connect VNFs to src VL
       connectVnfToVL(srcVnfInfo.getVnfProfile(), srcCpds.get("data0").getCpdId().get(0),
