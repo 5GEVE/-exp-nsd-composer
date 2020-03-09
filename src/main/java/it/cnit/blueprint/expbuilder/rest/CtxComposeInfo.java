@@ -8,6 +8,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class CtxComposeInfo {
 
-  private OnboardCtxBlueprintRequest ctxBReq;
+  private OnboardCtxBlueprintRequest ctxbRequest;
   private ConnectInput connectInput;
 }

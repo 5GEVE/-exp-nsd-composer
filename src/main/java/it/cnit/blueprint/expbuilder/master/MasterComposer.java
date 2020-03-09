@@ -42,8 +42,8 @@ public class MasterComposer {
     Nsd vsbNsd = vsbRequest.getNsds().get(0);
     for (CtxComposeInfo ctx : contexts) {
       // - The Ctx has only 1 Nsd.
-      Nsd ctxNsd = ctx.getCtxBReq().getNsds().get(0);
-      CtxBlueprint ctxB = ctx.getCtxBReq().getCtxBlueprint();
+      Nsd ctxNsd = ctx.getCtxbRequest().getNsds().get(0);
+      CtxBlueprint ctxB = ctx.getCtxbRequest().getCtxBlueprint();
       if (ctx.getConnectInput() == null) {
         ctx.setConnectInput(new ConnectInput());
       }
