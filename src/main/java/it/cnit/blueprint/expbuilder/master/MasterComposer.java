@@ -1,13 +1,13 @@
 package it.cnit.blueprint.expbuilder.master;
 
 import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer;
-import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnBoardVsBlueprintRequest;
+import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardCtxBlueprintRequest;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
@@ -34,15 +34,15 @@ public class MasterComposer {
   // TODO Composition Strategy comes from CtxB
   private static CompositionStrategy STRAT = CompositionStrategy.CONNECT;
 
-  public void compose(OnBoardVsBlueprintRequest vsbRequest, CtxComposeInfo[] contexts)
+  public void compose(OnBoardVsBlueprintRequest vsbRequest, OnboardCtxBlueprintRequest[] contexts)
       throws InvalidCtxComposeInfo, InvalidNsd {
     // Assumptions:
     // - The Vsb has only 1 Nsd.
     Nsd vsbNsd = vsbRequest.getNsds().get(0);
-    for (CtxComposeInfo ctx : contexts) {
+    for (OnboardCtxBlueprintRequest ctx : contexts) {
       // - The Ctx has only 1 Nsd.
-      Nsd ctxNsd = ctx.getCtxBReq().getNsds().get(0);
-      CtxBlueprint ctxB = ctx.getCtxBReq().getCtxBlueprint();
+      Nsd ctxNsd = ctx.getNsds().get(0);
+      CtxBlueprint ctxB = ctx.getCtxBlueprint();
 
       Sapd ranSapd = findRanSapd(vsbRequest.getVsBlueprint(), vsbNsd);
       NsVirtualLinkDesc vsbMgmtVld = findMgmtVld(ctxB, ctxNsd);
@@ -59,7 +59,7 @@ public class MasterComposer {
           throw new InvalidCtxComposeInfo("More than one VNF found in Ctx for PASS_THROUGH");
         }
         passThroughComposer.compose(ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
-        // compose Exp blueprint
+        // TODO compose Exp blueprint
       } else {
         log.error("not supported");
         throw new InvalidCtxComposeInfo("Strategy x not supported.");
