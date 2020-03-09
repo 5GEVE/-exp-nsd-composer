@@ -1,13 +1,14 @@
 package it.cnit.blueprint.expbuilder.master;
 
 import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer;
+import it.cnit.blueprint.expbuilder.rest.ConnectInput;
+import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnBoardVsBlueprintRequest;
-import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardCtxBlueprintRequest;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
@@ -34,22 +35,26 @@ public class MasterComposer {
   // TODO Composition Strategy comes from CtxB
   private static CompositionStrategy STRAT = CompositionStrategy.CONNECT;
 
-  public void compose(OnBoardVsBlueprintRequest vsbRequest, OnboardCtxBlueprintRequest[] contexts)
+  public void compose(OnBoardVsBlueprintRequest vsbRequest, CtxComposeInfo[] contexts)
       throws InvalidCtxComposeInfo, InvalidNsd {
     // Assumptions:
     // - The Vsb has only 1 Nsd.
     Nsd vsbNsd = vsbRequest.getNsds().get(0);
-    for (OnboardCtxBlueprintRequest ctx : contexts) {
+    for (CtxComposeInfo ctx : contexts) {
       // - The Ctx has only 1 Nsd.
-      Nsd ctxNsd = ctx.getNsds().get(0);
-      CtxBlueprint ctxB = ctx.getCtxBlueprint();
+      Nsd ctxNsd = ctx.getCtxBReq().getNsds().get(0);
+      CtxBlueprint ctxB = ctx.getCtxBReq().getCtxBlueprint();
+      if (ctx.getConnectInput() == null) {
+        ctx.setConnectInput(new ConnectInput());
+      }
 
       Sapd ranSapd = findRanSapd(vsbRequest.getVsBlueprint(), vsbNsd);
       NsVirtualLinkDesc vsbMgmtVld = findMgmtVld(ctxB, ctxNsd);
       NsVirtualLinkDesc ctxMgmtVld = findMgmtVld(ctxB, ctxNsd);
       if (STRAT.equals(CompositionStrategy.CONNECT)) {
         log.info("connect");
-        connectComposer.compose(ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+        connectComposer
+            .compose(ctx.getConnectInput(), ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
       } else if (STRAT.equals(CompositionStrategy.PASS_THROUGH)) {
         log.info("pass_through");
         // compose Nsd
@@ -58,7 +63,8 @@ public class MasterComposer {
         } else {
           throw new InvalidCtxComposeInfo("More than one VNF found in Ctx for PASS_THROUGH");
         }
-        passThroughComposer.compose(ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+        passThroughComposer
+            .compose(ctx.getConnectInput(), ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
         // TODO compose Exp blueprint
       } else {
         log.error("not supported");
