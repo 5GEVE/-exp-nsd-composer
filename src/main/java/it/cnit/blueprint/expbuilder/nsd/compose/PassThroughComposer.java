@@ -34,11 +34,11 @@ public class PassThroughComposer extends NsdComposer {
       Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl)
       throws InvalidNsd {
     // Retrieve ctx VNF
-    String ctxVnfdId = ctxNsd.getVnfdId().get(0);
+    String ctxVnfpId = ctxNsLvl.getVnfToLevelMapping().get(0).getVnfProfileId();
     VnfInfo ctxVnfInfo;
     try {
-      ctxVnfInfo = retrieveVnfInfoByDescId(ctxVnfdId, ctxNsd, ctxNsDf, ctxNsLvl);
-      log.debug("Found VnfInfo for vnfdId='{}' in context.", ctxVnfdId);
+      ctxVnfInfo = retrieveVnfInfoByProfileId(ctxVnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
+      log.debug("Found VnfInfo for vnfpId='{}' in context.", ctxVnfpId);
     } catch (VnfNotFoundInLvlMapping e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
@@ -89,10 +89,11 @@ public class PassThroughComposer extends NsdComposer {
 
     // Modify vsbNsd
     addVnf(ctxVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
-    log.debug("Added Vnfd='{}' in service (if not present).", ctxVnfdId);
+    log.debug("Added VnfProfile='{}' in service (if not present).",
+        ctxVnfInfo.getVnfProfile().getVnfProfileId());
     addVirtualLink(ctxNonMgmtVl, vsbNsd, vsbNsDf, vsbNsLvl);
-    log.debug("Added VirtualLinkDescriptor='{}' in service (if not present).",
-        ctxNonMgmtVl.getVlDescriptor().getVirtualLinkDescId());
+    log.debug("Added VlProfile='{}' in service (if not present).",
+        ctxNonMgmtVl.getVlProfile().getVirtualLinkProfileId());
     try {
       // Connect ranVnf to the new VL coming from ctx
       connectVnfToVL(ranVnfProfile, ranVnfCpd, ctxNonMgmtVl.getVlProfile());
