@@ -13,6 +13,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,10 @@ import org.springframework.web.context.WebApplicationContext;
 @AllArgsConstructor
 public class MasterComposer {
 
-  private NsdComposer nsdComposer;
+  @Qualifier("PASS_THROUGH")
+  private NsdComposer passThroughComposer;
+  @Qualifier("CONNECT")
+  private NsdComposer connectComposer;
   // TODO vsbComposer
 
   // TODO Composition Strategy comes from CtxB
@@ -39,8 +43,13 @@ public class MasterComposer {
       // - The Ctx has only 1 Nsd.
       Nsd ctxNsd = ctx.getCtxBReq().getNsds().get(0);
       CtxBlueprint ctxB = ctx.getCtxBReq().getCtxBlueprint();
+
+      Sapd ranSapd = findRanSapd(vsbRequest.getVsBlueprint(), vsbNsd);
+      NsVirtualLinkDesc vsbMgmtVld = findMgmtVld(ctxB, ctxNsd);
+      NsVirtualLinkDesc ctxMgmtVld = findMgmtVld(ctxB, ctxNsd);
       if (STRAT.equals(CompositionStrategy.CONNECT)) {
         log.info("connect");
+        connectComposer.compose(ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
       } else if (STRAT.equals(CompositionStrategy.PASS_THROUGH)) {
         log.info("pass_through");
         // compose Nsd
@@ -49,10 +58,7 @@ public class MasterComposer {
         } else {
           throw new InvalidCtxComposeInfo("More than one VNF found in Ctx for PASS_THROUGH");
         }
-        Sapd ranSapd = findRanSapd(vsbRequest.getVsBlueprint(), vsbNsd);
-        NsVirtualLinkDesc vsbMgmtVld = findMgmtVld(ctxB, ctxNsd);
-        NsVirtualLinkDesc ctxMgmtVld = findMgmtVld(ctxB, ctxNsd);
-        nsdComposer.composePassThrough(ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+        passThroughComposer.compose(ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
         // compose Exp blueprint
       } else {
         log.error("not supported");

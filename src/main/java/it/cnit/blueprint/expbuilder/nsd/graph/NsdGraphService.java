@@ -36,7 +36,7 @@ public class NsdGraphService {
     List<VirtualLinkProfileVertex> vlPVertices = new ArrayList<>();
     List<SapVertex> sapVertices = new ArrayList<>();
 
-    //vertices
+    // Vertices
     for (VnfToLevelMapping vnfToLevelMapping : nsLevel.getVnfToLevelMapping()) {
       VnfProfileVertex v;
       try {
@@ -81,14 +81,14 @@ public class NsdGraphService {
       g.addVertex(v);
     }
 
-    // edges
+    // Edges
     for (VnfProfileVertex v1 : vnfPVertices) {
       for (NsVirtualLinkConnectivity vlc : v1.getVnfProfile()
           .getNsVirtualLinkConnectivity()) {
         for (VirtualLinkProfileVertex v2 : vlPVertices) {
           if (vlc.getVirtualLinkProfileId()
               .equals(v2.getVlProfile().getVirtualLinkProfileId())) {
-            g.addEdge(v1, v2, vlc.getCpdId().get(0));
+            g.addEdge(v1, v2, v1.getVnfProfile().getVnfProfileId() + "_" + vlc.getCpdId().get(0));
           }
         }
       }
@@ -99,7 +99,7 @@ public class NsdGraphService {
         for (VirtualLinkProfileVertex v2 : vlPVertices) {
           if (vlc.getVirtualLinkProfileId()
               .equals(v2.getVlProfile().getVirtualLinkProfileId())) {
-            g.addEdge(v1, v2, vlc.getCpdId().get(0));
+            g.addEdge(v1, v2, v1.getPnfProfile().getPnfProfileId() + "_" + vlc.getCpdId().get(0));
           }
         }
       }
