@@ -8,5 +8,4 @@ public class ComposeRequest {
 
   public OnBoardVsBlueprintRequest vsbRequest;
   public CtxComposeInfo[] contexts;
-
 }

@@ -1,6 +1,7 @@
 package it.cnit.blueprint.expbuilder.nsd.compose;
 
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
+import it.cnit.blueprint.expbuilder.rest.ConnectInput;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
@@ -30,65 +31,108 @@ public class ConnectComposer extends NsdComposer {
 
   @Override
   public void composeWithStrategy(
-      VlInfo ranVlInfo, VlInfo vsbMgmtVlInfo, VlInfo ctxMgmtVlInfo,
+      ConnectInput connectInput, VlInfo ranVlInfo, VlInfo vsbMgmtVlInfo, VlInfo ctxMgmtVlInfo,
       Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl,
       Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl)
       throws InvalidNsd {
     log.info("Compose with CONNECT.");
     // Retrieve ctx VNFs
     VnfInfo srcVnfInfo;
-    VnfInfo dstVnfInfo;
-    // Assumption: src is 0 and dst is 1
     try {
-      String srcVnfpId = ctxNsLvl.getVnfToLevelMapping().get(0).getVnfProfileId();
+      String srcVnfpId;
+      if (connectInput.getSrcVnfdId() != null && !connectInput.getSrcVnfdId().isEmpty()) {
+        srcVnfpId = getVnfProfileByDescId(connectInput.getSrcVnfdId(), ctxNsDf, ctxNsLvl)
+            .getVnfProfileId();
+      } else {
+        // Assumption: src is 0
+        srcVnfpId = ctxNsLvl.getVnfToLevelMapping().get(0).getVnfProfileId();
+      }
       srcVnfInfo = retrieveVnfInfoByProfileId(srcVnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
-      String dstVnfpId = ctxNsLvl.getVnfToLevelMapping().get(1).getVnfProfileId();
-      dstVnfInfo = retrieveVnfInfoByProfileId(dstVnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
-    } catch (VnfNotFoundInLvlMapping e) {
+    } catch (NotExistingEntityException | VnfNotFoundInLvlMapping e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
     }
 
-    // Retrieve CpdId for src VNF
+    VnfInfo dstVnfInfo;
+    try {
+      String dstVnfpId;
+      if (connectInput.getDstVnfdId() != null && !connectInput.getDstVnfdId().isEmpty()) {
+        dstVnfpId = getVnfProfileByDescId(connectInput.getDstVnfdId(), ctxNsDf, ctxNsLvl)
+            .getVnfProfileId();
+      } else {
+        // Assumption: dst is 1
+        dstVnfpId = ctxNsLvl.getVnfToLevelMapping().get(1).getVnfProfileId();
+      }
+      dstVnfInfo = retrieveVnfInfoByProfileId(dstVnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
+    } catch (NotExistingEntityException | VnfNotFoundInLvlMapping e) {
+      log.error(e.getMessage());
+      throw new InvalidNsd(e.getMessage());
+    }
+
+    // Retrieve Cpds for src VNF
     Map<String, NsVirtualLinkConnectivity> srcCpds;
     try {
       srcCpds = getMgmtDataCpds(srcVnfInfo, vsbMgmtVlInfo, ctxMgmtVlInfo);
     } catch (Exception e) {
+      log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
     }
-    // Retrieve CpdId for dst VNF
+    // Retrieve Cpds for dst VNF
     Map<String, NsVirtualLinkConnectivity> dstCpds;
     try {
       dstCpds = getMgmtDataCpds(dstVnfInfo, vsbMgmtVlInfo, ctxMgmtVlInfo);
     } catch (Exception e) {
+      log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
     }
 
-    // TODO handle custom VL input
     // Retrieve src VL
-    VlInfo srcVlInfo = ranVlInfo;
+    VlInfo srcVlInfo;
+    if (connectInput.getSrcVldId() != null && !connectInput.getSrcVldId().isEmpty()) {
+      try {
+        srcVlInfo = retrieveVlInfo(getVlDescriptor(connectInput.getSrcVldId(), vsbNsd), vsbNsDf,
+            vsbNsLvl);
+      } catch (VlNotFoundInLvlMapping | NotExistingEntityException e) {
+        log.error(e.getMessage());
+        throw new InvalidNsd(e.getMessage());
+      }
+    } else {
+      // Default: select a RAN VL
+      srcVlInfo = ranVlInfo;
+    }
     // Retrieve dst VL
     VlInfo dstVlInfo;
-    Optional<VirtualLinkToLevelMapping> optDstLvlMap = vsbNsLvl.getVirtualLinkToLevelMapping()
-        .stream()
-        .filter(m -> !m.getVirtualLinkProfileId()
-            .equals(vsbMgmtVlInfo.getVlProfile().getVirtualLinkProfileId())
-            && !m.getVirtualLinkProfileId()
-            .equals(ranVlInfo.getVlProfile().getVirtualLinkProfileId()))
-        .findFirst();
-    try {
-      if (optDstLvlMap.isPresent()) {
-        dstVlInfo = retrieveVlInfo(optDstLvlMap.get().getVirtualLinkProfileId(),
-            vsbNsd, vsbNsDf, vsbNsLvl);
-        log.debug("Found non-mgmt VlInfo='{}'.",
-            dstVlInfo.getVlProfile().getVirtualLinkProfileId());
-      } else {
-        throw new InvalidNsd(
-            "Can't find a non-mgmt VlInfo in vsbNsd: '" + vsbNsd.getNsdIdentifier() + "'");
+    if (connectInput.getDstVldId() != null && !connectInput.getDstVldId().isEmpty()) {
+      try {
+        dstVlInfo = retrieveVlInfo(getVlDescriptor(connectInput.getDstVldId(), vsbNsd), vsbNsDf,
+            vsbNsLvl);
+      } catch (VlNotFoundInLvlMapping | NotExistingEntityException e) {
+        log.error(e.getMessage());
+        throw new InvalidNsd(e.getMessage());
       }
-    } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
-      log.error(e.getMessage());
-      throw new InvalidNsd(e.getMessage());
+    } else {
+      // Default: select a non-management VL, different from RAN VL
+      Optional<VirtualLinkToLevelMapping> optDstLvlMap = vsbNsLvl.getVirtualLinkToLevelMapping()
+          .stream()
+          .filter(m -> !m.getVirtualLinkProfileId()
+              .equals(vsbMgmtVlInfo.getVlProfile().getVirtualLinkProfileId())
+              && !m.getVirtualLinkProfileId()
+              .equals(ranVlInfo.getVlProfile().getVirtualLinkProfileId()))
+          .findFirst();
+      try {
+        if (optDstLvlMap.isPresent()) {
+          dstVlInfo = retrieveVlInfo(optDstLvlMap.get().getVirtualLinkProfileId(),
+              vsbNsd, vsbNsDf, vsbNsLvl);
+          log.debug("Found non-mgmt VlInfo='{}'.",
+              dstVlInfo.getVlProfile().getVirtualLinkProfileId());
+        } else {
+          throw new InvalidNsd(
+              "Can't find a non-mgmt VlInfo in vsbNsd: '" + vsbNsd.getNsdIdentifier() + "'");
+        }
+      } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
+        log.error(e.getMessage());
+        throw new InvalidNsd(e.getMessage());
+      }
     }
 
     // Modify vsbNsd

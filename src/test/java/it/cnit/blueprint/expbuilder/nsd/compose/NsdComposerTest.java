@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.nsd.graph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
+import it.cnit.blueprint.expbuilder.rest.ConnectInput;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
@@ -82,7 +83,8 @@ public class NsdComposerTest {
     }
 
     // When
-    passThroughComposer.compose(ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+    passThroughComposer
+        .compose(new ConnectInput(), ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
     vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
@@ -144,7 +146,7 @@ public class NsdComposerTest {
     }
 
     // When
-    connectComposer.compose(ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+    connectComposer.compose(new ConnectInput(), ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
     vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");

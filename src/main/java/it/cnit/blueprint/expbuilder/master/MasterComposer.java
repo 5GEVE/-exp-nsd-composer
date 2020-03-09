@@ -1,6 +1,7 @@
 package it.cnit.blueprint.expbuilder.master;
 
 import it.cnit.blueprint.expbuilder.nsd.compose.NsdComposer;
+import it.cnit.blueprint.expbuilder.rest.ConnectInput;
 import it.cnit.blueprint.expbuilder.rest.CtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidCtxComposeInfo;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
@@ -41,15 +42,19 @@ public class MasterComposer {
     Nsd vsbNsd = vsbRequest.getNsds().get(0);
     for (CtxComposeInfo ctx : contexts) {
       // - The Ctx has only 1 Nsd.
-      Nsd ctxNsd = ctx.getCtxBReq().getNsds().get(0);
-      CtxBlueprint ctxB = ctx.getCtxBReq().getCtxBlueprint();
+      Nsd ctxNsd = ctx.getCtxbRequest().getNsds().get(0);
+      CtxBlueprint ctxB = ctx.getCtxbRequest().getCtxBlueprint();
+      if (ctx.getConnectInput() == null) {
+        ctx.setConnectInput(new ConnectInput());
+      }
 
       Sapd ranSapd = findRanSapd(vsbRequest.getVsBlueprint(), vsbNsd);
       NsVirtualLinkDesc vsbMgmtVld = findMgmtVld(ctxB, ctxNsd);
       NsVirtualLinkDesc ctxMgmtVld = findMgmtVld(ctxB, ctxNsd);
       if (STRAT.equals(CompositionStrategy.CONNECT)) {
         log.info("connect");
-        connectComposer.compose(ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+        connectComposer
+            .compose(ctx.getConnectInput(), ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
       } else if (STRAT.equals(CompositionStrategy.PASS_THROUGH)) {
         log.info("pass_through");
         // compose Nsd
@@ -58,8 +63,9 @@ public class MasterComposer {
         } else {
           throw new InvalidCtxComposeInfo("More than one VNF found in Ctx for PASS_THROUGH");
         }
-        passThroughComposer.compose(ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
-        // compose Exp blueprint
+        passThroughComposer
+            .compose(ctx.getConnectInput(), ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+        // TODO compose Exp blueprint
       } else {
         log.error("not supported");
         throw new InvalidCtxComposeInfo("Strategy x not supported.");

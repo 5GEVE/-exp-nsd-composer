@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.expbuilder.nsd.graph.ProfileVertex;
+import it.cnit.blueprint.expbuilder.rest.ConnectInput;
 import it.cnit.blueprint.expbuilder.rest.InvalidNsd;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -19,8 +20,10 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -49,18 +52,30 @@ public abstract class NsdComposer {
     return vnfProfile;
   }
 
-  protected VnfProfile getVnfProfileByDescId(String vnfdId, NsDf nsDf)
-      throws NotExistingEntityException {
-    VnfProfile vnfProfile;
-    Optional<VnfProfile> optVnfP = nsDf.getVnfProfile().stream()
-        .filter(p -> p.getVnfdId().equals(vnfdId)).findFirst();
-    if (optVnfP.isPresent()) {
-      vnfProfile = optVnfP.get();
-    } else {
+  protected VnfProfile getVnfProfileByDescId(String vnfdId, NsDf nsDf, NsLevel nsLvl)
+      throws NotExistingEntityException, VnfNotFoundInLvlMapping {
+    VnfProfile vnfProfile = null;
+    List<VnfProfile> filterVnfp = nsDf.getVnfProfile().stream()
+        .filter(p -> p.getVnfdId().equals(vnfdId)).collect(Collectors.toList());
+    if (filterVnfp.isEmpty()) {
       String m = MessageFormatter
           .format("No VnfProfile with vnfdId='{}' found in nsDf='{}'", vnfdId, nsDf.getNsDfId())
           .getMessage();
       throw new NotExistingEntityException(m);
+    }
+    for (VnfProfile vnfp : filterVnfp) {
+      if (nsLvl.getVnfToLevelMapping().stream()
+          .anyMatch(m -> m.getVnfProfileId().equals(vnfp.getVnfProfileId()))) {
+        vnfProfile = vnfp;
+        break;
+      }
+    }
+    if (vnfProfile == null) {
+      String m = MessageFormatter
+          .format("No VnfProfile with vnfdId='{}' found in nsLvl='{}'", vnfdId,
+              nsLvl.getNsLevelId())
+          .getMessage();
+      throw new VnfNotFoundInLvlMapping(m);
     }
     return vnfProfile;
   }
@@ -207,32 +222,6 @@ public abstract class NsdComposer {
     return new VnfInfo(vnfProfile.getVnfdId(), vnfProfile, vnfLvlMap);
   }
 
-  protected VnfInfo retrieveVnfInfoByDescId(String vnfdId, Nsd nsd, NsDf nsDf,
-      NsLevel nsLevel)
-      throws InvalidNsd, VnfNotFoundInLvlMapping {
-    Optional<String> optVnfdId = nsd.getVnfdId().stream()
-        .filter(id -> id.equals(vnfdId)).findFirst();
-    if (!optVnfdId.isPresent()) {
-      String m = MessageFormatter
-          .format("vnfdId='{}' not found in nsd='{}'.", vnfdId, nsd.getNsdIdentifier())
-          .getMessage();
-      throw new InvalidNsd(m);
-    }
-    VnfProfile vnfProfile;
-    try {
-      vnfProfile = getVnfProfileByDescId(vnfdId, nsDf);
-    } catch (NotExistingEntityException e) {
-      throw new InvalidNsd(e.getMessage());
-    }
-    VnfToLevelMapping vnfLvlMap;
-    try {
-      vnfLvlMap = getVnfLvlMapping(vnfProfile.getVnfProfileId(), nsLevel);
-    } catch (NotExistingEntityException e) {
-      throw new VnfNotFoundInLvlMapping(e.getMessage());
-    }
-    return new VnfInfo(vnfdId, vnfProfile, vnfLvlMap);
-  }
-
   protected VlInfo retrieveVlInfo(String vlProfileId, Nsd nsd, NsDf nsDf, NsLevel nsLevel)
       throws InvalidNsd, VlNotFoundInLvlMapping {
     VirtualLinkToLevelMapping vlMap;
@@ -316,147 +305,9 @@ public abstract class NsdComposer {
     return cpdIdMap;
   }
 
-//  @SuppressWarnings("DuplicatedCode")
-//  @SneakyThrows(JsonProcessingException.class)
-//  public void compose(Nsd vsNsd, CtxComposeInfo[] ctxComposeInfos)
-//      throws InvalidCtxComposeInfo, InvalidNsd {
-//    ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
-//    for (CtxComposeInfo ctxComposeInfo : ctxComposeInfos) {
-//      Nsd ctxNsd = ctxComposeInfo.getCtxBReq().getNsds().get(0);
-//      // We assume only one NsDf for the context
-//      NsDf ctxNsDf = ctxNsd.getNsDf().get(0);
-//      // We assume only one NsLevel for the context
-//      NsLevel ctxNsLvl = ctxNsDf.getNsInstantiationLevel().get(0);
-//      log.info("Composing '{}' with <{}, {}, {}>.",
-//          vsNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
-//          ctxNsLvl.getNsLevelId());
-//      log.debug("Nsd BEFORE composition:\n{}", objectMapper.writeValueAsString(vsNsd));
-//      vsNsd.setNsdName(vsNsd.getNsdName() + " + " + ctxNsd.getNsdName());
-//      for (NsDf vsNsDf : vsNsd.getNsDf()) {
-//        for (NsLevel vsNsLvl : vsNsDf.getNsInstantiationLevel()) {
-//          log.info("Start composition for nsDf='{}' and nsLvl='{}'",
-//              vsNsDf.getNsDfId(), vsNsLvl.getNsLevelId());
-//          Graph<ProfileVertex, String> g = nsdGraphService
-//              .buildGraph(vsNsd.getSapd(), vsNsDf, vsNsLvl);
-//          log.debug("Graph BEFORE composition :\n{}", nsdGraphService.export(g));
-//          for (VnfConnection ctxC : ctxComposeInfo.getCtxConnections()) {
-//            log.info("ctxConnection: {}", ctxC);
-//            VnfWrapper vnfWrapper;
-//            VlWrapper vlWrapper;
-//
-//            // Retrieve the VNF from context Nsd
-//            try {
-//              vnfWrapper = retrieveVnfInfo(ctxC.getVnfProfileId(), ctxC.getCpdId(),
-//                  ctxNsd, ctxNsDf, ctxNsLvl);
-//              log.debug("Found vnfProfile='{}' in context.", ctxC.getVnfProfileId());
-//            } catch (VnfNotFoundInLvlMapping e) {
-//              log.warn(e.getMessage() + " Skip.");
-//              continue;
-//            } catch (InvalidNsd e) {
-//              log.error(e.getMessage());
-//              throw e;
-//            }
-//
-//            // Retrieve the VirtualLink from context Nsd (and add it)
-//            try {
-//              vlWrapper = retrieveVlInfo(ctxC.getVlProfileId(), ctxNsd, ctxNsDf, ctxNsLvl);
-//              log.debug("Found vlProfile='{}' in context.", ctxC.getVlProfileId());
-//              addVirtualLink(vsNsd, vsNsDf, vsNsLvl, vlWrapper);
-//              log.debug("Added vlProfile='{}' in service (if not present).", ctxC.getVlProfileId());
-//            } catch (VlNotFoundInLvlMapping e) {
-//              log.debug(e.getMessage() + " Trying in service.");
-//              // Retrieve the VirtualLink from vertical Nsd
-//              try {
-//                vlWrapper = retrieveVlInfo(ctxC.getVlProfileId(), vsNsd, vsNsDf, vsNsLvl);
-//                log.debug("Found vlProfile='{}' in vertical service.", ctxC.getVlProfileId());
-//              } catch (VlNotFoundInLvlMapping vlNotFoundInLvlMapping) {
-//                String m = MessageFormatter
-//                    .format("vlProfile='{}' not found neither in context or vertical service.",
-//                        ctxC.getVlProfileId()).getMessage();
-//                log.error(m, e);
-//                throw new InvalidCtxComposeInfo(m);
-//              }
-//            } catch (InvalidNsd e) {
-//              log.error(e.getMessage());
-//              throw e;
-//            }
-//
-//            // Create connection between Vnf and VL
-//            vnfWrapper.getVlConnectivity()
-//                .setVirtualLinkProfileId(vlWrapper.getVlProfile().getVirtualLinkProfileId());
-//            log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
-//                ctxC.getVnfProfileId(), ctxC.getVlProfileId());
-//            addVnf(vsNsd, vsNsDf, vsNsLvl, vnfWrapper);
-//            log.debug("Added vnfProfile='{}' in service (if not present).", ctxC.getVnfProfileId());
-//          }
-//          for (VnfConnection vsC : ctxComposeInfo.getVsConnections()) {
-//            log.info("vsConnection: {}", vsC);
-//            VnfWrapper vnfWrapper;
-//            VlWrapper vlWrapper;
-//
-//            // Retrieve the VNF from vertical Nsd
-//            try {
-//              vnfWrapper = retrieveVnfInfo(vsC.getVnfProfileId(), vsC.getCpdId(),
-//                  vsNsd, vsNsDf, vsNsLvl);
-//              log.debug("Found vnfProfile='{}' in vertical service.", vsC.getVnfProfileId());
-//            } catch (VnfNotFoundInLvlMapping e) {
-//              log.warn(e.getMessage() + " Skip.");
-//              continue;
-//            } catch (InvalidNsd e) {
-//              log.error(e.getMessage());
-//              throw e;
-//            }
-//
-//            // Retrieve the VirtualLink from context Nsd (and add it)
-//            try {
-//              vlWrapper = retrieveVlInfo(vsC.getVlProfileId(), ctxNsd, ctxNsDf, ctxNsLvl);
-//              log.debug("Found vlProfile='{}' in context.", vsC.getVlProfileId());
-//              addVirtualLink(vsNsd, vsNsDf, vsNsLvl, vlWrapper);
-//              log.info("Added vlProfile='{}' in service. (if not present).", vsC.getVlProfileId());
-//            } catch (VlNotFoundInLvlMapping e) {
-//              String m = MessageFormatter
-//                  .format("vlProfile='{}' not found in context.", vsC.getVlProfileId())
-//                  .getMessage();
-//              log.error(m, e);
-//              throw new InvalidCtxComposeInfo(m);
-//            } catch (InvalidNsd e) {
-//              log.error(e.getMessage());
-//              throw e;
-//            }
-//
-//            // Create connection between Vnf and VL
-//            vnfWrapper.getVlConnectivity()
-//                .setVirtualLinkProfileId(vlWrapper.getVlProfile().getVirtualLinkProfileId());
-//            log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
-//                vsC.getVnfProfileId(), vsC.getVlProfileId());
-//          }
-//          try {
-//            vsNsd.isValid();
-//          } catch (MalformattedElementException e) {
-//            String m = "Nsd looks not valid after composition";
-//            log.error(m, e);
-//            throw new InvalidNsd(m);
-//          }
-//          g = nsdGraphService.buildGraph(vsNsd.getSapd(), vsNsDf, vsNsLvl);
-//          log.debug("Graph AFTER composition with {}:\n{}",
-//              ctxNsd.getNsdIdentifier(), nsdGraphService.export(g));
-//          log.info("Completed composition for nsDf='{}' and nsLvl='{}'",
-//              vsNsDf.getNsDfId(), vsNsLvl.getNsLevelId());
-//        }
-//      }
-//      vsNsd.setNsdIdentifier(UUID.randomUUID().toString());
-//      vsNsd.setNsdInvariantId(UUID.randomUUID().toString());
-//      log.debug("Nsd AFTER composition with {}:\n{}",
-//          ctxNsd.getNsdIdentifier(), objectMapper.writeValueAsString(vsNsd));
-//      log.info("Completed composition of '{}' with <{}, {}, {}>.",
-//          vsNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
-//          ctxNsLvl.getNsLevelId());
-//    }
-//  }
-
   @SneakyThrows(JsonProcessingException.class)
-  public void compose(Sapd ranSapd, NsVirtualLinkDesc vsbMgmtVld, Nsd vsbNsd,
-      NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd)
+  public void compose(ConnectInput connectInput, Sapd ranSapd, NsVirtualLinkDesc vsbMgmtVld,
+      Nsd vsbNsd, NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd)
       throws InvalidNsd {
     NsVirtualLinkDesc ranVld;
     try {
@@ -503,7 +354,7 @@ public abstract class NsdComposer {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
-      composeWithStrategy(ranVlInfo, vsbMgmtVlInfo, ctxMgmtVlInfo,
+      composeWithStrategy(connectInput, ranVlInfo, vsbMgmtVlInfo, ctxMgmtVlInfo,
           vsbNsd, vsbNsDf, vsbNsLvl,
           ctxNsd, ctxNsDf, ctxNsLvl);
 
@@ -529,7 +380,7 @@ public abstract class NsdComposer {
   }
 
   public abstract void composeWithStrategy(
-      VlInfo ranVlInfo, VlInfo vsbMgmtVlInfo, VlInfo ctxMgmtVlInfo,
+      ConnectInput connectInput, VlInfo ranVlInfo, VlInfo vsbMgmtVlInfo, VlInfo ctxMgmtVlInfo,
       Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl,
       Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl
   ) throws InvalidNsd;
