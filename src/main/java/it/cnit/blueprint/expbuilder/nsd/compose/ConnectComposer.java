@@ -33,6 +33,7 @@ public class ConnectComposer extends NsdComposer {
       Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl,
       Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl)
       throws InvalidNsd {
+    log.info("Compose with CONNECT.");
     // Retrieve ctx VNFs
     VnfInfo srcVnfInfo;
     VnfInfo dstVnfInfo;

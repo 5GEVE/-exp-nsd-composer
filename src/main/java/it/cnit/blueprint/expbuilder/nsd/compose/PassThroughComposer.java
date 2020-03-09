@@ -33,6 +33,7 @@ public class PassThroughComposer extends NsdComposer {
       Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl,
       Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl)
       throws InvalidNsd {
+    log.info("Compose with PASS_THROUGH.");
     // Retrieve ctx VNF
     String ctxVnfpId = ctxNsLvl.getVnfToLevelMapping().get(0).getVnfProfileId();
     VnfInfo ctxVnfInfo;
