@@ -48,10 +48,6 @@ public class ConnectComposer extends NsdComposer {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
     }
-    addVnf(srcVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
-    log.debug("Added Vnfd='{}' in service (if not present).", srcVnfInfo.getVfndId());
-    addVnf(dstVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
-    log.debug("Added Vnfd='{}' in service (if not present).", dstVnfInfo.getVfndId());
 
     // Retrieve CpdId for src VNF
     Map<String, NsVirtualLinkConnectivity> srcCpds;
@@ -90,13 +86,19 @@ public class ConnectComposer extends NsdComposer {
       throw new InvalidNsd(e.getMessage());
     }
 
+    // Modify vsbNsd
+    addVnf(srcVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
+    log.debug("Added Vnfd='{}' in service (if not present).", srcVnfInfo.getVfndId());
+    addVnf(dstVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
+    log.debug("Added Vnfd='{}' in service (if not present).", dstVnfInfo.getVfndId());
     try {
-      // Connect VNFs to src and dst VLs
+      // Connect VNFs to src VL
       connectVnfToVL(srcVnfInfo.getVnfProfile(), srcCpds.get("data0").getCpdId().get(0),
           srcVlInfo.getVlProfile());
       log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
           srcVnfInfo.getVnfProfile().getVnfProfileId(),
           srcVlInfo.getVlProfile().getVirtualLinkProfileId());
+      // Connect VNFs to dst VL
       connectVnfToVL(dstVnfInfo.getVnfProfile(), dstCpds.get("data0").getCpdId().get(0),
           dstVlInfo.getVlProfile());
       log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
