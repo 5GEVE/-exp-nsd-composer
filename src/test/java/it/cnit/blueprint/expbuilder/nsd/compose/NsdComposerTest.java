@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.expbuilder.nsd.graph.GraphVizExporter;
 import it.cnit.blueprint.expbuilder.nsd.graph.NsdGraphService;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
@@ -46,7 +45,7 @@ public class NsdComposerTest {
     passThroughComposer = new PassThroughComposer(nsdGraphService);
     connectComposer = new ConnectComposer(nsdGraphService);
     Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    root.setLevel(Level.DEBUG);
+    root.setLevel(Level.INFO);
   }
 
   @Test
@@ -89,7 +88,8 @@ public class NsdComposerTest {
     vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
 
     // Then
-    InputStream in = getClass().getResourceAsStream("/expb_ares2t_tracker_delay_nsds.yaml");
+    InputStream in = getClass().getResourceAsStream(
+        "/expb_ares2t_tracker_delay_nsds_passthrough.yaml");
     Nsd expNsd = oM.readValue(in, Nsd[].class)[0];
     assertEquals(oM.writeValueAsString(expNsd), oM.writeValueAsString(vsbNsd));
   }
@@ -150,7 +150,8 @@ public class NsdComposerTest {
     vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
 
     // Then
-    InputStream in = getClass().getResourceAsStream("/expb_ares2t_tracker_delay_nsds.yaml");
+    InputStream in = getClass().getResourceAsStream(
+        "/expb_ares2t_tracker_delay_nsds_connect.yaml");
     Nsd expNsd = oM.readValue(in, Nsd[].class)[0];
     assertEquals(oM.writeValueAsString(expNsd), oM.writeValueAsString(vsbNsd));
   }
