@@ -11,14 +11,14 @@ strict graph G {
   -1971465616 [ label="vlp_vl_tracking_exp_data" shape="oval" style="filled" fillcolor="dodgerblue" ];
   142347183 [ label="sap_tracking_exp_mobile" shape="oval" style="filled" fillcolor="darksalmon" ];
   474467885 [ label="sap_tracking_exp_mgt" shape="oval" style="filled" fillcolor="darksalmon" ];
-  -1874275603 -- 1008003435 [ label="cp_tracker_ext_in" ];
-  -1874275603 -- -1971465616 [ label="cp_tracker_data" ];
-  -1874275603 -- 1183339156 [ label="cp_tracker_mgt" ];
-  1392640733 -- -1971465616 [ label="cp_vis_data" ];
-  1392640733 -- 1183339156 [ label="cp_vis_mgt" ];
-  -793362586 -- 1008003435 [ label="cp_dg_traffic_out" ];
-  -793362586 -- 1183339156 [ label="cp_dg_mgt" ];
-  -793362586 -- -227812888 [ label="cp_dg_traffic_in" ];
+  -1874275603 -- 1008003435 [ label="vnfp_small_Ares2T_Tracker_exp_cp_tracker_ext_in" ];
+  -1874275603 -- -1971465616 [ label="vnfp_small_Ares2T_Tracker_exp_cp_tracker_data" ];
+  -1874275603 -- 1183339156 [ label="vnfp_small_Ares2T_Tracker_exp_cp_tracker_mgt" ];
+  1392640733 -- -1971465616 [ label="vnfp_Ares2T_Vis_exp_cp_vis_data" ];
+  1392640733 -- 1183339156 [ label="vnfp_Ares2T_Vis_exp_cp_vis_mgt" ];
+  -793362586 -- 1008003435 [ label="vnfp_netem_exp_cp_dg_traffic_out" ];
+  -793362586 -- 1183339156 [ label="vnfp_netem_exp_cp_dg_mgt" ];
+  -793362586 -- -227812888 [ label="vnfp_netem_exp_cp_dg_traffic_in" ];
   142347183 -- -227812888 [ label="sap_tracking_exp_mobile" ];
   474467885 -- 1183339156 [ label="sap_tracking_exp_mgt" ];
 }

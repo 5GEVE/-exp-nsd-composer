@@ -9,11 +9,11 @@ strict graph G {
   -2137711178 [ label="vlp_vl_tracking_mgt" shape="oval" style="filled" fillcolor="dodgerblue" ];
   -734211891 [ label="sap_tracking_mobile" shape="oval" style="filled" fillcolor="darksalmon" ];
   1141657039 [ label="sap_tracking_mgt" shape="oval" style="filled" fillcolor="darksalmon" ];
-  -1503706314 -- 1228317574 [ label="cp_tracker_ext_in" ];
-  -1503706314 -- -1844810866 [ label="cp_tracker_data" ];
-  -1503706314 -- -2137711178 [ label="cp_tracker_mgt" ];
-  1169940735 -- -1844810866 [ label="cp_vis_data" ];
-  1169940735 -- -2137711178 [ label="cp_vis_mgt" ];
+  -1503706314 -- 1228317574 [ label="vnfp_big_Ares2T_Tracker_cp_tracker_ext_in" ];
+  -1503706314 -- -1844810866 [ label="vnfp_big_Ares2T_Tracker_cp_tracker_data" ];
+  -1503706314 -- -2137711178 [ label="vnfp_big_Ares2T_Tracker_cp_tracker_mgt" ];
+  1169940735 -- -1844810866 [ label="vnfp_Ares2T_Vis_cp_vis_data" ];
+  1169940735 -- -2137711178 [ label="vnfp_Ares2T_Vis_cp_vis_mgt" ];
   -734211891 -- 1228317574 [ label="sap_tracking_mobile" ];
   1141657039 -- -2137711178 [ label="sap_tracking_mgt" ];
 }
