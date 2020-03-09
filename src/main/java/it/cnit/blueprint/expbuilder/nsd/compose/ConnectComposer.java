@@ -9,6 +9,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -122,6 +123,17 @@ public class ConnectComposer extends NsdComposer {
             vsbMgmtVlInfo.getVlProfile());
       } else {
         log.warn("Could not find a management Cp for dstVnf. Skip.");
+      }
+      // Cleanup unused cpds
+      for (Entry<String, NsVirtualLinkConnectivity> cpd : srcCpds.entrySet()) {
+        if (!cpd.getKey().equals("data0") && !cpd.getKey().equals("mgmt")) {
+          srcVnfInfo.getVnfProfile().getNsVirtualLinkConnectivity().remove(cpd.getValue());
+        }
+      }
+      for (Entry<String, NsVirtualLinkConnectivity> cpd : dstCpds.entrySet()) {
+        if (!cpd.getKey().equals("data0") && !cpd.getKey().equals("mgmt")) {
+          dstVnfInfo.getVnfProfile().getNsVirtualLinkConnectivity().remove(cpd.getValue());
+        }
       }
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());

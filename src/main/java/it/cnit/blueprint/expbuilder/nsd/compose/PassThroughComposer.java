@@ -10,6 +10,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
 import java.util.Map;
+import java.util.Map.Entry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -116,6 +117,13 @@ public class PassThroughComposer extends NsdComposer {
             vsbMgmtVlInfo.getVlProfile().getVirtualLinkProfileId());
       } else {
         log.warn("Could not find a management Cp for ctxVnf. Skip.");
+      }
+      // Cleanup unused cpds of ctxVnf (if any)
+      for (Entry<String, NsVirtualLinkConnectivity> cpd : ctxVnfCpds.entrySet()) {
+        if (!cpd.getKey().equals("data0") && !cpd.getKey().equals("data1") && !cpd.getKey()
+            .equals("mgmt")) {
+          ctxVnfInfo.getVnfProfile().getNsVirtualLinkConnectivity().remove(cpd.getValue());
+        }
       }
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
