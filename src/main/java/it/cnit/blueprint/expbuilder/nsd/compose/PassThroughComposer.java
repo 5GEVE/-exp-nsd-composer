@@ -47,6 +47,7 @@ public class PassThroughComposer extends NsdComposer {
     }
 
     // Retrieve non-management VLs from ctx
+    // Assumption: select the first Vl attached to ctxVnf
     Map<String, NsVirtualLinkConnectivity> ctxVnfCpds;
     VlInfo ctxNonMgmtVl;
     try {
@@ -57,9 +58,6 @@ public class PassThroughComposer extends NsdComposer {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
     }
-    addVirtualLink(ctxNonMgmtVl, vsbNsd, vsbNsDf, vsbNsLvl);
-    log.debug("Added VirtualLinkDescriptor='{}' in service (if not present).",
-        ctxNonMgmtVl.getVlDescriptor().getVirtualLinkDescId());
 
     // Retrieve RAN closest VNF information from vsb
     // Assumption: select the first VNF attached to the RAN VL
@@ -91,20 +89,18 @@ public class PassThroughComposer extends NsdComposer {
     log.debug("ranVnfProfile: '{}'", ranVnfProfile.getVnfProfileId());
     log.debug("ranVnfCpd: '{}'", ranVnfCpd);
 
+    // Modify vsbNsd
     addVnf(ctxVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
     log.debug("Added Vnfd='{}' in service (if not present).", ctxVnfdId);
-    // Connect ranVnf to the new VL coming from ctx
+    addVirtualLink(ctxNonMgmtVl, vsbNsd, vsbNsDf, vsbNsLvl);
+    log.debug("Added VirtualLinkDescriptor='{}' in service (if not present).",
+        ctxNonMgmtVl.getVlDescriptor().getVirtualLinkDescId());
     try {
+      // Connect ranVnf to the new VL coming from ctx
       connectVnfToVL(ranVnfProfile, ranVnfCpd, ctxNonMgmtVl.getVlProfile());
       log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
           ranVnfProfile.getVnfProfileId(),
           ctxNonMgmtVl.getVlProfile().getVirtualLinkProfileId());
-    } catch (NotExistingEntityException e) {
-      log.error(e.getMessage());
-      throw new InvalidNsd(e.getMessage());
-    }
-
-    try {
       // Connect ctxVnf with RAN VL
       connectVnfToVL(ctxVnfInfo.getVnfProfile(), ctxVnfCpds.get("data1").getCpdId().get(0),
           ranVlInfo.getVlProfile());
@@ -122,11 +118,9 @@ public class PassThroughComposer extends NsdComposer {
       } else {
         log.warn("Could not find a management Cp for ctxVnf. Skip.");
       }
-
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
     }
-
   }
 }
