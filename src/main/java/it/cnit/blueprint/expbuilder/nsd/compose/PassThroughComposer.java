@@ -112,7 +112,6 @@ public class PassThroughComposer extends NsdComposer {
         log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
             ctxVnfInfo.getVnfProfile().getVnfProfileId(),
             vsbMgmtVlInfo.getVlProfile().getVirtualLinkProfileId());
-        log.debug("qui");
       } else {
         log.warn("Could not find a management Cp for ctxVnf. Skip.");
       }
