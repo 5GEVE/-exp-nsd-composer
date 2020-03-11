@@ -1,4 +1,4 @@
-package it.cnit.blueprint.expbuilder.nsd.compose;
+package it.cnit.blueprint.composer.nsd.compose;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,10 +6,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import it.cnit.blueprint.composer.nsd.compose.ConnectComposer;
-import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
-import it.cnit.blueprint.composer.nsd.compose.PassThroughComposer;
-import it.cnit.blueprint.composer.nsd.compose.VnfInfo;
 import it.cnit.blueprint.composer.nsd.graph.GraphVizExporter;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.rest.ConnectInput;

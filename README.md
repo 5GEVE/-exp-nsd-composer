@@ -1,5 +1,5 @@
-# 5geve-experiment-builder
-A REST API module to compose VSB and CBs.
+# 5G EVE Experment NSD composer
+A REST API module to compose the NSD of a VSB and multiple CBs.
 The project is designed to be deployed with Docker.
 Check the pom.xml for details about plugins to ease docker image build.
 

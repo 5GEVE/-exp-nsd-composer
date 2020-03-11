@@ -11,10 +11,9 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>it.cnit.blueprint</groupId>
-  <artifactId>expbuilder</artifactId>
+  <artifactId>composer</artifactId>
   <version>0.0.2-SNAPSHOT</version>
-  <description>A REST API module to compose VSD and CDs.</description>
-  <url>https://github.com/TheWall89/5geve-experiment-builder</url>
+  <description>A REST API module to compose NSDs.</description>
   <packaging>docker-build</packaging>
 
   <properties>

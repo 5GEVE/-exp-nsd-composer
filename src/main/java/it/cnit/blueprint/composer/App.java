@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
-@EntityScan(basePackages = {"it.nextworks.nfvmano.libs.ifa", "it.cnit.blueprint.expbuilder"})
+@EntityScan(basePackages = {"it.nextworks.nfvmano.libs.ifa", "it.cnit.blueprint.composer"})
 @Slf4j
 public class App {
 

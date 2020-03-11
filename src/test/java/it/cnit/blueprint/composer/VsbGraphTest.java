@@ -1,4 +1,4 @@
-package it.cnit.blueprint.expbuilder;
+package it.cnit.blueprint.composer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
