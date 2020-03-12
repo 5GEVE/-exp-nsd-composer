@@ -40,6 +40,7 @@ public class MasterComposer {
     // Assumptions:
     // - The Vsb has only 1 Nsd.
     Nsd vsbNsd = vsbRequest.getNsds().get(0);
+    NsVirtualLinkDesc ranVld =  findRanVld(vsbRequest.getVsBlueprint(), vsbNsd);
     for (CtxComposeInfo ctx : contexts) {
       // - The Ctx has only 1 Nsd.
       Nsd ctxNsd = ctx.getCtxbRequest().getNsds().get(0);
@@ -48,13 +49,12 @@ public class MasterComposer {
         ctx.setConnectInput(new ConnectInput());
       }
 
-      Sapd ranSapd = findRanSapd(vsbRequest.getVsBlueprint(), vsbNsd);
       NsVirtualLinkDesc vsbMgmtVld = findMgmtVld(ctxB, ctxNsd);
       NsVirtualLinkDesc ctxMgmtVld = findMgmtVld(ctxB, ctxNsd);
       if (STRAT.equals(CompositionStrategy.CONNECT)) {
         log.info("connect");
         connectComposer
-            .compose(ctx.getConnectInput(), ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+            .compose(ctx.getConnectInput(), ranVld, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
       } else if (STRAT.equals(CompositionStrategy.PASS_THROUGH)) {
         log.info("pass_through");
         // compose Nsd
@@ -64,7 +64,7 @@ public class MasterComposer {
           throw new InvalidCtxComposeInfo("More than one VNF found in Ctx for PASS_THROUGH");
         }
         passThroughComposer
-            .compose(ctx.getConnectInput(), ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+            .compose(ctx.getConnectInput(), ranVld, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
         // TODO compose Exp blueprint
       } else {
         log.error("not supported");
@@ -80,18 +80,23 @@ public class MasterComposer {
     return new NsVirtualLinkDesc();
   }
 
-  private Sapd findRanSapd(Blueprint b, Nsd nsd) {
+  private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd) throws InvalidNsd {
+    Sapd ranSapd = null;
     for (VsbEndpoint e : b.getEndPoints()) {
       if (e.isRanConnection()) {
         for (Sapd sapd : nsd.getSapd()) {
           if (e.getEndPointId().equals(sapd.getCpdId())) {
-            return sapd;
+            ranSapd = sapd;
+            break;
           }
         }
       }
     }
-    // TODO exception invalid blueprint or nsd
-    return null;
+    if (ranSapd == null) {
+      // TODO think of a better message
+      throw new InvalidNsd("Cannot find a Sap descriptor for RAN.");
+    }
+    return connectComposer.getRanVlDesc(ranSapd, nsd);
   }
 
 }

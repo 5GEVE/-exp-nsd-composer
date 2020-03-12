@@ -305,10 +305,7 @@ public abstract class NsdComposer {
     return cpdIdMap;
   }
 
-  @SneakyThrows(JsonProcessingException.class)
-  public void compose(ConnectInput connectInput, Sapd ranSapd, NsVirtualLinkDesc vsbMgmtVld,
-                      Nsd vsbNsd, NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd)
-      throws InvalidNsd {
+  public NsVirtualLinkDesc getRanVlDesc(Sapd ranSapd, Nsd vsbNsd) throws InvalidNsd {
     NsVirtualLinkDesc ranVld;
     try {
       ranVld = getVlDescriptor(ranSapd.getNsVirtualLinkDescId(), vsbNsd);
@@ -316,7 +313,13 @@ public abstract class NsdComposer {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
     }
+    return ranVld;
+  }
 
+  @SneakyThrows(JsonProcessingException.class)
+  public void compose(ConnectInput connectInput, NsVirtualLinkDesc ranVld,
+      NsVirtualLinkDesc vsbMgmtVld, Nsd vsbNsd, NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd)
+      throws InvalidNsd {
     // We assume only one NsDf for the context
     NsDf ctxNsDf = ctxNsd.getNsDf().get(0);
     // We assume only one NsLevel for the context
