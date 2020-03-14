@@ -32,7 +32,7 @@ public class NsdGeneratorTest {
     urlProp.load(input);
     oM = new ObjectMapper(new YAMLFactory());
     nsdGraphService = new NsdGraphService(new GraphVizExporter());
-    nsdGenerator = new NsdGenerator();
+    nsdGenerator = new NsdGenerator(nsdGraphService);
     Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     root.setLevel(Level.DEBUG);
   }
