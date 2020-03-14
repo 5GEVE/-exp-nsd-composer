@@ -12,7 +12,6 @@ import it.cnit.blueprint.composer.rest.ConnectInput;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
 import java.io.InputStream;
@@ -55,11 +54,12 @@ public class NsdComposerTest {
 
     // Given
     Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
-    Sapd ranSapd;
-    Optional<Sapd> optSapd = vsbNsd.getSapd().stream()
-        .filter(s -> s.getCpdId().equals("sap_tracking_mobile")).findFirst();
-    if (optSapd.isPresent()) {
-      ranSapd = optSapd.get();
+    NsVirtualLinkDesc ranVld;
+    Optional<NsVirtualLinkDesc> optRanVl = vsbNsd.getVirtualLinkDesc().stream()
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mobile"))
+        .findFirst();
+    if (optRanVl.isPresent()) {
+      ranVld = optRanVl.get();
     } else {
       throw new Exception();
     }
@@ -84,7 +84,7 @@ public class NsdComposerTest {
 
     // When
     passThroughComposer
-        .compose(new ConnectInput(), ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+        .compose(new ConnectInput(), ranVld, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
     vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
@@ -102,11 +102,12 @@ public class NsdComposerTest {
 
     // Given
     Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
-    Sapd ranSapd;
-    Optional<Sapd> optSapd = vsbNsd.getSapd().stream()
-        .filter(s -> s.getCpdId().equals("sap_tracking_mobile")).findFirst();
-    if (optSapd.isPresent()) {
-      ranSapd = optSapd.get();
+    NsVirtualLinkDesc ranVld;
+    Optional<NsVirtualLinkDesc> optRanVl = vsbNsd.getVirtualLinkDesc().stream()
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mobile"))
+        .findFirst();
+    if (optRanVl.isPresent()) {
+      ranVld = optRanVl.get();
     } else {
       throw new Exception();
     }
@@ -146,7 +147,7 @@ public class NsdComposerTest {
     }
 
     // When
-    connectComposer.compose(new ConnectInput(), ranSapd, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+    connectComposer.compose(new ConnectInput(), ranVld, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
     vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
