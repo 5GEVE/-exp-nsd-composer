@@ -1,4 +1,4 @@
-package it.cnit.blueprint.composer.master;
+package it.cnit.blueprint.composer.rest;
 
 public enum CompositionStrategy {
   PASS_THROUGH,

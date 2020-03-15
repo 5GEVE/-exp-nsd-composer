@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ConnectInput {
 
-  String srcVnfdId;
-  String srcVldId;
-  String dstVnfdId;
-  String dstVldId;
+  private String srcVnfdId;
+  private String srcVldId;
+  private String dstVnfdId;
+  private String dstVldId;
 }

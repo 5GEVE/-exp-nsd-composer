@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 public class ComposeRequest {
 
-  public OnBoardVsBlueprintRequest vsbRequest;
-  public CtxComposeInfo[] contexts;
+  private OnBoardVsBlueprintRequest vsbRequest;
+  private CtxComposeInfo[] contexts;
 }
