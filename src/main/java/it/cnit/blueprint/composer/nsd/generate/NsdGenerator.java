@@ -8,10 +8,15 @@ import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.composer.rest.InvalidNsd;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
+import it.nextworks.nfvmano.libs.ifa.common.enums.AddressType;
+import it.nextworks.nfvmano.libs.ifa.common.enums.CpRole;
+import it.nextworks.nfvmano.libs.ifa.common.enums.IpVersion;
 import it.nextworks.nfvmano.libs.ifa.common.enums.LayerProtocol;
 import it.nextworks.nfvmano.libs.ifa.common.enums.ServiceAvailabilityLevel;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.AddressData;
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.ConnectivityType;
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.LinkBitrateRequirements;
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkDf;
@@ -21,6 +26,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.SecurityParameters;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
@@ -104,7 +110,38 @@ public class NsdGenerator {
       vldCount++;
     }
 
-    // TODO generate Sapd
+    List<Sapd> sapdList = new ArrayList<>();
+    for (VsbEndpoint e : vsb.getEndPoints()) {
+      if (e.isExternal() && e.getEndPointId().contains("sap")) {
+        Sapd sapd = new Sapd();
+        sapd.setCpdId(e.getEndPointId());
+        sapd.setDescription("A generated Sapd");
+        sapd.setLayerProtocol(LayerProtocol.IPV4);
+        sapd.setCpRole(CpRole.ROOT); // TODO meaning of this?
+        sapd.setSapAddressAssignment(false);
+        int count = 0;
+        for (VsbLink cs : vsb.getConnectivityServices()) {
+          for (String ep : cs.getEndPointIds()) {
+            if (ep.equals(sapd.getCpdId())) {
+              // TODO change this when connectivity service has a name
+              sapd.setNsVirtualLinkDescId("vld_" + count);
+              break;
+            }
+          }
+          count++;
+        }
+        AddressData addressData = new AddressData();
+        addressData.setAddressType(AddressType.IP_ADDRESS);
+        addressData.setiPAddressType(IpVersion.IPv4);
+        addressData.setiPAddressAssignment(false);
+        addressData.setFloatingIpActivated(true);
+        addressData.setNumberOfIpAddress(1);
+        sapd.setAddressData(Collections.singletonList(addressData));
+
+        sapdList.add(sapd);
+      }
+    }
+    nsd.setSapd(sapdList);
 
     for (VsComponent vsc : vsb.getAtomicComponents()) {
       nsd.getVnfdId().add(vsc.getComponentId());
