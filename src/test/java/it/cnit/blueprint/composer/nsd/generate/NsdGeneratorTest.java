@@ -48,6 +48,9 @@ public class NsdGeneratorTest {
     //When
     Nsd vsbNsd = nsdGenerator.generate(vsb);
 
+    //Then
+    //TODO
+
   }
 
   @Test
@@ -60,5 +63,8 @@ public class NsdGeneratorTest {
     //When
     Nsd vsbNsd = nsdGenerator.generate(vsb);
 
+    //Then
+    //TODO
+    
   }
 }
