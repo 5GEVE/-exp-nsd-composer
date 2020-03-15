@@ -40,10 +40,22 @@ public class NsdGeneratorTest {
 
   @Test
   @SneakyThrows
-  public void generate() {
+  public void generateTracker() {
 
     // Given
     VsBlueprint vsb = oM.readValue(new URL(urlProp.getProperty("vsb.tracker")), VsBlueprint.class);
+
+    //When
+    Nsd vsbNsd = nsdGenerator.generate(vsb);
+
+  }
+
+  @Test
+  @SneakyThrows
+  public void generateV360() {
+
+    // Given
+    VsBlueprint vsb = oM.readValue(new URL(urlProp.getProperty("vsb.v360")), VsBlueprint.class);
 
     //When
     Nsd vsbNsd = nsdGenerator.generate(vsb);
