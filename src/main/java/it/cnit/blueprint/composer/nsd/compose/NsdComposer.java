@@ -3,9 +3,9 @@ package it.cnit.blueprint.composer.nsd.compose;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.composer.rest.ConnectInput;
-import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.rest.InvalidNsd;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -324,8 +324,6 @@ public abstract class NsdComposer {
     NsDf ctxNsDf = ctxNsd.getNsDf().get(0);
     // We assume only one NsLevel for the context
     NsLevel ctxNsLvl = ctxNsDf.getNsInstantiationLevel().get(0);
-    // We assume only one NsDf for the vertical service
-    NsDf vsbNsDf = vsbNsd.getNsDf().get(0);
     Graph<ProfileVertex, String> ctxG = nsdGraphService
         .buildGraph(ctxNsd.getSapd(), ctxNsDf, ctxNsLvl);
     log.debug("ctxG graph:\n{}", nsdGraphService.export(ctxG));
@@ -336,44 +334,48 @@ public abstract class NsdComposer {
     log.debug("Nsd BEFORE composition:\n{}", OBJECT_MAPPER.writeValueAsString(vsbNsd));
 
     vsbNsd.setNsdName(vsbNsd.getNsdName() + " + " + ctxNsd.getNsdName());
-    for (NsLevel vsbNsLvl : vsbNsDf.getNsInstantiationLevel()) {
-      log.info("Start composition for nsDf='{}' and nsLvl='{}'",
-          vsbNsDf.getNsDfId(), vsbNsLvl.getNsLevelId());
-      Graph<ProfileVertex, String> vsbG = nsdGraphService
-          .buildGraph(vsbNsd.getSapd(), vsbNsDf, vsbNsLvl);
-      log.debug("vsbG BEFORE composition :\n{}", nsdGraphService.export(vsbG));
+    for (NsDf vsbNsDf : vsbNsd.getNsDf()) {
+      for (NsLevel vsbNsLvl : vsbNsDf.getNsInstantiationLevel()) {
+        log.info("Start composition for nsDf='{}' and nsLvl='{}'",
+            vsbNsDf.getNsDfId(), vsbNsLvl.getNsLevelId());
+        Graph<ProfileVertex, String> vsbG = nsdGraphService
+            .buildGraph(vsbNsd.getSapd(), vsbNsDf, vsbNsLvl);
+        log.debug("vsbG BEFORE composition :\n{}", nsdGraphService.export(vsbG));
 
-      VlInfo ranVlInfo;
-      VlInfo vsbMgmtVlInfo;
-      VlInfo ctxMgmtVlInfo;
-      try {
-        ranVlInfo = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
-        log.debug("Found VlInfo for ranVld='{}' in vsbNsd.", ranVld.getVirtualLinkDescId());
-        vsbMgmtVlInfo = retrieveVlInfo(vsbMgmtVld, vsbNsDf, vsbNsLvl);
-        log.debug("Found VlInfo for vsbMgmtVld='{}' in vsbNsd.", vsbMgmtVld.getVirtualLinkDescId());
-        ctxMgmtVlInfo = retrieveVlInfo(ctxMgmtVld, ctxNsDf, ctxNsLvl);
-        log.debug("Found VlInfo for ctxMgmtVld='{}' in ctxNsd.", ctxMgmtVld.getVirtualLinkDescId());
-      } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
-        log.error(e.getMessage());
-        throw new InvalidNsd(e.getMessage());
-      }
-      composeWithStrategy(connectInput, ranVlInfo, vsbMgmtVlInfo, ctxMgmtVlInfo,
-          vsbNsd, vsbNsDf, vsbNsLvl,
-          ctxNsd, ctxNsDf, ctxNsLvl);
+        VlInfo ranVlInfo;
+        VlInfo vsbMgmtVlInfo;
+        VlInfo ctxMgmtVlInfo;
+        try {
+          ranVlInfo = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
+          log.debug("Found VlInfo for ranVld='{}' in vsbNsd.", ranVld.getVirtualLinkDescId());
+          vsbMgmtVlInfo = retrieveVlInfo(vsbMgmtVld, vsbNsDf, vsbNsLvl);
+          log.debug("Found VlInfo for vsbMgmtVld='{}' in vsbNsd.",
+              vsbMgmtVld.getVirtualLinkDescId());
+          ctxMgmtVlInfo = retrieveVlInfo(ctxMgmtVld, ctxNsDf, ctxNsLvl);
+          log.debug("Found VlInfo for ctxMgmtVld='{}' in ctxNsd.",
+              ctxMgmtVld.getVirtualLinkDescId());
+        } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
+          log.error(e.getMessage());
+          throw new InvalidNsd(e.getMessage());
+        }
+        composeWithStrategy(connectInput, ranVlInfo, vsbMgmtVlInfo, ctxMgmtVlInfo,
+            vsbNsd, vsbNsDf, vsbNsLvl,
+            ctxNsd, ctxNsDf, ctxNsLvl);
 
-      // Nsd validation and logging
-      try {
-        vsbNsd.isValid();
-      } catch (MalformattedElementException e) {
-        String m = "Nsd looks not valid after composition";
-        log.error(m, e);
-        throw new InvalidNsd(m);
+        // Nsd validation and logging
+        try {
+          vsbNsd.isValid();
+        } catch (MalformattedElementException e) {
+          String m = "Nsd looks not valid after composition";
+          log.error(m, e);
+          throw new InvalidNsd(m);
+        }
+        vsbG = nsdGraphService.buildGraph(vsbNsd.getSapd(), vsbNsDf, vsbNsLvl);
+        log.debug("Graph AFTER composition with {}:\n{}",
+            ctxNsd.getNsdIdentifier(), nsdGraphService.export(vsbG));
+        log.info("Completed composition for nsDf='{}' and nsLvl='{}'",
+            vsbNsDf.getNsDfId(), vsbNsLvl.getNsLevelId());
       }
-      vsbG = nsdGraphService.buildGraph(vsbNsd.getSapd(), vsbNsDf, vsbNsLvl);
-      log.debug("Graph AFTER composition with {}:\n{}",
-          ctxNsd.getNsdIdentifier(), nsdGraphService.export(vsbG));
-      log.info("Completed composition for nsDf='{}' and nsLvl='{}'",
-          vsbNsDf.getNsDfId(), vsbNsLvl.getNsLevelId());
     }
     log.debug("Nsd AFTER composition with {}:\n{}",
         ctxNsd.getNsdIdentifier(), OBJECT_MAPPER.writeValueAsString(vsbNsd));
