@@ -278,13 +278,13 @@ public abstract class NsdComposer {
   }
 
   protected Map<String, NsVirtualLinkConnectivity> getMgmtDataCpds(VnfInfo vnfInfo,
-      VlInfo vsbMgmtVlinfo, VlInfo ctxMgmtVlInfo)
+      VlInfo expMgmtVlinfo, VlInfo ctxMgmtVlInfo)
       throws InvalidNsd {
     Map<String, NsVirtualLinkConnectivity> cpdIdMap = new HashMap<>();
     int dataCount = 0;
     for (NsVirtualLinkConnectivity vlc : vnfInfo.getVnfProfile().getNsVirtualLinkConnectivity()) {
       if (vlc.getVirtualLinkProfileId()
-          .equals(vsbMgmtVlinfo.getVlProfile().getVirtualLinkProfileId())
+          .equals(expMgmtVlinfo.getVlProfile().getVirtualLinkProfileId())
           || vlc.getVirtualLinkProfileId()
           .equals(ctxMgmtVlInfo.getVlProfile().getVirtualLinkProfileId())) {
         cpdIdMap.put("mgmt", vlc);
@@ -305,10 +305,10 @@ public abstract class NsdComposer {
     return cpdIdMap;
   }
 
-  public NsVirtualLinkDesc getRanVlDesc(Sapd ranSapd, Nsd vsbNsd) throws InvalidNsd {
+  public NsVirtualLinkDesc getRanVlDesc(Sapd ranSapd, Nsd expNsd) throws InvalidNsd {
     NsVirtualLinkDesc ranVld;
     try {
-      ranVld = getVlDescriptor(ranSapd.getNsVirtualLinkDescId(), vsbNsd);
+      ranVld = getVlDescriptor(ranSapd.getNsVirtualLinkDescId(), expNsd);
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
@@ -318,7 +318,7 @@ public abstract class NsdComposer {
 
   @SneakyThrows(JsonProcessingException.class)
   public void compose(ConnectInput connectInput, NsVirtualLinkDesc ranVld,
-      NsVirtualLinkDesc vsbMgmtVld, Nsd vsbNsd, NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd)
+      NsVirtualLinkDesc expMgmtVld, Nsd expNsd, NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd)
       throws InvalidNsd {
     // We assume only one NsDf for the context
     NsDf ctxNsDf = ctxNsd.getNsDf().get(0);
@@ -329,28 +329,28 @@ public abstract class NsdComposer {
     log.debug("ctxG graph:\n{}", nsdGraphService.export(ctxG));
 
     log.info("Composing '{}' with <{}, {}, {}>.",
-        vsbNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
+        expNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
         ctxNsLvl.getNsLevelId());
-    log.debug("Nsd BEFORE composition:\n{}", OBJECT_MAPPER.writeValueAsString(vsbNsd));
+    log.debug("Nsd BEFORE composition:\n{}", OBJECT_MAPPER.writeValueAsString(expNsd));
 
-    vsbNsd.setNsdName(vsbNsd.getNsdName() + " + " + ctxNsd.getNsdName());
-    for (NsDf vsbNsDf : vsbNsd.getNsDf()) {
-      for (NsLevel vsbNsLvl : vsbNsDf.getNsInstantiationLevel()) {
+    expNsd.setNsdName(expNsd.getNsdName() + " + " + ctxNsd.getNsdName());
+    for (NsDf expNsDf: expNsd.getNsDf()) {
+      for (NsLevel expNsLvl : expNsDf.getNsInstantiationLevel()) {
         log.info("Start composition for nsDf='{}' and nsLvl='{}'",
-            vsbNsDf.getNsDfId(), vsbNsLvl.getNsLevelId());
-        Graph<ProfileVertex, String> vsbG = nsdGraphService
-            .buildGraph(vsbNsd.getSapd(), vsbNsDf, vsbNsLvl);
-        log.debug("vsbG BEFORE composition :\n{}", nsdGraphService.export(vsbG));
+            expNsDf.getNsDfId(), expNsLvl.getNsLevelId());
+        Graph<ProfileVertex, String> expG = nsdGraphService
+            .buildGraph(expNsd.getSapd(), expNsDf, expNsLvl);
+        log.debug("expG BEFORE composition :\n{}", nsdGraphService.export(expG));
 
         VlInfo ranVlInfo;
-        VlInfo vsbMgmtVlInfo;
+        VlInfo expMgmtVlInfo;
         VlInfo ctxMgmtVlInfo;
         try {
-          ranVlInfo = retrieveVlInfo(ranVld, vsbNsDf, vsbNsLvl);
-          log.debug("Found VlInfo for ranVld='{}' in vsbNsd.", ranVld.getVirtualLinkDescId());
-          vsbMgmtVlInfo = retrieveVlInfo(vsbMgmtVld, vsbNsDf, vsbNsLvl);
-          log.debug("Found VlInfo for vsbMgmtVld='{}' in vsbNsd.",
-              vsbMgmtVld.getVirtualLinkDescId());
+          ranVlInfo = retrieveVlInfo(ranVld, expNsDf, expNsLvl);
+          log.debug("Found VlInfo for ranVld='{}' in expNsd.", ranVld.getVirtualLinkDescId());
+          expMgmtVlInfo = retrieveVlInfo(expMgmtVld, expNsDf, expNsLvl);
+          log.debug("Found VlInfo for expMgmtVld='{}' in expNsd.",
+              expMgmtVld.getVirtualLinkDescId());
           ctxMgmtVlInfo = retrieveVlInfo(ctxMgmtVld, ctxNsDf, ctxNsLvl);
           log.debug("Found VlInfo for ctxMgmtVld='{}' in ctxNsd.",
               ctxMgmtVld.getVirtualLinkDescId());
@@ -358,35 +358,35 @@ public abstract class NsdComposer {
           log.error(e.getMessage());
           throw new InvalidNsd(e.getMessage());
         }
-        composeWithStrategy(connectInput, ranVlInfo, vsbMgmtVlInfo, ctxMgmtVlInfo,
-            vsbNsd, vsbNsDf, vsbNsLvl,
+        composeWithStrategy(connectInput, ranVlInfo, expMgmtVlInfo, ctxMgmtVlInfo,
+            expNsd, expNsDf, expNsLvl,
             ctxNsd, ctxNsDf, ctxNsLvl);
 
         // Nsd validation and logging
         try {
-          vsbNsd.isValid();
+          expNsd.isValid();
         } catch (MalformattedElementException e) {
           String m = "Nsd looks not valid after composition";
           log.error(m, e);
           throw new InvalidNsd(m);
         }
-        vsbG = nsdGraphService.buildGraph(vsbNsd.getSapd(), vsbNsDf, vsbNsLvl);
+        expG = nsdGraphService.buildGraph(expNsd.getSapd(), expNsDf, expNsLvl);
         log.debug("Graph AFTER composition with {}:\n{}",
-            ctxNsd.getNsdIdentifier(), nsdGraphService.export(vsbG));
+            ctxNsd.getNsdIdentifier(), nsdGraphService.export(expG));
         log.info("Completed composition for nsDf='{}' and nsLvl='{}'",
-            vsbNsDf.getNsDfId(), vsbNsLvl.getNsLevelId());
+            expNsDf.getNsDfId(), expNsLvl.getNsLevelId());
       }
     }
     log.debug("Nsd AFTER composition with {}:\n{}",
-        ctxNsd.getNsdIdentifier(), OBJECT_MAPPER.writeValueAsString(vsbNsd));
+        ctxNsd.getNsdIdentifier(), OBJECT_MAPPER.writeValueAsString(expNsd));
     log.info("Completed composition of '{}' with <{}, {}, {}>.",
-        vsbNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
+        expNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
         ctxNsLvl.getNsLevelId());
   }
 
   public abstract void composeWithStrategy(
-      ConnectInput connectInput, VlInfo ranVlInfo, VlInfo vsbMgmtVlInfo, VlInfo ctxMgmtVlInfo,
-      Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl,
+      ConnectInput connectInput, VlInfo ranVlInfo, VlInfo expMgmtVlInfo, VlInfo ctxMgmtVlInfo,
+      Nsd expNsd, NsDf expNsDf, NsLevel expNsLvl,
       Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl
   ) throws InvalidNsd;
 

@@ -31,8 +31,8 @@ public class ConnectComposer extends NsdComposer {
 
   @Override
   public void composeWithStrategy(
-          ConnectInput connectInput, VlInfo ranVlInfo, VlInfo vsbMgmtVlInfo, VlInfo ctxMgmtVlInfo,
-          Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl,
+          ConnectInput connectInput, VlInfo ranVlInfo, VlInfo expMgmtVlInfo, VlInfo ctxMgmtVlInfo,
+          Nsd expNsd, NsDf expNsDf, NsLevel expNsLvl,
           Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl)
       throws InvalidNsd {
     log.info("Compose with CONNECT.");
@@ -72,7 +72,7 @@ public class ConnectComposer extends NsdComposer {
     // Retrieve Cpds for src VNF
     Map<String, NsVirtualLinkConnectivity> srcCpds;
     try {
-      srcCpds = getMgmtDataCpds(srcVnfInfo, vsbMgmtVlInfo, ctxMgmtVlInfo);
+      srcCpds = getMgmtDataCpds(srcVnfInfo, expMgmtVlInfo, ctxMgmtVlInfo);
     } catch (Exception e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
@@ -80,7 +80,7 @@ public class ConnectComposer extends NsdComposer {
     // Retrieve Cpds for dst VNF
     Map<String, NsVirtualLinkConnectivity> dstCpds;
     try {
-      dstCpds = getMgmtDataCpds(dstVnfInfo, vsbMgmtVlInfo, ctxMgmtVlInfo);
+      dstCpds = getMgmtDataCpds(dstVnfInfo, expMgmtVlInfo, ctxMgmtVlInfo);
     } catch (Exception e) {
       log.error(e.getMessage());
       throw new InvalidNsd(e.getMessage());
@@ -90,8 +90,8 @@ public class ConnectComposer extends NsdComposer {
     VlInfo srcVlInfo;
     if (connectInput.getSrcVldId() != null && !connectInput.getSrcVldId().isEmpty()) {
       try {
-        srcVlInfo = retrieveVlInfo(getVlDescriptor(connectInput.getSrcVldId(), vsbNsd), vsbNsDf,
-            vsbNsLvl);
+        srcVlInfo = retrieveVlInfo(getVlDescriptor(connectInput.getSrcVldId(), expNsd), expNsDf,
+            expNsLvl);
       } catch (VlNotFoundInLvlMapping | NotExistingEntityException e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
@@ -104,30 +104,30 @@ public class ConnectComposer extends NsdComposer {
     VlInfo dstVlInfo;
     if (connectInput.getDstVldId() != null && !connectInput.getDstVldId().isEmpty()) {
       try {
-        dstVlInfo = retrieveVlInfo(getVlDescriptor(connectInput.getDstVldId(), vsbNsd), vsbNsDf,
-            vsbNsLvl);
+        dstVlInfo = retrieveVlInfo(getVlDescriptor(connectInput.getDstVldId(), expNsd), expNsDf,
+            expNsLvl);
       } catch (VlNotFoundInLvlMapping | NotExistingEntityException e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
       }
     } else {
       // Default: select a non-management VL, different from RAN VL
-      Optional<VirtualLinkToLevelMapping> optDstLvlMap = vsbNsLvl.getVirtualLinkToLevelMapping()
+      Optional<VirtualLinkToLevelMapping> optDstLvlMap = expNsLvl.getVirtualLinkToLevelMapping()
           .stream()
           .filter(m -> !m.getVirtualLinkProfileId()
-              .equals(vsbMgmtVlInfo.getVlProfile().getVirtualLinkProfileId())
+              .equals(expMgmtVlInfo.getVlProfile().getVirtualLinkProfileId())
               && !m.getVirtualLinkProfileId()
               .equals(ranVlInfo.getVlProfile().getVirtualLinkProfileId()))
           .findFirst();
       try {
         if (optDstLvlMap.isPresent()) {
           dstVlInfo = retrieveVlInfo(optDstLvlMap.get().getVirtualLinkProfileId(),
-              vsbNsd, vsbNsDf, vsbNsLvl);
+              expNsd, expNsDf, expNsLvl);
           log.debug("Found non-mgmt VlInfo='{}'.",
               dstVlInfo.getVlProfile().getVirtualLinkProfileId());
         } else {
           throw new InvalidNsd(
-              "Can't find a non-mgmt VlInfo in vsbNsd: '" + vsbNsd.getNsdIdentifier() + "'");
+              "Can't find a non-mgmt VlInfo in expNsd: '" + expNsd.getNsdIdentifier() + "'");
         }
       } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
         log.error(e.getMessage());
@@ -135,11 +135,11 @@ public class ConnectComposer extends NsdComposer {
       }
     }
 
-    // Modify vsbNsd
-    addVnf(srcVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
+    // Modify expNsd
+    addVnf(srcVnfInfo, expNsd, expNsDf, expNsLvl);
     log.debug("Added VnfProfile='{}' in service (if not present).",
         srcVnfInfo.getVnfProfile().getVnfProfileId());
-    addVnf(dstVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
+    addVnf(dstVnfInfo, expNsd, expNsDf, expNsLvl);
     log.debug("Added VnfProfile='{}' in service (if not present).",
         dstVnfInfo.getVnfProfile().getVnfProfileId());
     try {
@@ -158,13 +158,13 @@ public class ConnectComposer extends NsdComposer {
       // Connect VNFs to mgmt VL (if possible)
       if (srcCpds.get("mgmt") != null) {
         connectVnfToVL(srcVnfInfo.getVnfProfile(), srcCpds.get("mgmt").getCpdId().get(0),
-            vsbMgmtVlInfo.getVlProfile());
+            expMgmtVlInfo.getVlProfile());
       } else {
         log.warn("Could not find a management Cp for srcVnf. Skip.");
       }
       if (dstCpds.get("mgmt") != null) {
         connectVnfToVL(dstVnfInfo.getVnfProfile(), dstCpds.get("mgmt").getCpdId().get(0),
-            vsbMgmtVlInfo.getVlProfile());
+            expMgmtVlInfo.getVlProfile());
       } else {
         log.warn("Could not find a management Cp for dstVnf. Skip.");
       }

@@ -31,8 +31,8 @@ public class PassThroughComposer extends NsdComposer {
 
   @Override
   public void composeWithStrategy(
-          ConnectInput connectInput, VlInfo ranVlInfo, VlInfo vsbMgmtVlInfo, VlInfo ctxMgmtVlInfo,
-          Nsd vsbNsd, NsDf vsbNsDf, NsLevel vsbNsLvl,
+          ConnectInput connectInput, VlInfo ranVlInfo, VlInfo expMgmtVlInfo, VlInfo ctxMgmtVlInfo,
+          Nsd expNsd, NsDf expNsDf, NsLevel expNsLvl,
           Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl)
       throws InvalidNsd {
     log.info("Compose with PASS_THROUGH.");
@@ -52,7 +52,7 @@ public class PassThroughComposer extends NsdComposer {
     Map<String, NsVirtualLinkConnectivity> ctxVnfCpds;
     VlInfo ctxNonMgmtVl;
     try {
-      ctxVnfCpds = getMgmtDataCpds(ctxVnfInfo, vsbMgmtVlInfo, ctxMgmtVlInfo);
+      ctxVnfCpds = getMgmtDataCpds(ctxVnfInfo, expMgmtVlInfo, ctxMgmtVlInfo);
       ctxNonMgmtVl = retrieveVlInfo(ctxVnfCpds.get("data0").getVirtualLinkProfileId(),
           ctxNsd, ctxNsDf, ctxNsLvl);
     } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
@@ -60,15 +60,15 @@ public class PassThroughComposer extends NsdComposer {
       throw new InvalidNsd(e.getMessage());
     }
 
-    // Retrieve RAN closest VNF information from vsb
+    // Retrieve RAN closest VNF information from exp
     // Assumption: select the first VNF attached to the RAN VL
     // TODO Can create composition inconsistencies across multiple NsLvl
     String ranVnfCpd = null;
     VnfProfile ranVnfProfile = null;
-    for (VnfToLevelMapping vnfLvl : vsbNsLvl.getVnfToLevelMapping()) {
+    for (VnfToLevelMapping vnfLvl : expNsLvl.getVnfToLevelMapping()) {
       VnfInfo vnfInfo;
       try {
-        vnfInfo = retrieveVnfInfoByProfileId(vnfLvl.getVnfProfileId(), vsbNsd, vsbNsDf, vsbNsLvl);
+        vnfInfo = retrieveVnfInfoByProfileId(vnfLvl.getVnfProfileId(), expNsd, expNsDf, expNsLvl);
       } catch (VnfNotFoundInLvlMapping e) {
         log.error(e.getMessage());
         throw new InvalidNsd(e.getMessage());
@@ -90,11 +90,11 @@ public class PassThroughComposer extends NsdComposer {
     log.debug("ranVnfProfile: '{}'", ranVnfProfile.getVnfProfileId());
     log.debug("ranVnfCpd: '{}'", ranVnfCpd);
 
-    // Modify vsbNsd
-    addVnf(ctxVnfInfo, vsbNsd, vsbNsDf, vsbNsLvl);
+    // Modify expNsd
+    addVnf(ctxVnfInfo, expNsd, expNsDf, expNsLvl);
     log.debug("Added VnfProfile='{}' in service (if not present).",
         ctxVnfInfo.getVnfProfile().getVnfProfileId());
-    addVirtualLink(ctxNonMgmtVl, vsbNsd, vsbNsDf, vsbNsLvl);
+    addVirtualLink(ctxNonMgmtVl, expNsd, expNsDf, expNsLvl);
     log.debug("Added VlProfile='{}' in service (if not present).",
         ctxNonMgmtVl.getVlProfile().getVirtualLinkProfileId());
     try {
@@ -109,13 +109,13 @@ public class PassThroughComposer extends NsdComposer {
       log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
           ctxVnfInfo.getVnfProfile().getVnfProfileId(),
           ranVlInfo.getVlProfile().getVirtualLinkProfileId());
-      // Connect ctxVnf to vsbNsd mgmt VL
+      // Connect ctxVnf to expNsd mgmt VL
       if (ctxVnfCpds.get("mgmt") != null) {
         connectVnfToVL(ctxVnfInfo.getVnfProfile(), ctxVnfCpds.get("mgmt").getCpdId().get(0),
-            vsbMgmtVlInfo.getVlProfile());
+            expMgmtVlInfo.getVlProfile());
         log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
             ctxVnfInfo.getVnfProfile().getVnfProfileId(),
-            vsbMgmtVlInfo.getVlProfile().getVirtualLinkProfileId());
+            expMgmtVlInfo.getVlProfile().getVirtualLinkProfileId());
       } else {
         log.warn("Could not find a management Cp for ctxVnf. Skip.");
       }

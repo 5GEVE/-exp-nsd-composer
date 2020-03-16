@@ -40,9 +40,9 @@ public class ExperimentsController {
     try {
       // Assumptions:
       // - The Vsb has only 1 Nsd.
-      Nsd vsbNsd = composeRequest.getVsbRequest().getNsds().get(0);
+      Nsd expNsd = composeRequest.getVsbRequest().getNsds().get(0);
       NsVirtualLinkDesc ranVld = findRanVld(composeRequest.getVsbRequest().getVsBlueprint(),
-          vsbNsd);
+          expNsd);
       for (CtxComposeInfo ctx : composeRequest.getContexts()) {
         // - The Ctx has only 1 Nsd.
         Nsd ctxNsd = ctx.getCtxbRequest().getNsds().get(0);
@@ -51,12 +51,12 @@ public class ExperimentsController {
           ctx.setConnectInput(new ConnectInput());
         }
 
-        NsVirtualLinkDesc vsbMgmtVld = findMgmtVld(ctxB, ctxNsd);
+        NsVirtualLinkDesc expMgmtVld = findMgmtVld(ctxB, ctxNsd);
         NsVirtualLinkDesc ctxMgmtVld = findMgmtVld(ctxB, ctxNsd);
         if (STRAT.equals(CompositionStrategy.CONNECT)) {
           log.info("connect");
           connectComposer
-              .compose(ctx.getConnectInput(), ranVld, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+              .compose(ctx.getConnectInput(), ranVld, expMgmtVld, expNsd, ctxMgmtVld, ctxNsd);
         } else if (STRAT.equals(CompositionStrategy.PASS_THROUGH)) {
           log.info("pass_through");
           if (ctxNsd.getVnfdId().size() == 1) {
@@ -65,7 +65,7 @@ public class ExperimentsController {
             throw new InvalidCtxComposeInfo("More than one VNF found in Ctx for PASS_THROUGH");
           }
           passThroughComposer
-              .compose(ctx.getConnectInput(), ranVld, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+              .compose(ctx.getConnectInput(), ranVld, expMgmtVld, expNsd, ctxMgmtVld, ctxNsd);
         } else {
           String m = MessageFormatter.format("Composition strategy {} not supported.", STRAT)
               .getMessage();
