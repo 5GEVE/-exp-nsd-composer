@@ -35,6 +35,7 @@ public class ExperimentsController {
     return null;
   }
 
+  // TODO change return object
   @PostMapping("/experiments")
   public OnboardExpBlueprintRequest composeExperiment(@RequestBody ComposeRequest composeRequest) {
     try {
@@ -43,7 +44,7 @@ public class ExperimentsController {
       Nsd expNsd = composeRequest.getVsbRequest().getNsds().get(0);
       NsVirtualLinkDesc ranVld = findRanVld(composeRequest.getVsbRequest().getVsBlueprint(),
           expNsd);
-      for (CtxComposeInfo ctx : composeRequest.getContexts()) {
+      for (Context ctx : composeRequest.getContexts()) {
         // - The Ctx has only 1 Nsd.
         Nsd ctxNsd = ctx.getCtxbRequest().getNsds().get(0);
         CtxBlueprint ctxB = ctx.getCtxbRequest().getCtxBlueprint();
@@ -62,7 +63,7 @@ public class ExperimentsController {
           if (ctxNsd.getVnfdId().size() == 1) {
             log.debug("ctxNsd has only one vnfdId.");
           } else {
-            throw new InvalidCtxComposeInfo("More than one VNF found in Ctx for PASS_THROUGH");
+            throw new InvalidContextException("More than one VNF found in Ctx for PASS_THROUGH");
           }
           passThroughComposer
               .compose(ctx.getConnectInput(), ranVld, expMgmtVld, expNsd, ctxMgmtVld, ctxNsd);
@@ -70,11 +71,11 @@ public class ExperimentsController {
           String m = MessageFormatter.format("Composition strategy {} not supported.", STRAT)
               .getMessage();
           log.error(m);
-          throw new InvalidCtxComposeInfo(m);
+          throw new InvalidContextException(m);
         }
 
       }
-    } catch (InvalidNsd | InvalidCtxComposeInfo e) {
+    } catch (InvalidNsd | InvalidContextException e) {
       log.error(e.getMessage());
       //TODO create and return a 422 response.
     }

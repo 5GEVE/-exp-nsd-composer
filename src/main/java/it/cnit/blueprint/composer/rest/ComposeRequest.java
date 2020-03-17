@@ -7,5 +7,5 @@ import lombok.Data;
 public class ComposeRequest {
 
   private OnBoardVsBlueprintRequest vsbRequest;
-  private CtxComposeInfo[] contexts;
+  private Context[] contexts;
 }

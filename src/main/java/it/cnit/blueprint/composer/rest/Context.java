@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class CtxComposeInfo {
+public class Context {
 
   private OnboardCtxBlueprintRequest ctxbRequest;
   private ConnectInput connectInput;
