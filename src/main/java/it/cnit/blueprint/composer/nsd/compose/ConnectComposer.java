@@ -2,7 +2,7 @@ package it.cnit.blueprint.composer.nsd.compose;
 
 import it.cnit.blueprint.composer.rest.ConnectInput;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
-import it.cnit.blueprint.composer.rest.InvalidNsd;
+import it.cnit.blueprint.composer.rest.InvalidNsdException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
@@ -34,7 +34,7 @@ public class ConnectComposer extends NsdComposer {
           ConnectInput connectInput, VlInfo ranVlInfo, VlInfo expMgmtVlInfo, VlInfo ctxMgmtVlInfo,
           Nsd expNsd, NsDf expNsDf, NsLevel expNsLvl,
           Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl)
-      throws InvalidNsd {
+      throws InvalidNsdException {
     log.info("Compose with CONNECT.");
     // Retrieve ctx VNFs
     VnfInfo srcVnfInfo;
@@ -50,7 +50,7 @@ public class ConnectComposer extends NsdComposer {
       srcVnfInfo = retrieveVnfInfoByProfileId(srcVnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
     } catch (NotExistingEntityException | VnfNotFoundInLvlMapping e) {
       log.error(e.getMessage());
-      throw new InvalidNsd(e.getMessage());
+      throw new InvalidNsdException(e.getMessage());
     }
 
     VnfInfo dstVnfInfo;
@@ -66,7 +66,7 @@ public class ConnectComposer extends NsdComposer {
       dstVnfInfo = retrieveVnfInfoByProfileId(dstVnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
     } catch (NotExistingEntityException | VnfNotFoundInLvlMapping e) {
       log.error(e.getMessage());
-      throw new InvalidNsd(e.getMessage());
+      throw new InvalidNsdException(e.getMessage());
     }
 
     // Retrieve Cpds for src VNF
@@ -75,7 +75,7 @@ public class ConnectComposer extends NsdComposer {
       srcCpds = getMgmtDataCpds(srcVnfInfo, expMgmtVlInfo, ctxMgmtVlInfo);
     } catch (Exception e) {
       log.error(e.getMessage());
-      throw new InvalidNsd(e.getMessage());
+      throw new InvalidNsdException(e.getMessage());
     }
     // Retrieve Cpds for dst VNF
     Map<String, NsVirtualLinkConnectivity> dstCpds;
@@ -83,7 +83,7 @@ public class ConnectComposer extends NsdComposer {
       dstCpds = getMgmtDataCpds(dstVnfInfo, expMgmtVlInfo, ctxMgmtVlInfo);
     } catch (Exception e) {
       log.error(e.getMessage());
-      throw new InvalidNsd(e.getMessage());
+      throw new InvalidNsdException(e.getMessage());
     }
 
     // Retrieve src VL
@@ -94,7 +94,7 @@ public class ConnectComposer extends NsdComposer {
             expNsLvl);
       } catch (VlNotFoundInLvlMapping | NotExistingEntityException e) {
         log.error(e.getMessage());
-        throw new InvalidNsd(e.getMessage());
+        throw new InvalidNsdException(e.getMessage());
       }
     } else {
       // Default: select a RAN VL
@@ -108,7 +108,7 @@ public class ConnectComposer extends NsdComposer {
             expNsLvl);
       } catch (VlNotFoundInLvlMapping | NotExistingEntityException e) {
         log.error(e.getMessage());
-        throw new InvalidNsd(e.getMessage());
+        throw new InvalidNsdException(e.getMessage());
       }
     } else {
       // Default: select a non-management VL, different from RAN VL
@@ -126,12 +126,12 @@ public class ConnectComposer extends NsdComposer {
           log.debug("Found non-mgmt VlInfo='{}'.",
               dstVlInfo.getVlProfile().getVirtualLinkProfileId());
         } else {
-          throw new InvalidNsd(
+          throw new InvalidNsdException(
               "Can't find a non-mgmt VlInfo in expNsd: '" + expNsd.getNsdIdentifier() + "'");
         }
-      } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
+      } catch (InvalidNsdException | VlNotFoundInLvlMapping e) {
         log.error(e.getMessage());
-        throw new InvalidNsd(e.getMessage());
+        throw new InvalidNsdException(e.getMessage());
       }
     }
 
@@ -181,7 +181,7 @@ public class ConnectComposer extends NsdComposer {
       }
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
-      throw new InvalidNsd(e.getMessage());
+      throw new InvalidNsdException(e.getMessage());
     }
   }
 

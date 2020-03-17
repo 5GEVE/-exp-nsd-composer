@@ -25,7 +25,7 @@ public class ServicesController {
     Nsd nsd;
     try {
       nsd = nsdGenerator.generate(vsb);
-    } catch (InvalidNsd e) {
+    } catch (InvalidNsdException e) {
       //TODO handle exception
       nsd = null;
       e.printStackTrace();

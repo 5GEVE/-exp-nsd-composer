@@ -6,7 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.composer.rest.ConnectInput;
-import it.cnit.blueprint.composer.rest.InvalidNsd;
+import it.cnit.blueprint.composer.rest.InvalidNsdException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
@@ -197,7 +197,7 @@ public abstract class NsdComposer {
 
   protected VnfInfo retrieveVnfInfoByProfileId(String vnfProfileId, Nsd nsd, NsDf nsDf,
       NsLevel nsLevel)
-      throws InvalidNsd, VnfNotFoundInLvlMapping {
+      throws InvalidNsdException, VnfNotFoundInLvlMapping {
     VnfToLevelMapping vnfLvlMap;
     try {
       vnfLvlMap = getVnfLvlMapping(vnfProfileId, nsLevel);
@@ -208,7 +208,7 @@ public abstract class NsdComposer {
     try {
       vnfProfile = getVnfProfileById(vnfProfileId, nsDf);
     } catch (NotExistingEntityException e) {
-      throw new InvalidNsd(e.getMessage());
+      throw new InvalidNsdException(e.getMessage());
     }
     Optional<String> optVnfdId = nsd.getVnfdId().stream()
         .filter(id -> id.equals(vnfProfile.getVnfdId())).findFirst();
@@ -217,13 +217,13 @@ public abstract class NsdComposer {
           .format("vnfdId='{}' not found in nsd='{}'.", vnfProfile.getVnfdId(),
               nsd.getNsdIdentifier())
           .getMessage();
-      throw new InvalidNsd(m);
+      throw new InvalidNsdException(m);
     }
     return new VnfInfo(vnfProfile.getVnfdId(), vnfProfile, vnfLvlMap);
   }
 
   protected VlInfo retrieveVlInfo(String vlProfileId, Nsd nsd, NsDf nsDf, NsLevel nsLevel)
-      throws InvalidNsd, VlNotFoundInLvlMapping {
+      throws InvalidNsdException, VlNotFoundInLvlMapping {
     VirtualLinkToLevelMapping vlMap;
     try {
       vlMap = getVlLvlMapping(vlProfileId, nsLevel);
@@ -234,24 +234,24 @@ public abstract class NsdComposer {
     try {
       vlProfile = getVlProfile(vlProfileId, nsDf);
     } catch (NotExistingEntityException e) {
-      throw new InvalidNsd(e.getMessage());
+      throw new InvalidNsdException(e.getMessage());
     }
     NsVirtualLinkDesc vlDesc;
     try {
       vlDesc = getVlDescriptor(vlProfile.getVirtualLinkDescId(), nsd);
     } catch (NotExistingEntityException e) {
-      throw new InvalidNsd(e.getMessage());
+      throw new InvalidNsdException(e.getMessage());
     }
     return new VlInfo(vlMap, vlProfile, vlDesc);
   }
 
   protected VlInfo retrieveVlInfo(NsVirtualLinkDesc vld, NsDf nsDf, NsLevel nsLevel)
-      throws InvalidNsd, VlNotFoundInLvlMapping {
+      throws InvalidNsdException, VlNotFoundInLvlMapping {
     VirtualLinkProfile vlProfile;
     try {
       vlProfile = getVlProfile(vld, nsDf);
     } catch (NotExistingEntityException e) {
-      throw new InvalidNsd(e.getMessage());
+      throw new InvalidNsdException(e.getMessage());
     }
     VirtualLinkToLevelMapping vlMap;
     try {
@@ -279,7 +279,7 @@ public abstract class NsdComposer {
 
   protected Map<String, NsVirtualLinkConnectivity> getMgmtDataCpds(VnfInfo vnfInfo,
       VlInfo expMgmtVlinfo, VlInfo ctxMgmtVlInfo)
-      throws InvalidNsd {
+      throws InvalidNsdException {
     Map<String, NsVirtualLinkConnectivity> cpdIdMap = new HashMap<>();
     int dataCount = 0;
     for (NsVirtualLinkConnectivity vlc : vnfInfo.getVnfProfile().getNsVirtualLinkConnectivity()) {
@@ -299,19 +299,19 @@ public abstract class NsdComposer {
     Optional<String> dataKey = cpdIdMap.keySet().stream().filter(k -> k.startsWith("data"))
         .findFirst();
     if (!dataKey.isPresent()) {
-      throw new InvalidNsd(
+      throw new InvalidNsdException(
           "No data cpd found for vnfProfile: '" + vnfInfo.getVnfProfile().getVnfProfileId() + "'.");
     }
     return cpdIdMap;
   }
 
-  public NsVirtualLinkDesc getRanVlDesc(Sapd ranSapd, Nsd expNsd) throws InvalidNsd {
+  public NsVirtualLinkDesc getRanVlDesc(Sapd ranSapd, Nsd expNsd) throws InvalidNsdException {
     NsVirtualLinkDesc ranVld;
     try {
       ranVld = getVlDescriptor(ranSapd.getNsVirtualLinkDescId(), expNsd);
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
-      throw new InvalidNsd(e.getMessage());
+      throw new InvalidNsdException(e.getMessage());
     }
     return ranVld;
   }
@@ -319,7 +319,7 @@ public abstract class NsdComposer {
   @SneakyThrows(JsonProcessingException.class)
   public void compose(ConnectInput connectInput, NsVirtualLinkDesc ranVld,
       NsVirtualLinkDesc expMgmtVld, Nsd expNsd, NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd)
-      throws InvalidNsd {
+      throws InvalidNsdException {
     // We assume only one NsDf for the context
     NsDf ctxNsDf = ctxNsd.getNsDf().get(0);
     // We assume only one NsLevel for the context
@@ -354,9 +354,9 @@ public abstract class NsdComposer {
           ctxMgmtVlInfo = retrieveVlInfo(ctxMgmtVld, ctxNsDf, ctxNsLvl);
           log.debug("Found VlInfo for ctxMgmtVld='{}' in ctxNsd.",
               ctxMgmtVld.getVirtualLinkDescId());
-        } catch (InvalidNsd | VlNotFoundInLvlMapping e) {
+        } catch (InvalidNsdException | VlNotFoundInLvlMapping e) {
           log.error(e.getMessage());
-          throw new InvalidNsd(e.getMessage());
+          throw new InvalidNsdException(e.getMessage());
         }
         composeWithStrategy(connectInput, ranVlInfo, expMgmtVlInfo, ctxMgmtVlInfo,
             expNsd, expNsDf, expNsLvl,
@@ -368,7 +368,7 @@ public abstract class NsdComposer {
         } catch (MalformattedElementException e) {
           String m = "Nsd looks not valid after composition";
           log.error(m, e);
-          throw new InvalidNsd(m);
+          throw new InvalidNsdException(m);
         }
         expG = nsdGraphService.buildGraph(expNsd.getSapd(), expNsDf, expNsLvl);
         log.debug("Graph AFTER composition with {}:\n{}",
@@ -388,6 +388,6 @@ public abstract class NsdComposer {
       ConnectInput connectInput, VlInfo ranVlInfo, VlInfo expMgmtVlInfo, VlInfo ctxMgmtVlInfo,
       Nsd expNsd, NsDf expNsDf, NsLevel expNsLvl,
       Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl
-  ) throws InvalidNsd;
+  ) throws InvalidNsdException;
 
 }

@@ -75,14 +75,14 @@ public class ExperimentsController {
         }
 
       }
-    } catch (InvalidNsd | InvalidContextException e) {
+    } catch (InvalidNsdException | InvalidContextException e) {
       log.error(e.getMessage());
       //TODO create and return a 422 response.
     }
     return new OnboardExpBlueprintRequest();
   }
 
-  private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd) throws InvalidNsd {
+  private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd) throws InvalidNsdException {
     Sapd ranSapd = null;
     for (VsbEndpoint e : b.getEndPoints()) {
       if (e.isRanConnection()) {
@@ -96,7 +96,7 @@ public class ExperimentsController {
     }
     if (ranSapd == null) {
       // TODO think of a better message
-      throw new InvalidNsd("Cannot find a Sap descriptor for RAN.");
+      throw new InvalidNsdException("Cannot find a Sap descriptor for RAN.");
     }
     return connectComposer.getRanVlDesc(ranSapd, nsd);
   }

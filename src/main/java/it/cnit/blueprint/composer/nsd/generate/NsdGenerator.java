@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
-import it.cnit.blueprint.composer.rest.InvalidNsd;
+import it.cnit.blueprint.composer.rest.InvalidNsdException;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
@@ -55,7 +55,7 @@ public class NsdGenerator {
   private NsdGraphService nsdGraphService;
 
   @SneakyThrows(JsonProcessingException.class)
-  public Nsd generate(VsBlueprint vsb) throws InvalidNsd {
+  public Nsd generate(VsBlueprint vsb) throws InvalidNsdException {
 
     log.debug(OBJECT_MAPPER.writeValueAsString(vsb));
 
@@ -188,7 +188,7 @@ public class NsdGenerator {
     } catch (MalformattedElementException e) {
       String m = "Nsd looks not valid after composition";
       log.error(m, e);
-      throw new InvalidNsd(m);
+      throw new InvalidNsdException(m);
     }
     log.debug("Nsd AFTER generation with {}:\n{}",
         nsd.getNsdIdentifier(), OBJECT_MAPPER.writeValueAsString(nsd));
