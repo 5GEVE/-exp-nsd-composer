@@ -4,10 +4,12 @@ import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardExpBlueprintRequest;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.MessageFormatter;
@@ -35,13 +37,12 @@ public class ExperimentsController {
     return null;
   }
 
-  // TODO change return object
   @PostMapping("/experiments")
-  public OnboardExpBlueprintRequest composeExperiment(@RequestBody ComposeRequest composeRequest) {
+  public ComposeResponse composeExperiment(@RequestBody ComposeRequest composeRequest) {
+    Nsd expNsd = composeRequest.getVsbRequest().getNsds().get(0);
     try {
       // Assumptions:
       // - The Vsb has only 1 Nsd.
-      Nsd expNsd = composeRequest.getVsbRequest().getNsds().get(0);
       NsVirtualLinkDesc ranVld = findRanVld(composeRequest.getVsbRequest().getVsBlueprint(),
           expNsd);
       for (Context ctx : composeRequest.getContexts()) {
@@ -79,7 +80,13 @@ public class ExperimentsController {
       log.error(e.getMessage());
       //TODO create and return a 422 response.
     }
-    return new OnboardExpBlueprintRequest();
+
+    List<VsdNsdTranslationRule> translationRules = composeRequest.getVsbRequest()
+        .getTranslationRules();
+    for (VsdNsdTranslationRule tr : translationRules) {
+      tr.setNsdInfoId(expNsd.getNsdIdentifier());
+    }
+    return new ComposeResponse(expNsd, translationRules);
   }
 
   private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd) throws InvalidNsdException {
