@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
+import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.jgrapht.graph.SimpleGraph;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.stereotype.Service;
@@ -132,6 +133,10 @@ public class NsdGraphService {
     }
   }
 
-  // TODO implement constraint on coloring: no VL and Vnf directly connected.
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+  public boolean isConnected(Graph<ProfileVertex, String> g){
+    ConnectivityInspector<ProfileVertex, String> inspector = new ConnectivityInspector<>(g);
+    return inspector.isConnected();
+  }
 
 }

@@ -334,13 +334,20 @@ public abstract class NsdComposer {
     log.debug("Nsd BEFORE composition:\n{}", OBJECT_MAPPER.writeValueAsString(expNsd));
 
     expNsd.setNsdName(expNsd.getNsdName() + " + " + ctxNsd.getNsdName());
-    for (NsDf expNsDf: expNsd.getNsDf()) {
+    for (NsDf expNsDf : expNsd.getNsDf()) {
       for (NsLevel expNsLvl : expNsDf.getNsInstantiationLevel()) {
         log.info("Start composition for nsDf='{}' and nsLvl='{}'",
             expNsDf.getNsDfId(), expNsLvl.getNsLevelId());
         Graph<ProfileVertex, String> expG = nsdGraphService
             .buildGraph(expNsd.getSapd(), expNsDf, expNsLvl);
         log.debug("expG BEFORE composition :\n{}", nsdGraphService.export(expG));
+        if (!nsdGraphService.isConnected(expG)) {
+          String m = MessageFormatter.format(
+              "Network topology for NsLevel='{}' is not connected", expNsLvl.getNsLevelId())
+              .getMessage();
+          log.error(m);
+          throw new InvalidNsdException(m);
+        }
 
         VlInfo ranVlInfo;
         VlInfo expMgmtVlInfo;
@@ -373,6 +380,13 @@ public abstract class NsdComposer {
         expG = nsdGraphService.buildGraph(expNsd.getSapd(), expNsDf, expNsLvl);
         log.debug("Graph AFTER composition with {}:\n{}",
             ctxNsd.getNsdIdentifier(), nsdGraphService.export(expG));
+        if (!nsdGraphService.isConnected(expG)) {
+          String m = MessageFormatter.format("Network topology not connected after composition",
+              expNsDf.getNsDfId(), expNsLvl.getNsLevelId())
+              .getMessage();
+          log.error(m);
+          throw new InvalidNsdException(m);
+        }
         log.info("Completed composition for nsDf='{}' and nsLvl='{}'",
             expNsDf.getNsDfId(), expNsLvl.getNsLevelId());
       }
