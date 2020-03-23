@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -197,6 +198,67 @@ public class NsdComposerTest {
     // Then
     InputStream in = getClass().getResourceAsStream(
         "/expb_ares2t_tracker_bg_traffic_nsds_connect.yaml");
+    Nsd expNsd = oM.readValue(in, Nsd[].class)[0];
+    assertEquals(oM.writeValueAsString(expNsd), oM.writeValueAsString(vsbNsd));
+
+  }
+  @Test
+  @SneakyThrows
+  public void composeTrackerWithBackgroundAndDelay() {
+
+    // Given
+    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    NsVirtualLinkDesc ranVld;
+    Optional<NsVirtualLinkDesc> optRanVl = vsbNsd.getVirtualLinkDesc().stream()
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mobile"))
+        .findFirst();
+    if (optRanVl.isPresent()) {
+      ranVld = optRanVl.get();
+    } else {
+      throw new Exception();
+    }
+    NsVirtualLinkDesc vsbMgmtVld;
+    Optional<NsVirtualLinkDesc> optVsbVld = vsbNsd.getVirtualLinkDesc().stream()
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mgt")).findFirst();
+    if (optVsbVld.isPresent()) {
+      vsbMgmtVld = optVsbVld.get();
+    } else {
+      throw new Exception();
+    }
+    Nsd delayNsd = Arrays
+        .asList(oM.readValue(new URL(urlProp.getProperty("ctx.delay.nsds")), Nsd[].class)).get(0);
+    NsVirtualLinkDesc delayMgmtVld;
+    Optional<NsVirtualLinkDesc> optCtxVld = delayNsd.getVirtualLinkDesc().stream()
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_dg_mgt")).findFirst();
+    if (optCtxVld.isPresent()) {
+      delayMgmtVld = optCtxVld.get();
+    } else {
+      throw new Exception();
+    }
+    Nsd bgNsd = Arrays
+        .asList(oM.readValue(new URL(urlProp.getProperty("ctx.bg_traffic.nsds")), Nsd[].class))
+        .get(0);
+    NsVirtualLinkDesc bgMgmtVld;
+    optCtxVld = bgNsd.getVirtualLinkDesc().stream()
+        .filter(v -> v.getVirtualLinkDescId().equals("vld_1")).findFirst();
+    if (optCtxVld.isPresent()) {
+      bgMgmtVld = optCtxVld.get();
+    } else {
+      throw new Exception();
+    }
+
+    // When
+    passThroughComposer
+        .compose(new ConnectInput(), ranVld, vsbMgmtVld, vsbNsd, delayMgmtVld, delayNsd);
+    connectComposer.compose(new ConnectInput(), ranVld, vsbMgmtVld, vsbNsd, bgMgmtVld, bgNsd);
+    // Setting ID manually for test purpose
+    vsbNsd.setNsdIdentifier("bfb761be-ab0f-499c-88d7-ac6ce7263651");
+    vsbNsd.setNsdInvariantId("d650cb24-28c5-41ba-8541-12a9cb93238c");
+    vsbNsd.setDesigner(vsbNsd.getDesigner() + " + NSD Generator");
+
+    // Then
+    InputStream in = getClass().getResourceAsStream(
+        "/expb_ares2t_tracker_delay_bg_traffic_nsds.yaml");
     Nsd expNsd = oM.readValue(in, Nsd[].class)[0];
     assertEquals(oM.writeValueAsString(expNsd), oM.writeValueAsString(vsbNsd));
 
