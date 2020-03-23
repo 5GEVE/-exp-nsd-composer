@@ -64,7 +64,7 @@ public class NsdGenerator {
     nsd.setDesigner("NSD generator");
     nsd.setNsdInvariantId(blueprint.getBlueprintId() + "_nsd");
     nsd.setVersion(blueprint.getVersion());
-    nsd.setNsdName(blueprint.getName() + "_nsd");
+    nsd.setNsdName(blueprint.getName() + " NSD");
     nsd.setSecurity(new SecurityParameters(
         "FC_NSD_SIGNATURE",
         "FC_NSD_ALGORITHM",
