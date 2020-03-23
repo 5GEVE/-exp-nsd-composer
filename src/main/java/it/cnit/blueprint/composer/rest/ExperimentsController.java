@@ -12,6 +12,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.MessageFormatter;
@@ -43,7 +44,12 @@ public class ExperimentsController {
 
   @PostMapping("/experiments")
   public ComposeResponse composeExperiment(@RequestBody ComposeRequest composeRequest) {
+
     Nsd expNsd = composeRequest.getVsbRequest().getNsds().get(0);
+    expNsd.setNsdIdentifier(UUID.randomUUID().toString());
+    expNsd.setNsdInvariantId(UUID.randomUUID().toString());
+    expNsd.setDesigner(expNsd.getDesigner() + " + NSD Generator");
+
     try {
       // Assumptions:
       // - The Vsb has only 1 Nsd.
