@@ -2,8 +2,6 @@ package it.cnit.blueprint.composer.nsd.compose;
 
 import static org.junit.Assert.assertEquals;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.nsd.graph.GraphVizExporter;
@@ -23,7 +21,6 @@ import java.util.Properties;
 import lombok.SneakyThrows;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 
 public class NsdComposerTest {
 
@@ -44,8 +41,6 @@ public class NsdComposerTest {
     nsdGraphService = new NsdGraphService(new GraphVizExporter());
     passThroughComposer = new PassThroughComposer(nsdGraphService);
     connectComposer = new ConnectComposer(nsdGraphService);
-    Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    root.setLevel(Level.DEBUG);
   }
 
   @Test
@@ -194,7 +189,7 @@ public class NsdComposerTest {
     }
 
     // When
-    connectComposer.compose(new ConnectInput(), ranVld,vsbMgmtVld,vsbNsd,ctxMgmtVld,ctxNsd);
+    connectComposer.compose(new ConnectInput(), ranVld, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("2dd7b5b1-9f39-4978-a035-6654d7bc9068");
     vsbNsd.setNsdInvariantId("d5959420-1ef7-4441-9eb9-9113172c988b");

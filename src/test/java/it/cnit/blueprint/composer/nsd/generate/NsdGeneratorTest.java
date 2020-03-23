@@ -2,8 +2,6 @@ package it.cnit.blueprint.composer.nsd.generate;
 
 import static org.junit.Assert.assertEquals;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.nsd.graph.GraphVizExporter;
@@ -17,7 +15,6 @@ import java.util.Properties;
 import lombok.SneakyThrows;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 
 
 public class NsdGeneratorTest {
@@ -37,8 +34,6 @@ public class NsdGeneratorTest {
     oM = new ObjectMapper(new YAMLFactory());
     nsdGraphService = new NsdGraphService(new GraphVizExporter());
     nsdGenerator = new NsdGenerator(nsdGraphService);
-    Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    root.setLevel(Level.DEBUG);
   }
 
 
