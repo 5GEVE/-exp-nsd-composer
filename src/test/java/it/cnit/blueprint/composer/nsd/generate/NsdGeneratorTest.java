@@ -1,11 +1,14 @@
 package it.cnit.blueprint.composer.nsd.generate;
 
+import static org.junit.Assert.assertEquals;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.nsd.graph.GraphVizExporter;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.InputStream;
@@ -15,6 +18,7 @@ import lombok.SneakyThrows;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
+
 
 public class NsdGeneratorTest {
 
@@ -65,6 +69,24 @@ public class NsdGeneratorTest {
 
     //Then
     //TODO
-    
+
+  }
+
+  @Test
+  @SneakyThrows
+  public void generateBgTrafficCtxB() {
+
+    // Given
+    CtxBlueprint ctxB = oM
+        .readValue(new URL(urlProp.getProperty("ctx.bg_traffic")), CtxBlueprint.class);
+
+    //When
+    Nsd actual = nsdGenerator.generate(ctxB);
+
+    //Then
+    Nsd expected = oM
+        .readValue(new URL(urlProp.getProperty("ctx.bg_traffic.nsds")), Nsd[].class)[0];
+    assertEquals(oM.writeValueAsString(expected), oM.writeValueAsString(actual));
+
   }
 }
