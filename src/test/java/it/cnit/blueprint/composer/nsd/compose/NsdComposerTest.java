@@ -45,7 +45,7 @@ public class NsdComposerTest {
     passThroughComposer = new PassThroughComposer(nsdGraphService);
     connectComposer = new ConnectComposer(nsdGraphService);
     Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    root.setLevel(Level.INFO);
+    root.setLevel(Level.DEBUG);
   }
 
   @Test
@@ -157,5 +157,53 @@ public class NsdComposerTest {
         "/expb_ares2t_tracker_delay_nsds_connect.yaml");
     Nsd expNsd = oM.readValue(in, Nsd[].class)[0];
     assertEquals(oM.writeValueAsString(expNsd), oM.writeValueAsString(vsbNsd));
+  }
+
+  @Test
+  @SneakyThrows
+  public void composeTrackerWithBackgroundConnect() {
+    // Given
+    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    NsVirtualLinkDesc ranVld;
+    Optional<NsVirtualLinkDesc> optRanVl = vsbNsd.getVirtualLinkDesc().stream()
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mobile"))
+        .findFirst();
+    if (optRanVl.isPresent()) {
+      ranVld = optRanVl.get();
+    } else {
+      throw new Exception();
+    }
+    NsVirtualLinkDesc vsbMgmtVld;
+    Optional<NsVirtualLinkDesc> optVsbVld = vsbNsd.getVirtualLinkDesc().stream()
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mgt")).findFirst();
+    if (optVsbVld.isPresent()) {
+      vsbMgmtVld = optVsbVld.get();
+    } else {
+      throw new Exception();
+    }
+    Nsd ctxNsd = Arrays
+        .asList(oM.readValue(new URL(urlProp.getProperty("ctx.bg_traffic.nsds")), Nsd[].class))
+        .get(0);
+    NsVirtualLinkDesc ctxMgmtVld;
+    Optional<NsVirtualLinkDesc> optCtxVld = ctxNsd.getVirtualLinkDesc().stream()
+        .filter(v -> v.getVirtualLinkDescId().equals("vld_1")).findFirst();
+    if (optCtxVld.isPresent()) {
+      ctxMgmtVld = optCtxVld.get();
+    } else {
+      throw new Exception();
+    }
+
+    // When
+    connectComposer.compose(new ConnectInput(), ranVld,vsbMgmtVld,vsbNsd,ctxMgmtVld,ctxNsd);
+    // Setting ID manually for test purpose
+    vsbNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
+    vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
+
+    // Then
+//    InputStream in = getClass().getResourceAsStream(
+//        "/expb_ares2t_tracker_bg_nsds_connect.yaml");
+//    Nsd expNsd = oM.readValue(in, Nsd[].class)[0];
+//    assertEquals(oM.writeValueAsString(expNsd), oM.writeValueAsString(vsbNsd));
+
   }
 }
