@@ -196,14 +196,14 @@ public class NsdComposerTest {
     // When
     connectComposer.compose(new ConnectInput(), ranVld,vsbMgmtVld,vsbNsd,ctxMgmtVld,ctxNsd);
     // Setting ID manually for test purpose
-    vsbNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
-    vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
+    vsbNsd.setNsdIdentifier("2dd7b5b1-9f39-4978-a035-6654d7bc9068");
+    vsbNsd.setNsdInvariantId("d5959420-1ef7-4441-9eb9-9113172c988b");
 
     // Then
-//    InputStream in = getClass().getResourceAsStream(
-//        "/expb_ares2t_tracker_bg_nsds_connect.yaml");
-//    Nsd expNsd = oM.readValue(in, Nsd[].class)[0];
-//    assertEquals(oM.writeValueAsString(expNsd), oM.writeValueAsString(vsbNsd));
+    InputStream in = getClass().getResourceAsStream(
+        "/expb_ares2t_tracker_bg_traffic_nsds_connect.yaml");
+    Nsd expNsd = oM.readValue(in, Nsd[].class)[0];
+    assertEquals(oM.writeValueAsString(expNsd), oM.writeValueAsString(vsbNsd));
 
   }
 }
