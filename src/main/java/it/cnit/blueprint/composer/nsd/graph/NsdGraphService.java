@@ -133,8 +133,7 @@ public class NsdGraphService {
     }
   }
 
-  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  public boolean isConnected(Graph<ProfileVertex, String> g){
+  public boolean isConnected(Graph<ProfileVertex, String> g) {
     ConnectivityInspector<ProfileVertex, String> inspector = new ConnectivityInspector<>(g);
     return inspector.isConnected();
   }
