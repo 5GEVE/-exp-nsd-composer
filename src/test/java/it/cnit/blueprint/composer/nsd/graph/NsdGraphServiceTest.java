@@ -1,6 +1,8 @@
 package it.cnit.blueprint.composer.nsd.graph;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -8,9 +10,12 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.Set;
 import lombok.SneakyThrows;
+import org.jgrapht.Graph;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -119,4 +124,41 @@ public class NsdGraphServiceTest {
     assertEquals(expected, actual);
   }
 
+  @Test
+  @SneakyThrows
+  public void isConnectedAres2TTrackerSmallTest() {
+
+    // Given
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    String nsLevel = "ns_ares2t_tracker_il_small";
+
+    // When
+    Graph<ProfileVertex, String> g = nsdGraphService
+        .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0), nsd.getNsDf().get(0).getNsLevel(nsLevel));
+
+    // Then
+    assertTrue(nsdGraphService.isConnected(g));
+  }
+
+  @Test
+  @SneakyThrows
+  public void isNotConnectedAres2TTrackerSmallTest() {
+
+    // Given
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    String nsLevel = "ns_ares2t_tracker_il_small";
+
+    // When
+    Graph<ProfileVertex, String> g = nsdGraphService
+        .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0), nsd.getNsDf().get(0).getNsLevel(nsLevel));
+    // Get the first vertex and remove its edges
+    ProfileVertex v = g.vertexSet().iterator().next();
+    Set<String> edges = new HashSet<>(g.edgesOf(v));
+    for (String e: edges){
+      g.removeEdge(e);
+    }
+
+    // Then
+    assertFalse(nsdGraphService.isConnected(g));
+  }
 }
