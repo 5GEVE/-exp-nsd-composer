@@ -122,7 +122,7 @@ public class ExperimentsController {
   }
 
   private NsVirtualLinkDesc findMgmtVld(Blueprint b, Nsd nsd) {
-    // TODO Visit vlDesc in nsd and check if mgmt in b.
+    // TODO Visit vlDesc in nsd and check if mgmt in connectivityServices of b.
     // We need model modifications to make this work.
     return new NsVirtualLinkDesc();
   }
