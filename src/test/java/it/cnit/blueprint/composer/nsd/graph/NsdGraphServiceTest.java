@@ -15,10 +15,12 @@ import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+@Slf4j
 public class NsdGraphServiceTest {
 
   static Properties prop;
@@ -46,6 +48,7 @@ public class NsdGraphServiceTest {
     // When
     String actual = nsdGraphService.export(nsdGraphService
         .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0), nsd.getNsDf().get(0).getNsLevel(nsLevel)));
+    log.debug("actual graph:\n{}", actual);
 
     // Then
     InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
@@ -68,6 +71,7 @@ public class NsdGraphServiceTest {
     // When
     String actual = nsdGraphService.export(nsdGraphService
         .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0), nsd.getNsDf().get(0).getNsLevel(nsLevel)));
+    log.debug("actual graph:\n{}", actual);
 
     // Then
     InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
@@ -90,6 +94,7 @@ public class NsdGraphServiceTest {
     // When
     String actual = nsdGraphService.export(nsdGraphService
         .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0), nsd.getNsDf().get(0).getNsLevel(nsLevel)));
+    log.debug("actual graph:\n{}", actual);
 
     // Then
     InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
@@ -112,6 +117,7 @@ public class NsdGraphServiceTest {
     // When
     String actual = nsdGraphService.export(nsdGraphService
         .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0), nsd.getNsDf().get(0).getNsLevel(nsLevel)));
+    log.debug("actual graph:\n{}", actual);
 
     // Then
     InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
