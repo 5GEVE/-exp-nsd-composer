@@ -61,7 +61,7 @@ public class NsdComposerTest {
     }
     NsVirtualLinkDesc vsbMgmtVld;
     Optional<NsVirtualLinkDesc> optVsbVld = vsbNsd.getVirtualLinkDesc().stream()
-        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mgt")).findFirst();
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mgmt")).findFirst();
     if (optVsbVld.isPresent()) {
       vsbMgmtVld = optVsbVld.get();
     } else {
@@ -71,7 +71,7 @@ public class NsdComposerTest {
         .asList(oM.readValue(new URL(urlProp.getProperty("ctx.delay.nsds")), Nsd[].class)).get(0);
     NsVirtualLinkDesc ctxMgmtVld;
     Optional<NsVirtualLinkDesc> optCtxVld = ctxNsd.getVirtualLinkDesc().stream()
-        .filter(v -> v.getVirtualLinkDescId().equals("vl_dg_mgt")).findFirst();
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_dg_mgmt")).findFirst();
     if (optCtxVld.isPresent()) {
       ctxMgmtVld = optCtxVld.get();
     } else {
@@ -84,6 +84,7 @@ public class NsdComposerTest {
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
     vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
+    vsbNsd.setDesigner(vsbNsd.getDesigner() + " + NSD Composer");
 
     // Then
     InputStream in = getClass().getResourceAsStream(
@@ -109,7 +110,7 @@ public class NsdComposerTest {
     }
     NsVirtualLinkDesc vsbMgmtVld;
     Optional<NsVirtualLinkDesc> optVsbVld = vsbNsd.getVirtualLinkDesc().stream()
-        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mgt")).findFirst();
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mgmt")).findFirst();
     if (optVsbVld.isPresent()) {
       vsbMgmtVld = optVsbVld.get();
     } else {
@@ -135,7 +136,7 @@ public class NsdComposerTest {
 
     NsVirtualLinkDesc ctxMgmtVld;
     Optional<NsVirtualLinkDesc> optCtxVld = ctxNsd.getVirtualLinkDesc().stream()
-        .filter(v -> v.getVirtualLinkDescId().equals("vl_dg_mgt")).findFirst();
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_dg_mgmt")).findFirst();
     if (optCtxVld.isPresent()) {
       ctxMgmtVld = optCtxVld.get();
     } else {
@@ -147,6 +148,7 @@ public class NsdComposerTest {
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
     vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
+    vsbNsd.setDesigner(vsbNsd.getDesigner() + " + NSD Composer");
 
     // Then
     InputStream in = getClass().getResourceAsStream(
@@ -171,7 +173,7 @@ public class NsdComposerTest {
     }
     NsVirtualLinkDesc vsbMgmtVld;
     Optional<NsVirtualLinkDesc> optVsbVld = vsbNsd.getVirtualLinkDesc().stream()
-        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mgt")).findFirst();
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mgmt")).findFirst();
     if (optVsbVld.isPresent()) {
       vsbMgmtVld = optVsbVld.get();
     } else {
@@ -194,6 +196,7 @@ public class NsdComposerTest {
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("2dd7b5b1-9f39-4978-a035-6654d7bc9068");
     vsbNsd.setNsdInvariantId("d5959420-1ef7-4441-9eb9-9113172c988b");
+    vsbNsd.setDesigner(vsbNsd.getDesigner() + " + NSD Composer");
 
     // Then
     InputStream in = getClass().getResourceAsStream(
@@ -219,7 +222,7 @@ public class NsdComposerTest {
     }
     NsVirtualLinkDesc vsbMgmtVld;
     Optional<NsVirtualLinkDesc> optVsbVld = vsbNsd.getVirtualLinkDesc().stream()
-        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mgt")).findFirst();
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mgmt")).findFirst();
     if (optVsbVld.isPresent()) {
       vsbMgmtVld = optVsbVld.get();
     } else {
@@ -229,7 +232,7 @@ public class NsdComposerTest {
         .asList(oM.readValue(new URL(urlProp.getProperty("ctx.delay.nsds")), Nsd[].class)).get(0);
     NsVirtualLinkDesc delayMgmtVld;
     Optional<NsVirtualLinkDesc> optCtxVld = delayNsd.getVirtualLinkDesc().stream()
-        .filter(v -> v.getVirtualLinkDescId().equals("vl_dg_mgt")).findFirst();
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_dg_mgmt")).findFirst();
     if (optCtxVld.isPresent()) {
       delayMgmtVld = optCtxVld.get();
     } else {
@@ -254,7 +257,7 @@ public class NsdComposerTest {
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("bfb761be-ab0f-499c-88d7-ac6ce7263651");
     vsbNsd.setNsdInvariantId("d650cb24-28c5-41ba-8541-12a9cb93238c");
-    vsbNsd.setDesigner(vsbNsd.getDesigner() + " + NSD Generator");
+    vsbNsd.setDesigner(vsbNsd.getDesigner() + " + NSD Composer");
 
     // Then
     InputStream in = getClass().getResourceAsStream(
