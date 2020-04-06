@@ -1,7 +1,7 @@
 # expb_ares2t_tracker_nsds.yaml
 ---
-- nsdIdentifier: bfb761be-ab0f-499c-88d7-ac6ce7263651
-  designer: "NXW + NSD Generator"
+- nsdIdentifier: "bfb761be-ab0f-499c-88d7-ac6ce7263651"
+  designer: "NXW + NSD Composer"
   version: "1.0"
   nsdName: "ARES2T Tracker Service @ 5GEVE + NETEM Traffic Delay Generator Service +\
     \ Context Blueprint Background Traffic_nsd"
@@ -27,7 +27,7 @@
           numberOfIpAddress: 1
       sapAddressAssignment: false
       nsVirtualLinkDescId: "vl_tracking_mobile"
-    - cpdId: "sap_tracking_mgt"
+    - cpdId: "sap_tracking_mgmt"
       layerProtocol: "IPV4"
       cpRole: "ROOT"
       description: "SAP for management"
@@ -39,7 +39,20 @@
           iPAddressType: "IPv4"
           numberOfIpAddress: 1
       sapAddressAssignment: false
-      nsVirtualLinkDescId: "vl_tracking_mgt"
+      nsVirtualLinkDescId: "vl_tracking_mgmt"
+    - cpdId: "sap_vis_user"
+      layerProtocol: "IPV4"
+      cpRole: "ROOT"
+      description: "SAP for user access to visualizer"
+      addressData:
+        - addressType: "IP_ADDRESS"
+          iPAddressAssignment: false
+          floatingIpActivated: false
+          management: false
+          iPAddressType: "IPv4"
+          numberOfIpAddress: 1
+      sapAddressAssignment: false
+      nsVirtualLinkDescId: "vl_tracking_user"
   virtualLinkDesc:
     - virtualLinkDescId: "vl_tracking_mobile"
       virtualLinkDescProvider: "NXW"
@@ -56,14 +69,14 @@
             priority: 0
           serviceAvaibilityLevel: "LEVEL_1"
       description: "Network to connect to the mobile user equipment"
-    - virtualLinkDescId: "vl_tracking_mgt"
+    - virtualLinkDescId: "vl_tracking_mgmt"
       virtualLinkDescProvider: "NXW"
       virtuaLinkDescVersion: "1.0"
       connectivityType:
         layerProtocol: "IPV4"
         flowPattern: null
       virtualLinkDf:
-        - flavourId: "df_vl_tracking_mgt"
+        - flavourId: "df_vl_tracking_mgmt"
           qos:
             latency: 0
             packetDelayVariation: 0
@@ -86,6 +99,21 @@
             priority: 0
           serviceAvaibilityLevel: "LEVEL_1"
       description: "Internal network to connect the tracking service components"
+    - virtualLinkDescId: "vl_tracking_user"
+      virtualLinkDescProvider: "NXW"
+      virtuaLinkDescVersion: "1.0"
+      connectivityType:
+        layerProtocol: "IPV4"
+        flowPattern: null
+      virtualLinkDf:
+        - flavourId: "df_vl_tracking_user"
+          qos:
+            latency: 0
+            packetDelayVariation: 0
+            packetLossRatio: 0
+            priority: 0
+          serviceAvaibilityLevel: "LEVEL_1"
+      description: "Network to connect to the Visualizer dashboard"
     - virtualLinkDescId: "vl_dg_out"
       virtualLinkDescProvider: "NXW"
       virtuaLinkDescVersion: "1.0"
@@ -118,9 +146,9 @@
             - virtualLinkProfileId: "vlp_vl_tracking_data"
               cpdId:
                 - "cp_tracker_data"
-            - virtualLinkProfileId: "vlp_vl_tracking_mgt"
+            - virtualLinkProfileId: "vlp_vl_tracking_mgmt"
               cpdId:
-                - "cp_tracker_mgt"
+                - "cp_tracker_mgmt"
         - vnfProfileId: "vnfp_big_Ares2T_Tracker"
           vnfdId: "c84b227e-520e-43c0-a75e-e52781dd54dd"
           flavourId: "vnf_df_Ares2T_Tracker"
@@ -134,9 +162,9 @@
             - virtualLinkProfileId: "vlp_vl_tracking_data"
               cpdId:
                 - "cp_tracker_data"
-            - virtualLinkProfileId: "vlp_vl_tracking_mgt"
+            - virtualLinkProfileId: "vlp_vl_tracking_mgmt"
               cpdId:
-                - "cp_tracker_mgt"
+                - "cp_tracker_mgmt"
         - vnfProfileId: "vnfp_Ares2T_Vis"
           vnfdId: "51c420e3-c83d-4ce9-a5bf-0dbe339b351d"
           flavourId: "vnf_df_Ares2T_Vis"
@@ -147,9 +175,12 @@
             - virtualLinkProfileId: "vlp_vl_tracking_data"
               cpdId:
                 - "cp_vis_data"
-            - virtualLinkProfileId: "vlp_vl_tracking_mgt"
+            - virtualLinkProfileId: "vlp_vl_tracking_mgmt"
               cpdId:
-                - "cp_vis_mgt"
+                - "cp_vis_mgmt"
+            - virtualLinkProfileId: "vlp_vl_tracking_user"
+              cpdId:
+                - "cp_vis_user"
         - vnfProfileId: "vnfp_netem"
           vnfdId: "396d1b6b-331b-4dd7-b48e-376517d3654a"
           flavourId: "vnf_df_netem"
@@ -160,9 +191,9 @@
             - virtualLinkProfileId: "vlp_vl_dg_out"
               cpdId:
                 - "cp_dg_traffic_out"
-            - virtualLinkProfileId: "vlp_vl_tracking_mgt"
+            - virtualLinkProfileId: "vlp_vl_tracking_mgmt"
               cpdId:
-                - "cp_dg_mgt"
+                - "cp_dg_mgmt"
             - virtualLinkProfileId: "vlp_vl_tracking_mobile"
               cpdId:
                 - "cp_dg_traffic_in"
@@ -176,7 +207,7 @@
             - virtualLinkProfileId: "vlp_vl_tracking_mobile"
               cpdId:
                 - "cp_bg_src_data"
-            - virtualLinkProfileId: "vlp_vl_tracking_mgt"
+            - virtualLinkProfileId: "vlp_vl_tracking_mgmt"
               cpdId:
                 - "cp_bg_src_mgmt"
         - vnfProfileId: "bg_traffic_dst_vnfp"
@@ -189,7 +220,7 @@
             - virtualLinkProfileId: "vlp_vl_tracking_data"
               cpdId:
                 - "cp_bg_dst_data"
-            - virtualLinkProfileId: "vlp_vl_tracking_mgt"
+            - virtualLinkProfileId: "vlp_vl_tracking_mgmt"
               cpdId:
                 - "cp_bg_dst_mgmt"
       virtualLinkProfile:
@@ -211,9 +242,18 @@
           minBitrateRequirements:
             root: "1"
             leaf: "1"
-        - virtualLinkProfileId: "vlp_vl_tracking_mgt"
-          virtualLinkDescId: "vl_tracking_mgt"
-          flavourId: "df_vl_tracking_mgt"
+        - virtualLinkProfileId: "vlp_vl_tracking_mgmt"
+          virtualLinkDescId: "vl_tracking_mgmt"
+          flavourId: "df_vl_tracking_mgmt"
+          maxBitrateRequirements:
+            root: "1"
+            leaf: "1"
+          minBitrateRequirements:
+            root: "1"
+            leaf: "1"
+        - virtualLinkProfileId: "vlp_vl_tracking_user"
+          virtualLinkDescId: "vl_tracking_user"
+          flavourId: "df_vl_tracking_user"
           maxBitrateRequirements:
             root: "1"
             leaf: "1"
@@ -252,7 +292,11 @@
               bitRateRequirements:
                 root: "1"
                 leaf: "1"
-            - virtualLinkProfileId: "vlp_vl_tracking_mgt"
+            - virtualLinkProfileId: "vlp_vl_tracking_mgmt"
+              bitRateRequirements:
+                root: "1"
+                leaf: "1"
+            - virtualLinkProfileId: "vlp_vl_tracking_user"
               bitRateRequirements:
                 root: "1"
                 leaf: "1"
@@ -282,7 +326,11 @@
               bitRateRequirements:
                 root: "1"
                 leaf: "1"
-            - virtualLinkProfileId: "vlp_vl_tracking_mgt"
+            - virtualLinkProfileId: "vlp_vl_tracking_mgmt"
+              bitRateRequirements:
+                root: "1"
+                leaf: "1"
+            - virtualLinkProfileId: "vlp_vl_tracking_user"
               bitRateRequirements:
                 root: "1"
                 leaf: "1"
