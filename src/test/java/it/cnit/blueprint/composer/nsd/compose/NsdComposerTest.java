@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.UUID;
 import lombok.SneakyThrows;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -205,6 +204,7 @@ public class NsdComposerTest {
     assertEquals(oM.writeValueAsString(expNsd), oM.writeValueAsString(vsbNsd));
 
   }
+
   @Test
   @SneakyThrows
   public void composeTrackerWithBackgroundAndDelay() {
