@@ -57,7 +57,8 @@ public class NsdGenerator {
   @SneakyThrows(JsonProcessingException.class)
   public Nsd generate(Blueprint blueprint) throws InvalidNsdException {
 
-    log.debug(OBJECT_MAPPER.writeValueAsString(blueprint));
+    log.debug("blueprint {}:\n{}", blueprint.getBlueprintId(),
+        OBJECT_MAPPER.writeValueAsString(blueprint));
 
     Nsd nsd = new Nsd();
     nsd.setNsdIdentifier(blueprint.getBlueprintId() + "_nsd");
