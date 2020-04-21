@@ -52,7 +52,7 @@ public class NsdGenerator {
 
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
-  private NsdGraphService nsdGraphService;
+  private final NsdGraphService nsdGraphService;
 
   @SneakyThrows(JsonProcessingException.class)
   public Nsd generate(Blueprint blueprint) throws InvalidNsdException {
