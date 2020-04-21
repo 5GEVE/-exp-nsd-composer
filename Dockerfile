@@ -1,42 +1,14 @@
-FROM azul/zulu-openjdk-alpine:8 as copy
+FROM maven:3.6.3-jdk-8 as mvn-build
+# speed up Maven JVM a bit
+ENV MAVEN_OPTS="-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xmx4G"
+WORKDIR /usr/src/mymaven
+# Copy pom.xml and download all dependencies for offline use
+COPY pom.xml pom.xml
+RUN mvn -T 1C verify clean --fail-never
+# Copy code
+COPY ./src ./src
+RUN mvn -T 1C verify
 
-# Copy files
-#COPY target/lib /usr/share/myservice/lib
-RUN mkdir /5geve-experiment-builder
-ARG JAR_FILE
-ENV JAR_FILE=${JAR_FILE}
-COPY target/${JAR_FILE} /5geve-experiment-builder
-WORKDIR /5geve-experiment-builder
-
-
-FROM copy as dev
-
-LABEL target=DEV
-
-# Enable remote debugger
-EXPOSE 5005
-ENV JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
-
-CMD java -jar ${JAR_FILE}
-
-
-FROM copy as prod
-
-LABEL maintainer="Matteo Pergolesi"
-LABEL org.label-schema.schema-version="1.0"
-ARG BUILD_DATE
-LABEL org.label-schema.build-date=$BUILD_DATE
-ARG REPOSITORY
-LABEL org.label-schema.name=$REPOSITORY
-ARG DESCRIPTION
-LABEL org.label-schema.description=$DESCRIPTION
-ARG VERSION
-LABEL org.label-schema.version=$VERSION
-ARG VCS_URL
-LABEL org.label-schema.vcs-url=$VCS_URL
-ARG VCS_REF
-LABEL org.label-schema.vcs-ref=$VCS_REF
-ARG COMMAND
-LABEL org.label-schema.docker.cmd=$COMMAND
-
-CMD java -jar ${JAR_FILE}
+FROM azul/zulu-openjdk-alpine:8-jre
+COPY --from=mvn-build /usr/src/mymaven/target/*.jar /app.jar
+CMD java -jar app.jar
