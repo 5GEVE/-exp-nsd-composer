@@ -4,14 +4,17 @@ import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
 import it.cnit.blueprint.composer.rules.InvalidTranslationRuleException;
 import it.cnit.blueprint.composer.rules.TranslationRulesComposer;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.CompositionStrategy;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardExpBlueprintRequest;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,15 +30,12 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class ExperimentsController {
 
-  // TODO Composition Strategy comes from CtxB
-  private static CompositionStrategy STRAT = CompositionStrategy.CONNECT;
-
   @Qualifier("PASS_THROUGH")
-  private NsdComposer passThroughComposer;
+  private final NsdComposer passThroughComposer;
   @Qualifier("CONNECT")
-  private NsdComposer connectComposer;
+  private final NsdComposer connectComposer;
 
-  private TranslationRulesComposer translationRulesComposer;
+  private final TranslationRulesComposer translationRulesComposer;
 
   @GetMapping("/experiments")
   public OnboardExpBlueprintRequest retrieveExperiment() {
@@ -59,18 +59,20 @@ public class ExperimentsController {
         // - The Ctx has only 1 Nsd.
         Nsd ctxNsd = ctx.getCtxbRequest().getNsds().get(0);
         CtxBlueprint ctxB = ctx.getCtxbRequest().getCtxBlueprint();
+
+        log.info("Current CtxB: {}", ctxB.getBlueprintId());
+
         if (ctx.getConnectInput() == null) {
           ctx.setConnectInput(new ConnectInput());
         }
-
         NsVirtualLinkDesc expMgmtVld = findMgmtVld(ctxB, ctxNsd);
         NsVirtualLinkDesc ctxMgmtVld = findMgmtVld(ctxB, ctxNsd);
-        if (STRAT.equals(CompositionStrategy.CONNECT)) {
-          log.info("connect");
+        if (ctxB.getCompositionStrategy().equals(CompositionStrategy.CONNECT)) {
+          log.info("Strategy is CONNECT");
           connectComposer
               .compose(ctx.getConnectInput(), ranVld, expMgmtVld, expNsd, ctxMgmtVld, ctxNsd);
-        } else if (STRAT.equals(CompositionStrategy.PASS_THROUGH)) {
-          log.info("pass_through");
+        } else if (ctxB.getCompositionStrategy().equals(CompositionStrategy.PASS_THROUGH)) {
+          log.info("Strategy is PASS_THROUGH");
           if (ctxNsd.getVnfdId().size() == 1) {
             log.debug("ctxNsd has only one vnfdId.");
           } else {
@@ -79,14 +81,15 @@ public class ExperimentsController {
           passThroughComposer
               .compose(ctx.getConnectInput(), ranVld, expMgmtVld, expNsd, ctxMgmtVld, ctxNsd);
         } else {
-          String m = MessageFormatter.format("Composition strategy {} not supported.", STRAT)
+          String m = MessageFormatter.format("Composition strategy {} not supported.",
+              ctxB.getCompositionStrategy().name())
               .getMessage();
           log.error(m);
           throw new InvalidContextException(m);
         }
 
       }
-    } catch (InvalidNsdException | InvalidContextException e) {
+    } catch (InvalidVsbException | InvalidNsdException | InvalidContextException e) {
       log.error(e.getMessage());
       //TODO create and return a 422 response.
     }
@@ -102,28 +105,46 @@ public class ExperimentsController {
     return new ComposeResponse(expNsd, translationRules);
   }
 
-  private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd) throws InvalidNsdException {
-    Sapd ranSapd = null;
-    for (VsbEndpoint e : b.getEndPoints()) {
-      if (e.isRanConnection()) {
-        for (Sapd sapd : nsd.getSapd()) {
-          if (e.getEndPointId().equals(sapd.getCpdId())) {
-            ranSapd = sapd;
-            break;
-          }
-        }
+  private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd)
+      throws InvalidNsdException, InvalidVsbException {
+    Optional<VsbEndpoint> ranEp = b.getEndPoints().stream()
+        .filter(VsbEndpoint::isRanConnection)
+        .findFirst();
+    if (ranEp.isPresent()) {
+      String epId = ranEp.get().getEndPointId();
+      Optional<Sapd> ranSapd = nsd.getSapd().stream()
+          .filter(sapd -> sapd.getCpdId().equals(epId))
+          .findFirst();
+      if (ranSapd.isPresent()) {
+        return connectComposer.getRanVlDesc(ranSapd.get(), nsd);
+      } else {
+        throw new InvalidNsdException(
+            "RAN Sap with id=" + epId + "not found in NSD " + nsd.getNsdIdentifier() + ".");
       }
+    } else {
+      throw new InvalidVsbException("No RAN endpoint found in VSB " + b.getBlueprintId() + ".");
     }
-    if (ranSapd == null) {
-      // TODO think of a better message
-      throw new InvalidNsdException("Cannot find a Sap descriptor for RAN.");
-    }
-    return connectComposer.getRanVlDesc(ranSapd, nsd);
   }
 
-  private NsVirtualLinkDesc findMgmtVld(Blueprint b, Nsd nsd) {
-    // TODO Visit vlDesc in nsd and check if mgmt in connectivityServices of b.
-    // We need model modifications to make this work.
-    return new NsVirtualLinkDesc();
+  private NsVirtualLinkDesc findMgmtVld(Blueprint b, Nsd nsd)
+      throws InvalidVsbException, InvalidNsdException {
+    Optional<VsbLink> optConnServ = b.getConnectivityServices().stream()
+        .filter(VsbLink::isManagement)
+        .findFirst();
+    if (optConnServ.isPresent()) {
+      String name = optConnServ.get().getName();
+      Optional<NsVirtualLinkDesc> optVld = nsd.getVirtualLinkDesc().stream()
+          .filter(vld -> vld.getVirtualLinkDescId().equals(name))
+          .findFirst();
+      if (optVld.isPresent()) {
+        return optVld.get();
+      } else {
+        throw new InvalidNsdException(
+            "Management Vld with id=" + name + "not found in NSD " + nsd.getNsdIdentifier() + ".");
+      }
+    } else {
+      throw new InvalidVsbException(
+          "No management connectivity service found in VSB " + b.getBlueprintId() + ".");
+    }
   }
 }

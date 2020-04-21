@@ -52,7 +52,7 @@ public class NsdGenerator {
 
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
-  private NsdGraphService nsdGraphService;
+  private final NsdGraphService nsdGraphService;
 
   @SneakyThrows(JsonProcessingException.class)
   public Nsd generate(Blueprint blueprint) throws InvalidNsdException {
@@ -80,14 +80,11 @@ public class NsdGenerator {
     nsLevel.setNsLevelId(blueprint.getBlueprintId() + "_il_default");
     nsLevel.setDescription("Default Instantiation Level");
 
-    int vldCount = 0;
     for (VsbLink connService : blueprint.getConnectivityServices()) {
       NsVirtualLinkDesc vld = new NsVirtualLinkDesc();
-//    TODO  vld.setVirtualLinkDescId(connService.getName());
-      vld.setVirtualLinkDescId("vld_" + vldCount);
+      vld.setVirtualLinkDescId(connService.getName());
       vld.setVirtualLinkDescProvider(nsd.getDesigner());
       vld.setVirtuaLinkDescVersion(nsd.getVersion());
-      vld.setDescription(vld.getVirtualLinkDescId());
       vld.setConnectivityType(new ConnectivityType(LayerProtocol.IPV4, ""));
       VirtualLinkDf vldf = new VirtualLinkDf();
       vldf.setFlavourId(vld.getVirtualLinkDescId() + "_df");
@@ -107,8 +104,6 @@ public class NsdGenerator {
       vlMap.setVirtualLinkProfileId(vlp.getVirtualLinkProfileId());
       vlMap.setBitRateRequirements(new LinkBitrateRequirements("1", "1"));
       nsLevel.getVirtualLinkToLevelMapping().add(vlMap);
-
-      vldCount++;
     }
 
     List<Sapd> sapdList = new ArrayList<>();
@@ -116,20 +111,16 @@ public class NsdGenerator {
       if (e.isExternal() && e.getEndPointId().contains("sap")) {
         Sapd sapd = new Sapd();
         sapd.setCpdId(e.getEndPointId());
-        sapd.setDescription("A generated Sapd");
         sapd.setLayerProtocol(LayerProtocol.IPV4);
-        sapd.setCpRole(CpRole.ROOT); // TODO meaning of this?
+        sapd.setCpRole(CpRole.ROOT);
         sapd.setSapAddressAssignment(false);
-        int count = 0;
         for (VsbLink cs : blueprint.getConnectivityServices()) {
           for (String ep : cs.getEndPointIds()) {
             if (ep.equals(sapd.getCpdId())) {
-              // TODO change this when connectivity service has a name
-              sapd.setNsVirtualLinkDescId("vld_" + count);
+              cs.getName();
               break;
             }
           }
-          count++;
         }
         AddressData addressData = new AddressData();
         addressData.setAddressType(AddressType.IP_ADDRESS);
@@ -155,13 +146,11 @@ public class NsdGenerator {
       vnfp.setMaxNumberOfInstances(1);
       List<NsVirtualLinkConnectivity> nsVirtualLinkConnectivities = new ArrayList<>();
       for (String ep : vsc.getEndPointsIds()) {
-        int count = 0;
         for (VsbLink cs : blueprint.getConnectivityServices()) {
           for (String csEp : cs.getEndPointIds()) {
             if (csEp.equals(ep)) {
               NsVirtualLinkConnectivity nsVLC = new NsVirtualLinkConnectivity();
-              // TODO change this when connectivity service has a name
-              String vldId = "vld_" + count;
+              String vldId = cs.getName();
               Optional<VirtualLinkProfile> optVlp = nsDf.getVirtualLinkProfile().stream()
                   .filter(vlp -> vlp.getVirtualLinkDescId().equals(vldId)).findFirst();
               if (optVlp.isPresent()) {
@@ -171,7 +160,6 @@ public class NsdGenerator {
               }
             }
           }
-          count++;
         }
       }
       vnfp.setNsVirtualLinkConnectivity(nsVirtualLinkConnectivities);
