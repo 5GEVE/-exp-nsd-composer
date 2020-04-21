@@ -105,23 +105,25 @@ public class ExperimentsController {
     return new ComposeResponse(expNsd, translationRules);
   }
 
-  private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd) throws InvalidNsdException {
-    Sapd ranSapd = null;
-    for (VsbEndpoint e : b.getEndPoints()) {
-      if (e.isRanConnection()) {
-        for (Sapd sapd : nsd.getSapd()) {
-          if (e.getEndPointId().equals(sapd.getCpdId())) {
-            ranSapd = sapd;
-            break;
-          }
-        }
+  private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd)
+      throws InvalidNsdException, InvalidVsbException {
+    Optional<VsbEndpoint> ranEp = b.getEndPoints().stream()
+        .filter(VsbEndpoint::isRanConnection)
+        .findFirst();
+    if (ranEp.isPresent()) {
+      String epId = ranEp.get().getEndPointId();
+      Optional<Sapd> ranSapd = nsd.getSapd().stream()
+          .filter(sapd -> sapd.getCpdId().equals(epId))
+          .findFirst();
+      if (ranSapd.isPresent()) {
+        return connectComposer.getRanVlDesc(ranSapd.get(), nsd);
+      } else {
+        throw new InvalidNsdException(
+            "RAN Sap with id=" + epId + "not found in NSD " + nsd.getNsdIdentifier() + ".");
       }
+    } else {
+      throw new InvalidVsbException("No RAN endpoint found in VSB " + b.getBlueprintId() + ".");
     }
-    if (ranSapd == null) {
-      // TODO think of a better message
-      throw new InvalidNsdException("Cannot find a Sap descriptor for RAN.");
-    }
-    return connectComposer.getRanVlDesc(ranSapd, nsd);
   }
 
   private NsVirtualLinkDesc findMgmtVld(Blueprint b, Nsd nsd)
@@ -137,10 +139,12 @@ public class ExperimentsController {
       if (optVld.isPresent()) {
         return optVld.get();
       } else {
-        throw new InvalidNsdException("Management Vld with id=" + name + "not found in NSD.");
+        throw new InvalidNsdException(
+            "Management Vld with id=" + name + "not found in NSD " + nsd.getNsdIdentifier() + ".");
       }
     } else {
-      throw new InvalidVsbException("No management connectivity service found in VSB.");
+      throw new InvalidVsbException(
+          "No management connectivity service found in VSB " + b.getBlueprintId() + ".");
     }
   }
 }
