@@ -4,6 +4,7 @@ import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
 import it.cnit.blueprint.composer.rules.InvalidTranslationRuleException;
 import it.cnit.blueprint.composer.rules.TranslationRulesComposer;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.CompositionStrategy;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
@@ -26,9 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @AllArgsConstructor
 public class ExperimentsController {
-
-  // TODO Composition Strategy comes from CtxB
-  private static CompositionStrategy STRAT = CompositionStrategy.CONNECT;
 
   @Qualifier("PASS_THROUGH")
   private NsdComposer passThroughComposer;
@@ -59,18 +57,20 @@ public class ExperimentsController {
         // - The Ctx has only 1 Nsd.
         Nsd ctxNsd = ctx.getCtxbRequest().getNsds().get(0);
         CtxBlueprint ctxB = ctx.getCtxbRequest().getCtxBlueprint();
+
+        log.info("Current CtxB: {}", ctxB.getBlueprintId());
+
         if (ctx.getConnectInput() == null) {
           ctx.setConnectInput(new ConnectInput());
         }
-
         NsVirtualLinkDesc expMgmtVld = findMgmtVld(ctxB, ctxNsd);
         NsVirtualLinkDesc ctxMgmtVld = findMgmtVld(ctxB, ctxNsd);
-        if (STRAT.equals(CompositionStrategy.CONNECT)) {
-          log.info("connect");
+        if (ctxB.getCompositionStrategy().equals(CompositionStrategy.CONNECT)) {
+          log.info("Strategy is CONNECT");
           connectComposer
               .compose(ctx.getConnectInput(), ranVld, expMgmtVld, expNsd, ctxMgmtVld, ctxNsd);
-        } else if (STRAT.equals(CompositionStrategy.PASS_THROUGH)) {
-          log.info("pass_through");
+        } else if (ctxB.getCompositionStrategy().equals(CompositionStrategy.PASS_THROUGH)) {
+          log.info("Strategy is PASS_THROUGH");
           if (ctxNsd.getVnfdId().size() == 1) {
             log.debug("ctxNsd has only one vnfdId.");
           } else {
@@ -79,7 +79,8 @@ public class ExperimentsController {
           passThroughComposer
               .compose(ctx.getConnectInput(), ranVld, expMgmtVld, expNsd, ctxMgmtVld, ctxNsd);
         } else {
-          String m = MessageFormatter.format("Composition strategy {} not supported.", STRAT)
+          String m = MessageFormatter.format("Composition strategy {} not supported.",
+              ctxB.getCompositionStrategy().name())
               .getMessage();
           log.error(m);
           throw new InvalidContextException(m);
