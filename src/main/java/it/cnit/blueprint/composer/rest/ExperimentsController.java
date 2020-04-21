@@ -7,12 +7,14 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CompositionStrategy;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardExpBlueprintRequest;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -87,7 +89,7 @@ public class ExperimentsController {
         }
 
       }
-    } catch (InvalidNsdException | InvalidContextException e) {
+    } catch (InvalidVsbException | InvalidNsdException | InvalidContextException e) {
       log.error(e.getMessage());
       //TODO create and return a 422 response.
     }
@@ -122,9 +124,23 @@ public class ExperimentsController {
     return connectComposer.getRanVlDesc(ranSapd, nsd);
   }
 
-  private NsVirtualLinkDesc findMgmtVld(Blueprint b, Nsd nsd) {
-    // TODO Visit vlDesc in nsd and check if mgmt in connectivityServices of b.
-    // We need model modifications to make this work.
-    return new NsVirtualLinkDesc();
+  private NsVirtualLinkDesc findMgmtVld(Blueprint b, Nsd nsd)
+      throws InvalidVsbException, InvalidNsdException {
+    Optional<VsbLink> optConnServ = b.getConnectivityServices().stream()
+        .filter(VsbLink::isManagement)
+        .findFirst();
+    if (optConnServ.isPresent()) {
+      String name = optConnServ.get().getName();
+      Optional<NsVirtualLinkDesc> optVld = nsd.getVirtualLinkDesc().stream()
+          .filter(vld -> vld.getVirtualLinkDescId().equals(name))
+          .findFirst();
+      if (optVld.isPresent()) {
+        return optVld.get();
+      } else {
+        throw new InvalidNsdException("Management Vld with id=" + name + "not found in NSD.");
+      }
+    } else {
+      throw new InvalidVsbException("No management connectivity service found in VSB.");
+    }
   }
 }
