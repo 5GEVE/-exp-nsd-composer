@@ -31,11 +31,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ExperimentsController {
 
   @Qualifier("PASS_THROUGH")
-  private NsdComposer passThroughComposer;
+  private final NsdComposer passThroughComposer;
   @Qualifier("CONNECT")
-  private NsdComposer connectComposer;
+  private final NsdComposer connectComposer;
 
-  private TranslationRulesComposer translationRulesComposer;
+  private final TranslationRulesComposer translationRulesComposer;
 
   @GetMapping("/experiments")
   public OnboardExpBlueprintRequest retrieveExperiment() {
