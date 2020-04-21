@@ -80,14 +80,11 @@ public class NsdGenerator {
     nsLevel.setNsLevelId(blueprint.getBlueprintId() + "_il_default");
     nsLevel.setDescription("Default Instantiation Level");
 
-    int vldCount = 0;
     for (VsbLink connService : blueprint.getConnectivityServices()) {
       NsVirtualLinkDesc vld = new NsVirtualLinkDesc();
-//    TODO  vld.setVirtualLinkDescId(connService.getName());
-      vld.setVirtualLinkDescId("vld_" + vldCount);
+      vld.setVirtualLinkDescId(connService.getName());
       vld.setVirtualLinkDescProvider(nsd.getDesigner());
       vld.setVirtuaLinkDescVersion(nsd.getVersion());
-      vld.setDescription(vld.getVirtualLinkDescId());
       vld.setConnectivityType(new ConnectivityType(LayerProtocol.IPV4, ""));
       VirtualLinkDf vldf = new VirtualLinkDf();
       vldf.setFlavourId(vld.getVirtualLinkDescId() + "_df");
@@ -107,8 +104,6 @@ public class NsdGenerator {
       vlMap.setVirtualLinkProfileId(vlp.getVirtualLinkProfileId());
       vlMap.setBitRateRequirements(new LinkBitrateRequirements("1", "1"));
       nsLevel.getVirtualLinkToLevelMapping().add(vlMap);
-
-      vldCount++;
     }
 
     List<Sapd> sapdList = new ArrayList<>();
