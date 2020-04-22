@@ -117,7 +117,7 @@ public class NsdGenerator {
         for (VsbLink cs : blueprint.getConnectivityServices()) {
           for (String ep : cs.getEndPointIds()) {
             if (ep.equals(sapd.getCpdId())) {
-              cs.getName();
+              sapd.setNsVirtualLinkDescId(cs.getName());
               break;
             }
           }
@@ -171,6 +171,9 @@ public class NsdGenerator {
     nsDf.setDefaultNsInstantiationLevelId(nsLevel.getNsLevelId());
     nsd.setNsDf(Collections.singletonList(nsDf));
 
+    log.debug("Nsd AFTER generation with {}:\n{}",
+        nsd.getNsdIdentifier(), OBJECT_MAPPER.writeValueAsString(nsd));
+
     // Nsd validation and logging
     try {
       nsd.isValid();
@@ -179,8 +182,6 @@ public class NsdGenerator {
       log.error(m, e);
       throw new InvalidNsdException(m);
     }
-    log.debug("Nsd AFTER generation with {}:\n{}",
-        nsd.getNsdIdentifier(), OBJECT_MAPPER.writeValueAsString(nsd));
 
     Graph<ProfileVertex, String> g = nsdGraphService.buildGraph(nsd.getSapd(), nsDf, nsLevel);
     log.debug("Graph AFTER generation with {}:\n{}",
