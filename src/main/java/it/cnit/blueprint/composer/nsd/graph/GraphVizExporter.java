@@ -47,7 +47,7 @@ public class GraphVizExporter implements GraphExporter {
         vertexLabelProvider, new StringComponentNameProvider<>(), vertexAttributeProvider, null);
     exporter.putGraphAttribute("splines", "false");
     exporter.putGraphAttribute("overlap", "false");
-    exporter.putGraphAttribute("mindist", "2.0");
+    exporter.putGraphAttribute("mindist", "0.5");
     Writer writer = new StringWriter();
     exporter.exportGraph(g, writer);
     return writer.toString();
