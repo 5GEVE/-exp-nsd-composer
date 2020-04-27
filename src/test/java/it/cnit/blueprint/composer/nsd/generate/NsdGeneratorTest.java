@@ -42,7 +42,7 @@ public class NsdGeneratorTest {
   public void generateTracker() {
 
     // Given
-    VsBlueprint vsb = oM.readValue(new URL(urlProp.getProperty("vsb.tracker")), VsBlueprint.class);
+    VsBlueprint vsb = oM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker")), VsBlueprint.class);
 
     //When
     Nsd vsbNsd = nsdGenerator.generate(vsb);
@@ -57,7 +57,7 @@ public class NsdGeneratorTest {
   public void generateV360() {
 
     // Given
-    VsBlueprint vsb = oM.readValue(new URL(urlProp.getProperty("vsb.v360")), VsBlueprint.class);
+    VsBlueprint vsb = oM.readValue(new URL(urlProp.getProperty("vsb_orange_v360")), VsBlueprint.class);
 
     //When
     Nsd vsbNsd = nsdGenerator.generate(vsb);
@@ -73,14 +73,14 @@ public class NsdGeneratorTest {
 
     // Given
     CtxBlueprint ctxB = oM
-        .readValue(new URL(urlProp.getProperty("ctx.bg_traffic")), CtxBlueprint.class);
+        .readValue(new URL(urlProp.getProperty("ctx_bg_traffic")), CtxBlueprint.class);
 
     //When
     Nsd actual = nsdGenerator.generate(ctxB);
 
     //Then
     Nsd expected = oM
-        .readValue(new URL(urlProp.getProperty("ctx.bg_traffic.nsds")), Nsd[].class)[0];
+        .readValue(new URL(urlProp.getProperty("ctx_bg_traffic_nsds")), Nsd[].class)[0];
     assertEquals(oM.writeValueAsString(expected), oM.writeValueAsString(actual));
 
   }

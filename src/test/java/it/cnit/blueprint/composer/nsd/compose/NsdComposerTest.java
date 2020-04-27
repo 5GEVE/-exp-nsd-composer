@@ -48,7 +48,7 @@ public class NsdComposerTest {
   public void composeTrackerWithDelayPassThrough() {
 
     // Given
-    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
     NsVirtualLinkDesc ranVld;
     Optional<NsVirtualLinkDesc> optRanVl = vsbNsd.getVirtualLinkDesc().stream()
         .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mobile"))
@@ -67,7 +67,7 @@ public class NsdComposerTest {
       throw new Exception();
     }
     Nsd ctxNsd = Arrays
-        .asList(oM.readValue(new URL(urlProp.getProperty("ctx.delay.nsds")), Nsd[].class)).get(0);
+        .asList(oM.readValue(new URL(urlProp.getProperty("ctx_delay_nsds")), Nsd[].class)).get(0);
     NsVirtualLinkDesc ctxMgmtVld;
     Optional<NsVirtualLinkDesc> optCtxVld = ctxNsd.getVirtualLinkDesc().stream()
         .filter(v -> v.getVirtualLinkDescId().equals("vl_dg_mgmt")).findFirst();
@@ -97,7 +97,7 @@ public class NsdComposerTest {
   public void composeTrackerWithDelayConnect() {
 
     // Given
-    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
     NsVirtualLinkDesc ranVld;
     Optional<NsVirtualLinkDesc> optRanVl = vsbNsd.getVirtualLinkDesc().stream()
         .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mobile"))
@@ -116,7 +116,7 @@ public class NsdComposerTest {
       throw new Exception();
     }
     Nsd ctxNsd = Arrays
-        .asList(oM.readValue(new URL(urlProp.getProperty("ctx.delay.nsds")), Nsd[].class)).get(0);
+        .asList(oM.readValue(new URL(urlProp.getProperty("ctx_delay_nsds")), Nsd[].class)).get(0);
     // Add twice the vnfd to fake the connect algorithm TODO use a real CONNECT ctx
 //    ctxNsd.getVnfdId().add(ctxNsd.getVnfdId().get(0));
     VnfProfile ctxVnfp = ctxNsd.getNsDf().get(0).getVnfProfile().get(0);
@@ -160,7 +160,7 @@ public class NsdComposerTest {
   @SneakyThrows
   public void composeTrackerWithBackgroundConnect() {
     // Given
-    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
     NsVirtualLinkDesc ranVld;
     Optional<NsVirtualLinkDesc> optRanVl = vsbNsd.getVirtualLinkDesc().stream()
         .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mobile"))
@@ -179,7 +179,7 @@ public class NsdComposerTest {
       throw new Exception();
     }
     Nsd ctxNsd = Arrays
-        .asList(oM.readValue(new URL(urlProp.getProperty("ctx.bg_traffic.nsds")), Nsd[].class))
+        .asList(oM.readValue(new URL(urlProp.getProperty("ctx_bg_traffic_nsds")), Nsd[].class))
         .get(0);
     NsVirtualLinkDesc ctxMgmtVld;
     Optional<NsVirtualLinkDesc> optCtxVld = ctxNsd.getVirtualLinkDesc().stream()
@@ -210,7 +210,7 @@ public class NsdComposerTest {
   public void composeTrackerWithBackgroundAndDelay() {
 
     // Given
-    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
     NsVirtualLinkDesc ranVld;
     Optional<NsVirtualLinkDesc> optRanVl = vsbNsd.getVirtualLinkDesc().stream()
         .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mobile"))
@@ -229,7 +229,7 @@ public class NsdComposerTest {
       throw new Exception();
     }
     Nsd delayNsd = Arrays
-        .asList(oM.readValue(new URL(urlProp.getProperty("ctx.delay.nsds")), Nsd[].class)).get(0);
+        .asList(oM.readValue(new URL(urlProp.getProperty("ctx_delay_nsds")), Nsd[].class)).get(0);
     NsVirtualLinkDesc delayMgmtVld;
     Optional<NsVirtualLinkDesc> optCtxVld = delayNsd.getVirtualLinkDesc().stream()
         .filter(v -> v.getVirtualLinkDescId().equals("vl_dg_mgmt")).findFirst();
@@ -239,7 +239,7 @@ public class NsdComposerTest {
       throw new Exception();
     }
     Nsd bgNsd = Arrays
-        .asList(oM.readValue(new URL(urlProp.getProperty("ctx.bg_traffic.nsds")), Nsd[].class))
+        .asList(oM.readValue(new URL(urlProp.getProperty("ctx_bg_traffic_nsds")), Nsd[].class))
         .get(0);
     NsVirtualLinkDesc bgMgmtVld;
     optCtxVld = bgNsd.getVirtualLinkDesc().stream()

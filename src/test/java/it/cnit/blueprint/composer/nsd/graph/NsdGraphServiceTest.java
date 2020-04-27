@@ -42,7 +42,7 @@ public class NsdGraphServiceTest {
   @SneakyThrows
   public void buildGraphAres2TTrackerBig() {
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
     String nsLevel = "ns_ares2t_tracker_il_big";
 
     // When
@@ -65,7 +65,7 @@ public class NsdGraphServiceTest {
   @SneakyThrows
   public void buildGraphAres2TTrackerSmall() {
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
     String nsLevel = "ns_ares2t_tracker_il_small";
 
     // When
@@ -88,7 +88,7 @@ public class NsdGraphServiceTest {
   @SneakyThrows
   public void buildGraphAres2TDelayExperimentBig() {
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("expb.tracker.delay.nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("expb_ares2t_tracker_delay_nsds")), Nsd[].class)[0];
     String nsLevel = "ns_ares2t_tracker_exp_il_big";
 
     // When
@@ -111,7 +111,7 @@ public class NsdGraphServiceTest {
   @SneakyThrows
   public void buildGraphAres2TDelayExperimentSmall() {
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("expb.tracker.delay.nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("expb_ares2t_tracker_delay_nsds")), Nsd[].class)[0];
     String nsLevel = "ns_ares2t_tracker_exp_il_small";
 
     // When
@@ -135,7 +135,7 @@ public class NsdGraphServiceTest {
   public void isConnectedAres2TTrackerSmallTest() {
 
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
     String nsLevel = "ns_ares2t_tracker_il_small";
 
     // When
@@ -151,7 +151,7 @@ public class NsdGraphServiceTest {
   public void isNotConnectedAres2TTrackerSmallTest() {
 
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb.tracker.nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
     String nsLevel = "ns_ares2t_tracker_il_small";
 
     // When
