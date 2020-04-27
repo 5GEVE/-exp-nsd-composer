@@ -1,7 +1,7 @@
 strict graph G {
   splines=false;
   overlap=false;
-  mindist=2.0;
+  mindist=0.5;
   -1874275603 [ label="vnfp_small_Ares2T_Tracker_exp" shape="box" style="filled" fillcolor="yellowgreen" ];
   1392640733 [ label="vnfp_Ares2T_Vis_exp" shape="box" style="filled" fillcolor="yellowgreen" ];
   -793362586 [ label="vnfp_netem_exp" shape="box" style="filled" fillcolor="yellowgreen" ];
