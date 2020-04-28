@@ -63,12 +63,11 @@ public class NsdGeneratorTest {
         .readValue(new URL(urlProp.getProperty("ctx_bg_traffic")), CtxBlueprint.class);
 
     //When
-    Nsd actual = nsdGenerator.generate(ctxB);
+    Nsd actualNsd = nsdGenerator.generate(ctxB);
 
     //Then
-    Nsd expected = oM
+    Nsd expectedNsd = oM
         .readValue(new URL(urlProp.getProperty("ctx_bg_traffic_nsds")), Nsd[].class)[0];
-    assertEquals(oM.writeValueAsString(expected), oM.writeValueAsString(actual));
-
+    assertEquals(oM.writeValueAsString(expectedNsd), oM.writeValueAsString(actualNsd));
   }
 }
