@@ -39,32 +39,19 @@ public class NsdGeneratorTest {
 
   @Test
   @SneakyThrows
-  public void generateTracker() {
+  public void generateVsbPolitoSmartCity() {
 
     // Given
-    VsBlueprint vsb = oM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker")), VsBlueprint.class);
+    VsBlueprint vsb = oM
+        .readValue(new URL(urlProp.getProperty("vsb_polito_smartcity")), VsBlueprint.class);
 
     //When
-    Nsd vsbNsd = nsdGenerator.generate(vsb);
+    Nsd actualNsd = nsdGenerator.generate(vsb);
 
     //Then
-    //TODO
-
-  }
-
-  @Test
-  @SneakyThrows
-  public void generateV360() {
-
-    // Given
-    VsBlueprint vsb = oM.readValue(new URL(urlProp.getProperty("vsb_orange_v360")), VsBlueprint.class);
-
-    //When
-    Nsd vsbNsd = nsdGenerator.generate(vsb);
-
-    //Then
-    //TODO
-
+    Nsd expectedNsd = oM
+        .readValue(new URL(urlProp.getProperty("vsb_polito_smartcity_nsds")), Nsd[].class)[0];
+    assertEquals(oM.writeValueAsString(expectedNsd), oM.writeValueAsString(actualNsd));
   }
 
   @Test
