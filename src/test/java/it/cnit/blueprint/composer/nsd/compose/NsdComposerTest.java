@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.nsd.graph.GraphVizExporter;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
-import it.cnit.blueprint.composer.rest.ConnectInput;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
@@ -16,6 +15,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.Properties;
 import lombok.SneakyThrows;
@@ -48,7 +48,8 @@ public class NsdComposerTest {
   public void composeTrackerWithDelayPassThrough() {
 
     // Given
-    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
+    Nsd vsbNsd = oM
+        .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
     NsVirtualLinkDesc ranVld;
     Optional<NsVirtualLinkDesc> optRanVl = vsbNsd.getVirtualLinkDesc().stream()
         .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mobile"))
@@ -79,7 +80,7 @@ public class NsdComposerTest {
 
     // When
     passThroughComposer
-        .compose(new ConnectInput(), ranVld, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+        .compose(new HashMap<>(), ranVld, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
     vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
@@ -97,7 +98,8 @@ public class NsdComposerTest {
   public void composeTrackerWithDelayConnect() {
 
     // Given
-    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
+    Nsd vsbNsd = oM
+        .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
     NsVirtualLinkDesc ranVld;
     Optional<NsVirtualLinkDesc> optRanVl = vsbNsd.getVirtualLinkDesc().stream()
         .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mobile"))
@@ -143,7 +145,7 @@ public class NsdComposerTest {
     }
 
     // When
-    connectComposer.compose(new ConnectInput(), ranVld, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+    connectComposer.compose(new HashMap<>(), ranVld, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
     vsbNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
@@ -160,7 +162,8 @@ public class NsdComposerTest {
   @SneakyThrows
   public void composeTrackerWithBackgroundConnect() {
     // Given
-    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
+    Nsd vsbNsd = oM
+        .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
     NsVirtualLinkDesc ranVld;
     Optional<NsVirtualLinkDesc> optRanVl = vsbNsd.getVirtualLinkDesc().stream()
         .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mobile"))
@@ -183,7 +186,7 @@ public class NsdComposerTest {
         .get(0);
     NsVirtualLinkDesc ctxMgmtVld;
     Optional<NsVirtualLinkDesc> optCtxVld = ctxNsd.getVirtualLinkDesc().stream()
-        .filter(v -> v.getVirtualLinkDescId().equals("vld_1")).findFirst();
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_bg_traffic_mgmt")).findFirst();
     if (optCtxVld.isPresent()) {
       ctxMgmtVld = optCtxVld.get();
     } else {
@@ -191,7 +194,7 @@ public class NsdComposerTest {
     }
 
     // When
-    connectComposer.compose(new ConnectInput(), ranVld, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
+    connectComposer.compose(new HashMap<>(), ranVld, vsbMgmtVld, vsbNsd, ctxMgmtVld, ctxNsd);
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("2dd7b5b1-9f39-4978-a035-6654d7bc9068");
     vsbNsd.setNsdInvariantId("d5959420-1ef7-4441-9eb9-9113172c988b");
@@ -210,7 +213,8 @@ public class NsdComposerTest {
   public void composeTrackerWithBackgroundAndDelay() {
 
     // Given
-    Nsd vsbNsd = oM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
+    Nsd vsbNsd = oM
+        .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
     NsVirtualLinkDesc ranVld;
     Optional<NsVirtualLinkDesc> optRanVl = vsbNsd.getVirtualLinkDesc().stream()
         .filter(v -> v.getVirtualLinkDescId().equals("vl_tracking_mobile"))
@@ -243,7 +247,7 @@ public class NsdComposerTest {
         .get(0);
     NsVirtualLinkDesc bgMgmtVld;
     optCtxVld = bgNsd.getVirtualLinkDesc().stream()
-        .filter(v -> v.getVirtualLinkDescId().equals("vld_1")).findFirst();
+        .filter(v -> v.getVirtualLinkDescId().equals("vl_bg_traffic_mgmt")).findFirst();
     if (optCtxVld.isPresent()) {
       bgMgmtVld = optCtxVld.get();
     } else {
@@ -252,8 +256,8 @@ public class NsdComposerTest {
 
     // When
     passThroughComposer
-        .compose(new ConnectInput(), ranVld, vsbMgmtVld, vsbNsd, delayMgmtVld, delayNsd);
-    connectComposer.compose(new ConnectInput(), ranVld, vsbMgmtVld, vsbNsd, bgMgmtVld, bgNsd);
+        .compose(new HashMap<>(), ranVld, vsbMgmtVld, vsbNsd, delayMgmtVld, delayNsd);
+    connectComposer.compose(new HashMap<>(), ranVld, vsbMgmtVld, vsbNsd, bgMgmtVld, bgNsd);
     // Setting ID manually for test purpose
     vsbNsd.setNsdIdentifier("bfb761be-ab0f-499c-88d7-ac6ce7263651");
     vsbNsd.setNsdInvariantId("d650cb24-28c5-41ba-8541-12a9cb93238c");
