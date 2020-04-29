@@ -186,14 +186,12 @@ public abstract class NsdComposer {
   }
 
   public NsVirtualLinkDesc getRanVlDesc(Sapd ranSapd, Nsd expNsd) throws InvalidNsdException {
-    NsVirtualLinkDesc ranVld;
     try {
-      ranVld = getVlDescriptor(ranSapd.getNsVirtualLinkDescId(), expNsd);
+      return getVlDescriptor(ranSapd.getNsVirtualLinkDescId(), expNsd);
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
-      throw new InvalidNsdException(e.getMessage());
+      throw new InvalidNsdException("VLD not found for SAP " + ranSapd.getCpdId(), e);
     }
-    return ranVld;
   }
 
   @SneakyThrows(JsonProcessingException.class)
