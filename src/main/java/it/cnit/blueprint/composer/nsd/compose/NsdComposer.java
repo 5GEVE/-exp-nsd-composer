@@ -18,10 +18,8 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -36,19 +34,14 @@ public abstract class NsdComposer {
 
   protected NsdGraphService nsdGraphService;
 
-  // TODO refactor
   protected VnfProfile getVnfProfileById(String vnfProfileId, NsDf nsDf)
       throws NotExistingEntityException {
-    VnfProfile vnfProfile;
-    try {
-      vnfProfile = nsDf.getVnfProfile(vnfProfileId);
-    } catch (NotExistingEntityException e) {
-      String m = MessageFormatter
-          .format("VnfProfile='{}' not found in nsDf='{}'", vnfProfileId, nsDf.getNsDfId())
-          .getMessage();
-      throw new NotExistingEntityException(m);
+    for (VnfProfile vp : nsDf.getVnfProfile()) {
+      if (vp.getVnfProfileId().equals(vnfProfileId)) {
+        return vp;
+      }
     }
-    return vnfProfile;
+    throw new NotExistingEntityException("VNF profile not found for ID " + vnfProfileId);
   }
 
   protected VnfProfile getVnfProfileByDescId(String vnfdId, NsDf nsDf)
@@ -58,49 +51,17 @@ public abstract class NsdComposer {
         return vp;
       }
     }
-    throw new NotExistingEntityException("VNF profile for VNFD ID " + vnfdId + " not found");
+    throw new NotExistingEntityException("VNF profile not found for VNFD ID " + vnfdId);
   }
 
-  protected VnfProfile getVnfProfileByDescIdOLd(String vnfdId, NsDf nsDf, NsLevel nsLvl)
-      throws NotExistingEntityException, VnfNotFoundInLvlMapping {
-    VnfProfile vnfProfile = null;
-    List<VnfProfile> filterVnfp = nsDf.getVnfProfile().stream()
-        .filter(p -> p.getVnfdId().equals(vnfdId)).collect(Collectors.toList());
-    if (filterVnfp.isEmpty()) {
-      String m = MessageFormatter
-          .format("No VnfProfile with vnfdId='{}' found in nsDf='{}'", vnfdId, nsDf.getNsDfId())
-          .getMessage();
-      throw new NotExistingEntityException(m);
-    }
-    for (VnfProfile vnfp : filterVnfp) {
-      if (nsLvl.getVnfToLevelMapping().stream()
-          .anyMatch(m -> m.getVnfProfileId().equals(vnfp.getVnfProfileId()))) {
-        vnfProfile = vnfp;
-        break;
+  protected VirtualLinkProfile getVlProfileById(String vlProfileId, NsDf nsDf)
+      throws NotExistingEntityException {
+    for (VirtualLinkProfile vp : nsDf.getVirtualLinkProfile()) {
+      if (vp.getVirtualLinkProfileId().equals(vlProfileId)) {
+        return vp;
       }
     }
-    if (vnfProfile == null) {
-      String m = MessageFormatter
-          .format("No VnfProfile with vnfdId='{}' found in nsLvl='{}'", vnfdId,
-              nsLvl.getNsLevelId())
-          .getMessage();
-      throw new VnfNotFoundInLvlMapping(m);
-    }
-    return vnfProfile;
-  }
-
-  protected VirtualLinkProfile getVlProfile(String vlProfileId, NsDf nsDf)
-      throws NotExistingEntityException {
-    VirtualLinkProfile vlProfile;
-    try {
-      vlProfile = nsDf.getVirtualLinkProfile(vlProfileId);
-    } catch (NotExistingEntityException e) {
-      String m = MessageFormatter
-          .format("vlProfileId='{}' not found in nsDf='{}'.", vlProfileId, nsDf.getNsDfId())
-          .getMessage();
-      throw new NotExistingEntityException(m);
-    }
-    return vlProfile;
+    throw new NotExistingEntityException("VL profile not found for ID " + vlProfileId);
   }
 
   protected VirtualLinkProfile getVlProfileByDescId(String vldId, NsDf nsDf)
@@ -110,24 +71,7 @@ public abstract class NsdComposer {
         return vl;
       }
     }
-    throw new NotExistingEntityException("VL profile for VLD ID " + vldId + " not found");
-  }
-
-  protected VirtualLinkProfile getVlProfile(NsVirtualLinkDesc vld, NsDf nsDf)
-      throws NotExistingEntityException {
-    VirtualLinkProfile resultVlp;
-    Optional<VirtualLinkProfile> optVlp = nsDf.getVirtualLinkProfile().stream()
-        .filter(vlp -> vlp.getVirtualLinkDescId().equals(vld.getVirtualLinkDescId())).findFirst();
-    if (optVlp.isPresent()) {
-      resultVlp = optVlp.get();
-    } else {
-      String m = MessageFormatter
-          .format("vlProfile with VirtualLinkDescId='{}' not found in nsDf='{}'.",
-              vld.getVirtualLinkDescId(), nsDf.getNsDfId())
-          .getMessage();
-      throw new NotExistingEntityException(m);
-    }
-    return resultVlp;
+    throw new NotExistingEntityException("VL profile not found for VLD ID " + vldId);
   }
 
   protected VnfToLevelMapping getVnfLvlMapping(String vnfProfileId, NsLevel nsLvl)
@@ -251,7 +195,7 @@ public abstract class NsdComposer {
     }
     VirtualLinkProfile vlProfile;
     try {
-      vlProfile = getVlProfile(vlProfileId, nsDf);
+      vlProfile = getVlProfileById(vlProfileId, nsDf);
     } catch (NotExistingEntityException e) {
       throw new InvalidNsdException(e.getMessage());
     }
@@ -268,7 +212,7 @@ public abstract class NsdComposer {
       throws InvalidNsdException, VlNotFoundInLvlMapping {
     VirtualLinkProfile vlProfile;
     try {
-      vlProfile = getVlProfile(vld, nsDf);
+      vlProfile = getVlProfileByDescId(vld.getVirtualLinkDescId(), nsDf);
     } catch (NotExistingEntityException e) {
       throw new InvalidNsdException(e.getMessage());
     }
