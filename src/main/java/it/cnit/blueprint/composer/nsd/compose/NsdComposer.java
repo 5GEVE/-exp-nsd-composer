@@ -144,33 +144,32 @@ public abstract class NsdComposer {
     if (nsd.getVnfdId().stream().noneMatch(id -> id.equals(vnfdId))) {
       nsd.getVnfdId().add(vnfdId);
     }
-    VnfProfile vnfProfile = vnfInfo.getVnfProfile();
+    VnfProfile vnfp = vnfInfo.getVnfProfile();
     if (nsDf.getVnfProfile().stream()
-        .noneMatch(vp -> vp.getVnfProfileId().equals(vnfProfile.getVnfProfileId()))) {
-      nsDf.getVnfProfile().add(vnfProfile);
+        .noneMatch(vp -> vp.getVnfProfileId().equals(vnfp.getVnfProfileId()))) {
+      nsDf.getVnfProfile().add(vnfp);
     }
-    VnfToLevelMapping vnfLvlMap = vnfInfo.getVnfToLevelMapping();
+    VnfToLevelMapping vnfMap = vnfInfo.getVnfToLevelMapping();
     if (nsLevel.getVnfToLevelMapping().stream()
-        .noneMatch(lm -> lm.getVnfProfileId().equals(vnfProfile.getVnfProfileId()))) {
-      nsLevel.getVnfToLevelMapping().add(vnfLvlMap);
+        .noneMatch(lm -> lm.getVnfProfileId().equals(vnfp.getVnfProfileId()))) {
+      nsLevel.getVnfToLevelMapping().add(vnfMap);
     }
   }
 
   protected void addVirtualLink(VlInfo vlInfo, Nsd nsd, NsDf nsDf, NsLevel nsLevel) {
-    NsVirtualLinkDesc vlDesc = vlInfo.getVlDescriptor();
+    NsVirtualLinkDesc vld = vlInfo.getVlDescriptor();
     if (nsd.getVirtualLinkDesc().stream()
-        .noneMatch(nsdVld -> nsdVld.getVirtualLinkDescId().equals(vlDesc.getVirtualLinkDescId()))) {
-      nsd.getVirtualLinkDesc().add(vlDesc);
+        .noneMatch(nsdVld -> nsdVld.getVirtualLinkDescId().equals(vld.getVirtualLinkDescId()))) {
+      nsd.getVirtualLinkDesc().add(vld);
     }
-    VirtualLinkProfile vlProfile = vlInfo.getVlProfile();
-    if (nsDf.getVirtualLinkProfile().stream().noneMatch(
-        nsdfVlP -> nsdfVlP.getVirtualLinkProfileId().equals(vlProfile.getVirtualLinkProfileId()))) {
-      nsDf.getVirtualLinkProfile().add(vlProfile);
+    VirtualLinkProfile vlp = vlInfo.getVlProfile();
+    if (nsDf.getVirtualLinkProfile().stream()
+        .noneMatch(vp -> vp.getVirtualLinkProfileId().equals(vlp.getVirtualLinkProfileId()))) {
+      nsDf.getVirtualLinkProfile().add(vlp);
     }
     VirtualLinkToLevelMapping vlMap = vlInfo.getVlToLevelMapping();
-    if (nsLevel.getVirtualLinkToLevelMapping().stream().noneMatch(
-        nslevelMap -> nslevelMap.getVirtualLinkProfileId()
-            .equals(vlMap.getVirtualLinkProfileId()))) {
+    if (nsLevel.getVirtualLinkToLevelMapping().stream()
+        .noneMatch(lm -> lm.getVirtualLinkProfileId().equals(vlMap.getVirtualLinkProfileId()))) {
       nsLevel.getVirtualLinkToLevelMapping().add(vlMap);
     }
   }
