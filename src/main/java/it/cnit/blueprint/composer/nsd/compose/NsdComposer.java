@@ -76,50 +76,32 @@ public abstract class NsdComposer {
 
   protected VnfToLevelMapping getVnfLvlMapping(String vnfProfileId, NsLevel nsLvl)
       throws NotExistingEntityException {
-    VnfToLevelMapping vnfLvlMap;
-    Optional<VnfToLevelMapping> optVnfLvlMap = nsLvl.getVnfToLevelMapping().stream()
-        .filter(m -> m.getVnfProfileId().equals(vnfProfileId)).findFirst();
-    if (optVnfLvlMap.isPresent()) {
-      vnfLvlMap = optVnfLvlMap.get();
-    } else {
-      String m = MessageFormatter
-          .format("vnfProfileId='{}' not found in nsLvl='{}'.", vnfProfileId, nsLvl.getNsLevelId())
-          .getMessage();
-      throw new NotExistingEntityException(m);
+    for (VnfToLevelMapping m: nsLvl.getVnfToLevelMapping()){
+      if (m.getVnfProfileId().equals(vnfProfileId)){
+        return m;
+      }
     }
-    return vnfLvlMap;
-  }
-
-  protected NsVirtualLinkDesc getVlDescriptor(String vlDescId, Nsd nsd)
-      throws NotExistingEntityException {
-    NsVirtualLinkDesc vlDesc;
-    Optional<NsVirtualLinkDesc> optVlDesc = nsd.getVirtualLinkDesc().stream()
-        .filter(nsdVlDesc -> nsdVlDesc.getVirtualLinkDescId().equals(vlDescId)).findFirst();
-    if (optVlDesc.isPresent()) {
-      vlDesc = optVlDesc.get();
-    } else {
-      String m = MessageFormatter
-          .format("vlDescId='{}' not found in nsd='{}'.", vlDescId, nsd.getNsdIdentifier())
-          .getMessage();
-      throw new NotExistingEntityException(m);
-    }
-    return vlDesc;
+    throw new NotExistingEntityException("Mapping not found for VNF profile ID " + vnfProfileId);
   }
 
   protected VirtualLinkToLevelMapping getVlLvlMapping(String vlProfileId, NsLevel nsLvl)
       throws NotExistingEntityException {
-    VirtualLinkToLevelMapping vlLvlMap;
-    Optional<VirtualLinkToLevelMapping> optVlLvlMap = nsLvl.getVirtualLinkToLevelMapping().stream()
-        .filter(m -> m.getVirtualLinkProfileId().equals(vlProfileId)).findFirst();
-    if (optVlLvlMap.isPresent()) {
-      vlLvlMap = optVlLvlMap.get();
-    } else {
-      String m = MessageFormatter
-          .format("vlProfileId='{}' not found in nsLvl='{}'.", vlProfileId, nsLvl.getNsLevelId())
-          .getMessage();
-      throw new NotExistingEntityException(m);
+    for (VirtualLinkToLevelMapping m: nsLvl.getVirtualLinkToLevelMapping()){
+      if (m.getVirtualLinkProfileId().equals(vlProfileId)){
+        return m;
+      }
     }
-    return vlLvlMap;
+    throw new NotExistingEntityException("Mapping not found for VL profile ID " + vlProfileId);
+  }
+
+  protected NsVirtualLinkDesc getVlDescriptor(String vldId, Nsd nsd)
+      throws NotExistingEntityException {
+    for (NsVirtualLinkDesc v: nsd.getVirtualLinkDesc()){
+      if (v.getVirtualLinkDescId().equals(vldId)){
+        return v;
+      }
+    }
+    throw new NotExistingEntityException("Descriptor not found for VLD ID " + vldId);
   }
 
   protected void addVnf(VnfInfo vnfInfo, Nsd nsd, NsDf nsDf, NsLevel nsLevel) {
