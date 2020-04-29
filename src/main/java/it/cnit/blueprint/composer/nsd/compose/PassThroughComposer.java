@@ -48,19 +48,18 @@ public class PassThroughComposer extends NsdComposer {
       ctxVnfInfo = retrieveVnfInfoByProfileId(ctxVnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
       log.debug("Found VnfInfo for vnfpId='{}' in context.", ctxVnfpId);
       ctxVnfInfo.setVlcLists(mgmtVlProfileIds);
-    } catch (VnfNotFoundInLvlMapping | NotExistingEntityException e) {
+    } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
       throw new InvalidNsdException(e.getMessage(), e);
     }
 
     // Retrieve non-management VLs from ctx
     // Assumption: select the first Vl attached to ctxVnf
-    Map<String, NsVirtualLinkConnectivity> ctxVnfCpds;
     VlInfo ctxNonMgmtVl;
     try {
-      ctxNonMgmtVl = retrieveVlInfo(ctxVnfInfo.getDataVlcList().get(0).getVirtualLinkProfileId(),
+      ctxNonMgmtVl = retrieveVlInfoByProfileId(ctxVnfInfo.getDataVlcList().get(0).getVirtualLinkProfileId(),
           ctxNsd, ctxNsDf, ctxNsLvl);
-    } catch (InvalidNsdException | VlNotFoundInLvlMapping e) {
+    } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
       throw new InvalidNsdException(e.getMessage());
     }
@@ -74,7 +73,7 @@ public class PassThroughComposer extends NsdComposer {
       VnfInfo vnfInfo;
       try {
         vnfInfo = retrieveVnfInfoByProfileId(vnfLvl.getVnfProfileId(), expNsd, expNsDf, expNsLvl);
-      } catch (VnfNotFoundInLvlMapping e) {
+      } catch (NotExistingEntityException e) {
         log.error(e.getMessage());
         throw new InvalidNsdException(e.getMessage());
       }

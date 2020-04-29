@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class VnfInfo {
 
-  private final String vfndId;
+  private final String vnfdId;
   private final VnfProfile vnfProfile;
   private final VnfToLevelMapping vnfToLevelMapping;
   private List<NsVirtualLinkConnectivity> mgmtVlcList;

@@ -10,7 +10,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class VlInfo {
 
-  private VirtualLinkToLevelMapping vlToLevelMapping;
-  private VirtualLinkProfile vlProfile;
   private NsVirtualLinkDesc vlDescriptor;
+  private VirtualLinkProfile vlProfile;
+  private VirtualLinkToLevelMapping vlToLevelMapping;
 }
