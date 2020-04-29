@@ -1,6 +1,5 @@
 package it.cnit.blueprint.composer.nsd.compose;
 
-import it.cnit.blueprint.composer.rest.ConnectInput;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.rest.InvalidNsdException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -31,9 +30,10 @@ public class PassThroughComposer extends NsdComposer {
 
   @Override
   public void composeWithStrategy(
-          ConnectInput connectInput, VlInfo ranVlInfo, VlInfo expMgmtVlInfo, VlInfo ctxMgmtVlInfo,
-          Nsd expNsd, NsDf expNsDf, NsLevel expNsLvl,
-          Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl)
+      Map<String, String> connectInput, VlInfo ranVlInfo, VlInfo expMgmtVlInfo,
+      VlInfo ctxMgmtVlInfo,
+      Nsd expNsd, NsDf expNsDf, NsLevel expNsLvl,
+      Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl)
       throws InvalidNsdException {
     log.info("Compose with PASS_THROUGH.");
     // Retrieve ctx VNF
