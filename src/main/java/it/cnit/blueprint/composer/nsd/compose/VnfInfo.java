@@ -15,16 +15,23 @@ public class VnfInfo {
   private final String vfndId;
   private final VnfProfile vnfProfile;
   private final VnfToLevelMapping vnfToLevelMapping;
-  private List<NsVirtualLinkConnectivity> mgmtVlcList = new ArrayList<>();
-  private List<NsVirtualLinkConnectivity> dataVlcList = new ArrayList<>();
+  private List<NsVirtualLinkConnectivity> mgmtVlcList;
+  private List<NsVirtualLinkConnectivity> dataVlcList;
 
-  public void setCpdLists(String mgmtVlProfileId) {
+  public void setVlcLists(List<String> mgmtVlProfileIds) {
+    mgmtVlcList = new ArrayList<>();
+    dataVlcList = new ArrayList<>();
     for (NsVirtualLinkConnectivity vlc : vnfProfile.getNsVirtualLinkConnectivity()) {
-      if (vlc.getVirtualLinkProfileId().equals(mgmtVlProfileId)) {
+      if (mgmtVlProfileIds.contains(vlc.getVirtualLinkProfileId())) {
         mgmtVlcList.add(vlc);
       } else {
         dataVlcList.add(vlc);
       }
+      // TODO exceptions if no data vlc
     }
+  }
+
+  public void cleanUpVlc(NsVirtualLinkConnectivity vlcToRemove) {
+    vnfProfile.getNsVirtualLinkConnectivity().remove(vlcToRemove);
   }
 }
