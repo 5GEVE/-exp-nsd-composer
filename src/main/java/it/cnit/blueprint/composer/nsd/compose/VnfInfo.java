@@ -1,5 +1,7 @@
 package it.cnit.blueprint.composer.nsd.compose;
 
+import it.cnit.blueprint.composer.rest.InvalidNsdException;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
@@ -18,7 +20,7 @@ public class VnfInfo {
   private List<NsVirtualLinkConnectivity> mgmtVlcList;
   private List<NsVirtualLinkConnectivity> dataVlcList;
 
-  public void setVlcLists(List<String> mgmtVlProfileIds) {
+  public void setVlcLists(List<String> mgmtVlProfileIds) throws NotExistingEntityException {
     mgmtVlcList = new ArrayList<>();
     dataVlcList = new ArrayList<>();
     for (NsVirtualLinkConnectivity vlc : vnfProfile.getNsVirtualLinkConnectivity()) {
@@ -27,7 +29,10 @@ public class VnfInfo {
       } else {
         dataVlcList.add(vlc);
       }
-      // TODO exceptions if no data vlc
+    }
+    if (dataVlcList.isEmpty()) {
+      throw new NotExistingEntityException(
+          "No data cpd found for vnfProfile: " + vnfProfile.getVnfProfileId());
     }
   }
 
