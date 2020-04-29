@@ -141,7 +141,7 @@ public abstract class NsdComposer {
 
   //TODO refactor from here
   protected void addVnf(VnfInfo vnfInfo, Nsd nsd, NsDf nsDf, NsLevel nsLevel) {
-    String vnfdId = vnfInfo.getVfndId();
+    String vnfdId = vnfInfo.getVnfdId();
     if (nsd.getVnfdId().stream().noneMatch(id -> id.equals(vnfdId))) {
       nsd.getVnfdId().add(vnfdId);
     }
