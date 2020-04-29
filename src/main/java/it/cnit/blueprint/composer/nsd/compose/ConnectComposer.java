@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -30,23 +29,17 @@ public class ConnectComposer extends NsdComposer {
     super(nsdGraphService);
   }
 
-  private VirtualLinkToLevelMapping getNonMgmtVlMap(NsLevel expNsLvl, VlInfo expMgmtVlInfo,
-      VlInfo ranVlInfo) throws NotExistingEntityException {
-    Optional<VirtualLinkToLevelMapping> optLvlMap =
-        expNsLvl.getVirtualLinkToLevelMapping().stream()
-            .filter(
-                m ->
-                    !m.getVirtualLinkProfileId()
-                        .equals(expMgmtVlInfo.getVlProfile().getVirtualLinkProfileId())
-                        && !m.getVirtualLinkProfileId()
-                        .equals(ranVlInfo.getVlProfile().getVirtualLinkProfileId()))
-            .findFirst();
-    if (optLvlMap.isPresent()) {
-      return optLvlMap.get();
-    } else {
-      throw new NotExistingEntityException(
-          "Can't find a non-mgmt VL in NsLevel " + expNsLvl.getNsLevelId());
+  private String getNonMgmtVlProfileId(NsLevel expNsLvl, String mgmtVlpId, String ranVlpId)
+      throws NotExistingEntityException {
+    for (VirtualLinkToLevelMapping m : expNsLvl.getVirtualLinkToLevelMapping()) {
+      if (!m.getVirtualLinkProfileId().equals(mgmtVlpId)
+          &&
+          !m.getVirtualLinkProfileId().equals(ranVlpId)) {
+        return m.getVirtualLinkProfileId();
+      }
     }
+    throw new NotExistingEntityException(
+        "Can't find a non-mgmt VL in NsLevel " + expNsLvl.getNsLevelId());
   }
 
   private void addConnectVnfToVl(VnfInfo vnfInfo, VlInfo dataVlInfo, VlInfo mgmtVlInfo, Nsd expNsd,
@@ -105,12 +98,11 @@ public class ConnectComposer extends NsdComposer {
             vlInfo = ranVlInfo;
             first = false;
           } else {
-            vlInfo =
-                retrieveVlInfo(
-                    getNonMgmtVlMap(expNsLvl, expMgmtVlInfo, ranVlInfo).getVirtualLinkProfileId(),
-                    expNsd,
-                    expNsDf,
-                    expNsLvl);
+            String nonMgmtVlpId = getNonMgmtVlProfileId(
+                expNsLvl,
+                expMgmtVlInfo.getVlProfile().getVirtualLinkProfileId(),
+                ranVlInfo.getVlProfile().getVirtualLinkProfileId());
+            vlInfo = retrieveVlInfo(nonMgmtVlpId, expNsd, expNsDf, expNsLvl);
           }
           addConnectVnfToVl(vnfInfo, vlInfo, expMgmtVlInfo, expNsd, expNsDf, expNsLvl);
         }
