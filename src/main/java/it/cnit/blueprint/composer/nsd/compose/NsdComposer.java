@@ -139,7 +139,6 @@ public abstract class NsdComposer {
     return new VlInfo(vld, vlProfile, vlMap);
   }
 
-  //TODO refactor from here
   protected void addVnf(VnfInfo vnfInfo, Nsd nsd, NsDf nsDf, NsLevel nsLevel) {
     String vnfdId = vnfInfo.getVnfdId();
     if (nsd.getVnfdId().stream().noneMatch(id -> id.equals(vnfdId))) {
@@ -178,17 +177,13 @@ public abstract class NsdComposer {
 
   protected void connectVnfToVL(VnfProfile vnfp, String cpdId, VirtualLinkProfile vlp)
       throws NotExistingEntityException {
-    Optional<NsVirtualLinkConnectivity> optVlConn = vnfp.getNsVirtualLinkConnectivity().stream()
-        .filter(vlConn -> vlConn.getCpdId().get(0).equals(cpdId)).findFirst();
-    if (optVlConn.isPresent()) {
-      optVlConn.get().setVirtualLinkProfileId(vlp.getVirtualLinkProfileId());
-    } else {
-      String m = MessageFormatter
-          .format("cpdId='{}' not found in vnfProfile='{}'.", cpdId, vnfp.getVnfProfileId())
-          .getMessage();
-      throw new NotExistingEntityException(m);
+    for (NsVirtualLinkConnectivity nsVlC : vnfp.getNsVirtualLinkConnectivity()) {
+      if (nsVlC.getCpdId().contains(cpdId)) {
+        nsVlC.setVirtualLinkProfileId(vlp.getVirtualLinkProfileId());
+        return;
+      }
     }
-
+    throw new NotExistingEntityException("VL connectivity not found for CPD ID " + cpdId);
   }
 
   public NsVirtualLinkDesc getRanVlDesc(Sapd ranSapd, Nsd expNsd) throws InvalidNsdException {
