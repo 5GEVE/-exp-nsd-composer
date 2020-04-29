@@ -40,7 +40,7 @@ public class PassThroughComposer extends NsdComposer {
     List<String> mgmtVlProfileIds = Arrays.asList(
         ctxMgmtVlInfo.getVlProfile().getVirtualLinkProfileId(),
         expMgmtVlInfo.getVlProfile().getVirtualLinkProfileId());
-   
+
     // Retrieve ctx VNF
     String ctxVnfpId = ctxNsLvl.getVnfToLevelMapping().get(0).getVnfProfileId();
     VnfInfo ctxVnfInfo;
