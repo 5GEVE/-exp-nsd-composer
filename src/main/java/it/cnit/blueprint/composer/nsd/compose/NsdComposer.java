@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
-import it.cnit.blueprint.composer.rest.ConnectInput;
 import it.cnit.blueprint.composer.rest.InvalidNsdException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -38,6 +37,7 @@ public abstract class NsdComposer {
 
   protected NsdGraphService nsdGraphService;
 
+  // TODO refactor
   protected VnfProfile getVnfProfileById(String vnfProfileId, NsDf nsDf)
       throws NotExistingEntityException {
     VnfProfile vnfProfile;
@@ -52,7 +52,15 @@ public abstract class NsdComposer {
     return vnfProfile;
   }
 
-  protected VnfProfile getVnfProfileByDescId(String vnfdId, NsDf nsDf, NsLevel nsLvl)
+  protected  VnfProfile getVnfProfileByDescId(String vnfdId, NsDf nsDf)
+      throws NotExistingEntityException {
+    for (VnfProfile vp : nsDf.getVnfProfile()) {
+      if (vp.getVnfdId().equals(vnfdId)) return vp;
+    }
+    throw new NotExistingEntityException("VNF profile for VNFD ID " + vnfdId + " not found");
+  }
+
+  protected VnfProfile getVnfProfileByDescIdOLd(String vnfdId, NsDf nsDf, NsLevel nsLvl)
       throws NotExistingEntityException, VnfNotFoundInLvlMapping {
     VnfProfile vnfProfile = null;
     List<VnfProfile> filterVnfp = nsDf.getVnfProfile().stream()
@@ -92,6 +100,14 @@ public abstract class NsdComposer {
       throw new NotExistingEntityException(m);
     }
     return vlProfile;
+  }
+
+  protected VirtualLinkProfile getVlProfileByDescId(String vldId, NsDf nsDf)
+      throws NotExistingEntityException {
+      for (VirtualLinkProfile vl : nsDf.getVirtualLinkProfile()) {
+        if (vl.getVirtualLinkDescId().equals(vldId)) return vl;
+      }
+      throw new NotExistingEntityException("VL profile for VLD ID " + vldId + " not found");
   }
 
   protected VirtualLinkProfile getVlProfile(NsVirtualLinkDesc vld, NsDf nsDf)
@@ -317,7 +333,7 @@ public abstract class NsdComposer {
   }
 
   @SneakyThrows(JsonProcessingException.class)
-  public void compose(ConnectInput connectInput, NsVirtualLinkDesc ranVld,
+  public void compose(Map<String, String> connectInput, NsVirtualLinkDesc ranVld,
       NsVirtualLinkDesc expMgmtVld, Nsd expNsd, NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd)
       throws InvalidNsdException {
     // We assume only one NsDf for the context
@@ -399,7 +415,8 @@ public abstract class NsdComposer {
   }
 
   public abstract void composeWithStrategy(
-      ConnectInput connectInput, VlInfo ranVlInfo, VlInfo expMgmtVlInfo, VlInfo ctxMgmtVlInfo,
+      Map<String, String> connectInput, VlInfo ranVlInfo, VlInfo expMgmtVlInfo,
+      VlInfo ctxMgmtVlInfo,
       Nsd expNsd, NsDf expNsDf, NsLevel expNsLvl,
       Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl
   ) throws InvalidNsdException;

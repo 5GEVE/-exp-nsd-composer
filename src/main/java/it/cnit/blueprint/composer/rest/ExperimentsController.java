@@ -13,6 +13,7 @@ import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardExpBlueprintRequ
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -63,7 +64,7 @@ public class ExperimentsController {
         log.info("Current CtxB: {}", ctxB.getBlueprintId());
 
         if (ctx.getConnectInput() == null) {
-          ctx.setConnectInput(new ConnectInput());
+          ctx.setConnectInput(new HashMap<>());
         }
         NsVirtualLinkDesc expMgmtVld = findMgmtVld(ctxB, ctxNsd);
         NsVirtualLinkDesc ctxMgmtVld = findMgmtVld(ctxB, ctxNsd);
