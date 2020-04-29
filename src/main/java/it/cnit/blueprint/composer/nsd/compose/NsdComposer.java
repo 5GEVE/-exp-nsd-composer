@@ -94,6 +94,16 @@ public abstract class NsdComposer {
     throw new NotExistingEntityException("Mapping not found for VL profile ID " + vlProfileId);
   }
 
+  protected String getVnfDescId(String vnfdId, Nsd nsd)
+      throws NotExistingEntityException {
+    for (String id: nsd.getVnfdId()){
+      if (id.equals(vnfdId)){
+        return id;
+      }
+    }
+    throw new NotExistingEntityException("VNFD ID not found for ID " + vnfdId);
+  }
+
   protected NsVirtualLinkDesc getVlDescriptor(String vldId, Nsd nsd)
       throws NotExistingEntityException {
     for (NsVirtualLinkDesc v: nsd.getVirtualLinkDesc()){
@@ -106,29 +116,11 @@ public abstract class NsdComposer {
 
   protected VnfInfo retrieveVnfInfoByProfileId(String vnfProfileId, Nsd nsd, NsDf nsDf,
       NsLevel nsLevel)
-      throws InvalidNsdException, VnfNotFoundInLvlMapping {
-    VnfToLevelMapping vnfLvlMap;
-    try {
-      vnfLvlMap = getVnfLvlMapping(vnfProfileId, nsLevel);
-    } catch (NotExistingEntityException e) {
-      throw new VnfNotFoundInLvlMapping(e.getMessage());
-    }
-    VnfProfile vnfProfile;
-    try {
-      vnfProfile = getVnfProfileById(vnfProfileId, nsDf);
-    } catch (NotExistingEntityException e) {
-      throw new InvalidNsdException(e.getMessage());
-    }
-    Optional<String> optVnfdId = nsd.getVnfdId().stream()
-        .filter(id -> id.equals(vnfProfile.getVnfdId())).findFirst();
-    if (!optVnfdId.isPresent()) {
-      String m = MessageFormatter
-          .format("vnfdId='{}' not found in nsd='{}'.", vnfProfile.getVnfdId(),
-              nsd.getNsdIdentifier())
-          .getMessage();
-      throw new InvalidNsdException(m);
-    }
-    return new VnfInfo(vnfProfile.getVnfdId(), vnfProfile, vnfLvlMap);
+      throws NotExistingEntityException {
+    VnfToLevelMapping vnfLvlMap = getVnfLvlMapping(vnfProfileId, nsLevel);
+    VnfProfile vnfProfile = getVnfProfileById(vnfProfileId, nsDf);;
+    String vnfdId = getVnfDescId(vnfProfile.getVnfdId(), nsd);
+    return new VnfInfo(vnfdId, vnfProfile, vnfLvlMap);
   }
 
   protected VlInfo retrieveVlInfo(String vlProfileId, Nsd nsd, NsDf nsDf, NsLevel nsLevel)

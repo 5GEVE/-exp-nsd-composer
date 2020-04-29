@@ -117,7 +117,7 @@ public class ConnectComposer extends NsdComposer {
           addConnectVnfToVl(vnfInfo, vlInfo, expMgmtVlInfo, expNsd, expNsDf, expNsLvl);
         }
       }
-    } catch (NotExistingEntityException | VnfNotFoundInLvlMapping | VlNotFoundInLvlMapping e) {
+    } catch (NotExistingEntityException | VlNotFoundInLvlMapping e) {
       log.error(e.getMessage());
       throw new InvalidNsdException("Nsd " + ctxNsd.getNsdIdentifier(), e);
     }
