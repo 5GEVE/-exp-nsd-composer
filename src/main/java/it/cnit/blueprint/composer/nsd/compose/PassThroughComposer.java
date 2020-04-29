@@ -9,8 +9,9 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -36,15 +37,20 @@ public class PassThroughComposer extends NsdComposer {
       Nsd ctxNsd, NsDf ctxNsDf, NsLevel ctxNsLvl)
       throws InvalidNsdException {
     log.info("Compose with PASS_THROUGH.");
+    List<String> mgmtVlProfileIds = Arrays.asList(
+        ctxMgmtVlInfo.getVlProfile().getVirtualLinkProfileId(),
+        expMgmtVlInfo.getVlProfile().getVirtualLinkProfileId());
+
     // Retrieve ctx VNF
     String ctxVnfpId = ctxNsLvl.getVnfToLevelMapping().get(0).getVnfProfileId();
     VnfInfo ctxVnfInfo;
     try {
       ctxVnfInfo = retrieveVnfInfoByProfileId(ctxVnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
       log.debug("Found VnfInfo for vnfpId='{}' in context.", ctxVnfpId);
-    } catch (VnfNotFoundInLvlMapping e) {
+      ctxVnfInfo.setVlcLists(mgmtVlProfileIds);
+    } catch (VnfNotFoundInLvlMapping | NotExistingEntityException e) {
       log.error(e.getMessage());
-      throw new InvalidNsdException(e.getMessage());
+      throw new InvalidNsdException(e.getMessage(), e);
     }
 
     // Retrieve non-management VLs from ctx
@@ -52,8 +58,7 @@ public class PassThroughComposer extends NsdComposer {
     Map<String, NsVirtualLinkConnectivity> ctxVnfCpds;
     VlInfo ctxNonMgmtVl;
     try {
-      ctxVnfCpds = getMgmtDataCpds(ctxVnfInfo, expMgmtVlInfo, ctxMgmtVlInfo);
-      ctxNonMgmtVl = retrieveVlInfo(ctxVnfCpds.get("data0").getVirtualLinkProfileId(),
+      ctxNonMgmtVl = retrieveVlInfo(ctxVnfInfo.getDataVlcList().get(0).getVirtualLinkProfileId(),
           ctxNsd, ctxNsDf, ctxNsLvl);
     } catch (InvalidNsdException | VlNotFoundInLvlMapping e) {
       log.error(e.getMessage());
@@ -104,14 +109,16 @@ public class PassThroughComposer extends NsdComposer {
           ranVnfProfile.getVnfProfileId(),
           ctxNonMgmtVl.getVlProfile().getVirtualLinkProfileId());
       // Connect ctxVnf with RAN VL
-      connectVnfToVL(ctxVnfInfo.getVnfProfile(), ctxVnfCpds.get("data1").getCpdId().get(0),
+      connectVnfToVL(ctxVnfInfo.getVnfProfile(),
+          ctxVnfInfo.getDataVlcList().get(1).getCpdId().get(0),
           ranVlInfo.getVlProfile());
       log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
           ctxVnfInfo.getVnfProfile().getVnfProfileId(),
           ranVlInfo.getVlProfile().getVirtualLinkProfileId());
       // Connect ctxVnf to expNsd mgmt VL
-      if (ctxVnfCpds.get("mgmt") != null) {
-        connectVnfToVL(ctxVnfInfo.getVnfProfile(), ctxVnfCpds.get("mgmt").getCpdId().get(0),
+      if (!ctxVnfInfo.getMgmtVlcList().isEmpty()) {
+        connectVnfToVL(ctxVnfInfo.getVnfProfile(),
+            ctxVnfInfo.getMgmtVlcList().get(0).getCpdId().get(0),
             expMgmtVlInfo.getVlProfile());
         log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
             ctxVnfInfo.getVnfProfile().getVnfProfileId(),
@@ -120,11 +127,8 @@ public class PassThroughComposer extends NsdComposer {
         log.warn("Could not find a management Cp for ctxVnf. Skip.");
       }
       // Cleanup unused cpds of ctxVnf (if any)
-      for (Entry<String, NsVirtualLinkConnectivity> cpd : ctxVnfCpds.entrySet()) {
-        if (!cpd.getKey().equals("data0") && !cpd.getKey().equals("data1") && !cpd.getKey()
-            .equals("mgmt")) {
-          ctxVnfInfo.getVnfProfile().getNsVirtualLinkConnectivity().remove(cpd.getValue());
-        }
+      for (int i = 2; i < ctxVnfInfo.getDataVlcList().size(); i++) {
+        ctxVnfInfo.cleanUpVlc(ctxVnfInfo.getDataVlcList().get(i));
       }
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());

@@ -18,7 +18,6 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,10 +51,12 @@ public abstract class NsdComposer {
     return vnfProfile;
   }
 
-  protected  VnfProfile getVnfProfileByDescId(String vnfdId, NsDf nsDf)
+  protected VnfProfile getVnfProfileByDescId(String vnfdId, NsDf nsDf)
       throws NotExistingEntityException {
     for (VnfProfile vp : nsDf.getVnfProfile()) {
-      if (vp.getVnfdId().equals(vnfdId)) return vp;
+      if (vp.getVnfdId().equals(vnfdId)) {
+        return vp;
+      }
     }
     throw new NotExistingEntityException("VNF profile for VNFD ID " + vnfdId + " not found");
   }
@@ -104,10 +105,12 @@ public abstract class NsdComposer {
 
   protected VirtualLinkProfile getVlProfileByDescId(String vldId, NsDf nsDf)
       throws NotExistingEntityException {
-      for (VirtualLinkProfile vl : nsDf.getVirtualLinkProfile()) {
-        if (vl.getVirtualLinkDescId().equals(vldId)) return vl;
+    for (VirtualLinkProfile vl : nsDf.getVirtualLinkProfile()) {
+      if (vl.getVirtualLinkDescId().equals(vldId)) {
+        return vl;
       }
-      throw new NotExistingEntityException("VL profile for VLD ID " + vldId + " not found");
+    }
+    throw new NotExistingEntityException("VL profile for VLD ID " + vldId + " not found");
   }
 
   protected VirtualLinkProfile getVlProfile(NsVirtualLinkDesc vld, NsDf nsDf)
@@ -291,34 +294,6 @@ public abstract class NsdComposer {
       throw new NotExistingEntityException(m);
     }
 
-  }
-
-  protected Map<String, NsVirtualLinkConnectivity> getMgmtDataCpds(VnfInfo vnfInfo,
-      VlInfo expMgmtVlinfo, VlInfo ctxMgmtVlInfo)
-      throws InvalidNsdException {
-    Map<String, NsVirtualLinkConnectivity> cpdIdMap = new HashMap<>();
-    int dataCount = 0;
-    for (NsVirtualLinkConnectivity vlc : vnfInfo.getVnfProfile().getNsVirtualLinkConnectivity()) {
-      if (vlc.getVirtualLinkProfileId()
-          .equals(expMgmtVlinfo.getVlProfile().getVirtualLinkProfileId())
-          || vlc.getVirtualLinkProfileId()
-          .equals(ctxMgmtVlInfo.getVlProfile().getVirtualLinkProfileId())) {
-        cpdIdMap.put("mgmt", vlc);
-      } else {
-        cpdIdMap.put("data" + dataCount, vlc);
-        dataCount++;
-      }
-    }
-    if (!cpdIdMap.containsKey("mgmt")) {
-      cpdIdMap.put("mgmt", null);
-    }
-    Optional<String> dataKey = cpdIdMap.keySet().stream().filter(k -> k.startsWith("data"))
-        .findFirst();
-    if (!dataKey.isPresent()) {
-      throw new InvalidNsdException(
-          "No data cpd found for vnfProfile: '" + vnfInfo.getVnfProfile().getVnfProfileId() + "'.");
-    }
-    return cpdIdMap;
   }
 
   public NsVirtualLinkDesc getRanVlDesc(Sapd ranSapd, Nsd expNsd) throws InvalidNsdException {
