@@ -129,14 +129,14 @@ public abstract class NsdComposer {
     VirtualLinkToLevelMapping vlMap = getVlLvlMapping(vlProfileId, nsLevel);
     VirtualLinkProfile vlProfile = getVlProfileById(vlProfileId, nsDf);
     NsVirtualLinkDesc vlDesc = getVlDescriptor(vlProfile.getVirtualLinkDescId(), nsd);
-    return new VlInfo(vlMap, vlProfile, vlDesc);
+    return new VlInfo(vlDesc, vlProfile, vlMap);
   }
 
   protected VlInfo retrieveVlInfoByDesc(NsVirtualLinkDesc vld, NsDf nsDf, NsLevel nsLevel)
       throws NotExistingEntityException {
     VirtualLinkProfile vlProfile = getVlProfileByDescId(vld.getVirtualLinkDescId(), nsDf);
     VirtualLinkToLevelMapping vlMap = getVlLvlMapping(vlProfile.getVirtualLinkProfileId(), nsLevel);
-    return new VlInfo(vlMap, vlProfile, vld);
+    return new VlInfo(vld, vlProfile, vlMap);
   }
 
   //TODO refactor from here
