@@ -102,7 +102,7 @@ public class ConnectComposer extends NsdComposer {
                 expNsLvl,
                 expMgmtVlInfo.getVlProfile().getVirtualLinkProfileId(),
                 ranVlInfo.getVlProfile().getVirtualLinkProfileId());
-            vlInfo = retrieveVlInfo(nonMgmtVlpId, expNsd, expNsDf, expNsLvl);
+            vlInfo = retrieveVlInfoByProfileId(nonMgmtVlpId, expNsd, expNsDf, expNsLvl);
           }
           addConnectVnfToVl(vnfInfo, vlInfo, expMgmtVlInfo, expNsd, expNsDf, expNsLvl);
         }
@@ -113,11 +113,11 @@ public class ConnectComposer extends NsdComposer {
           VnfInfo vnfInfo = retrieveVnfInfoByProfileId(vnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
           vnfInfo.setVlcLists(mgmtVlProfileIds);
           String vlpId = getVlProfileByDescId(entry.getValue(), ctxNsDf).getVirtualLinkProfileId();
-          VlInfo vlInfo = retrieveVlInfo(vlpId, ctxNsd, ctxNsDf, ctxNsLvl);
+          VlInfo vlInfo = retrieveVlInfoByProfileId(vlpId, ctxNsd, ctxNsDf, ctxNsLvl);
           addConnectVnfToVl(vnfInfo, vlInfo, expMgmtVlInfo, expNsd, expNsDf, expNsLvl);
         }
       }
-    } catch (NotExistingEntityException | VlNotFoundInLvlMapping e) {
+    } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
       throw new InvalidNsdException("Nsd " + ctxNsd.getNsdIdentifier(), e);
     }

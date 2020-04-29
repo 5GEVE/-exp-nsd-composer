@@ -76,8 +76,8 @@ public abstract class NsdComposer {
 
   protected VnfToLevelMapping getVnfLvlMapping(String vnfProfileId, NsLevel nsLvl)
       throws NotExistingEntityException {
-    for (VnfToLevelMapping m: nsLvl.getVnfToLevelMapping()){
-      if (m.getVnfProfileId().equals(vnfProfileId)){
+    for (VnfToLevelMapping m : nsLvl.getVnfToLevelMapping()) {
+      if (m.getVnfProfileId().equals(vnfProfileId)) {
         return m;
       }
     }
@@ -86,8 +86,8 @@ public abstract class NsdComposer {
 
   protected VirtualLinkToLevelMapping getVlLvlMapping(String vlProfileId, NsLevel nsLvl)
       throws NotExistingEntityException {
-    for (VirtualLinkToLevelMapping m: nsLvl.getVirtualLinkToLevelMapping()){
-      if (m.getVirtualLinkProfileId().equals(vlProfileId)){
+    for (VirtualLinkToLevelMapping m : nsLvl.getVirtualLinkToLevelMapping()) {
+      if (m.getVirtualLinkProfileId().equals(vlProfileId)) {
         return m;
       }
     }
@@ -96,8 +96,8 @@ public abstract class NsdComposer {
 
   protected String getVnfDescId(String vnfdId, Nsd nsd)
       throws NotExistingEntityException {
-    for (String id: nsd.getVnfdId()){
-      if (id.equals(vnfdId)){
+    for (String id : nsd.getVnfdId()) {
+      if (id.equals(vnfdId)) {
         return id;
       }
     }
@@ -106,8 +106,8 @@ public abstract class NsdComposer {
 
   protected NsVirtualLinkDesc getVlDescriptor(String vldId, Nsd nsd)
       throws NotExistingEntityException {
-    for (NsVirtualLinkDesc v: nsd.getVirtualLinkDesc()){
-      if (v.getVirtualLinkDescId().equals(vldId)){
+    for (NsVirtualLinkDesc v : nsd.getVirtualLinkDesc()) {
+      if (v.getVirtualLinkDescId().equals(vldId)) {
         return v;
       }
     }
@@ -118,51 +118,28 @@ public abstract class NsdComposer {
       NsLevel nsLevel)
       throws NotExistingEntityException {
     VnfToLevelMapping vnfLvlMap = getVnfLvlMapping(vnfProfileId, nsLevel);
-    VnfProfile vnfProfile = getVnfProfileById(vnfProfileId, nsDf);;
+    VnfProfile vnfProfile = getVnfProfileById(vnfProfileId, nsDf);
     String vnfdId = getVnfDescId(vnfProfile.getVnfdId(), nsd);
     return new VnfInfo(vnfdId, vnfProfile, vnfLvlMap);
   }
 
-  protected VlInfo retrieveVlInfo(String vlProfileId, Nsd nsd, NsDf nsDf, NsLevel nsLevel)
-      throws InvalidNsdException, VlNotFoundInLvlMapping {
-    VirtualLinkToLevelMapping vlMap;
-    try {
-      vlMap = getVlLvlMapping(vlProfileId, nsLevel);
-    } catch (NotExistingEntityException e) {
-      throw new VlNotFoundInLvlMapping(e.getMessage());
-    }
-    VirtualLinkProfile vlProfile;
-    try {
-      vlProfile = getVlProfileById(vlProfileId, nsDf);
-    } catch (NotExistingEntityException e) {
-      throw new InvalidNsdException(e.getMessage());
-    }
-    NsVirtualLinkDesc vlDesc;
-    try {
-      vlDesc = getVlDescriptor(vlProfile.getVirtualLinkDescId(), nsd);
-    } catch (NotExistingEntityException e) {
-      throw new InvalidNsdException(e.getMessage());
-    }
+  protected VlInfo retrieveVlInfoByProfileId(String vlProfileId, Nsd nsd, NsDf nsDf,
+      NsLevel nsLevel)
+      throws NotExistingEntityException {
+    VirtualLinkToLevelMapping vlMap = getVlLvlMapping(vlProfileId, nsLevel);
+    VirtualLinkProfile vlProfile = getVlProfileById(vlProfileId, nsDf);
+    NsVirtualLinkDesc vlDesc = getVlDescriptor(vlProfile.getVirtualLinkDescId(), nsd);
     return new VlInfo(vlMap, vlProfile, vlDesc);
   }
 
-  protected VlInfo retrieveVlInfo(NsVirtualLinkDesc vld, NsDf nsDf, NsLevel nsLevel)
-      throws InvalidNsdException, VlNotFoundInLvlMapping {
-    VirtualLinkProfile vlProfile;
-    try {
-      vlProfile = getVlProfileByDescId(vld.getVirtualLinkDescId(), nsDf);
-    } catch (NotExistingEntityException e) {
-      throw new InvalidNsdException(e.getMessage());
-    }
-    VirtualLinkToLevelMapping vlMap;
-    try {
-      vlMap = getVlLvlMapping(vlProfile.getVirtualLinkProfileId(), nsLevel);
-    } catch (NotExistingEntityException e) {
-      throw new VlNotFoundInLvlMapping(e.getMessage());
-    }
+  protected VlInfo retrieveVlInfoByDesc(NsVirtualLinkDesc vld, NsDf nsDf, NsLevel nsLevel)
+      throws NotExistingEntityException {
+    VirtualLinkProfile vlProfile = getVlProfileByDescId(vld.getVirtualLinkDescId(), nsDf);
+    VirtualLinkToLevelMapping vlMap = getVlLvlMapping(vlProfile.getVirtualLinkProfileId(), nsLevel);
     return new VlInfo(vlMap, vlProfile, vld);
   }
 
+  //TODO refactor from here
   protected void addVnf(VnfInfo vnfInfo, Nsd nsd, NsDf nsDf, NsLevel nsLevel) {
     String vnfdId = vnfInfo.getVfndId();
     if (nsd.getVnfdId().stream().noneMatch(id -> id.equals(vnfdId))) {
@@ -262,15 +239,15 @@ public abstract class NsdComposer {
         VlInfo expMgmtVlInfo;
         VlInfo ctxMgmtVlInfo;
         try {
-          ranVlInfo = retrieveVlInfo(ranVld, expNsDf, expNsLvl);
+          ranVlInfo = retrieveVlInfoByDesc(ranVld, expNsDf, expNsLvl);
           log.debug("Found VlInfo for ranVld='{}' in expNsd.", ranVld.getVirtualLinkDescId());
-          expMgmtVlInfo = retrieveVlInfo(expMgmtVld, expNsDf, expNsLvl);
+          expMgmtVlInfo = retrieveVlInfoByDesc(expMgmtVld, expNsDf, expNsLvl);
           log.debug("Found VlInfo for expMgmtVld='{}' in expNsd.",
               expMgmtVld.getVirtualLinkDescId());
-          ctxMgmtVlInfo = retrieveVlInfo(ctxMgmtVld, ctxNsDf, ctxNsLvl);
+          ctxMgmtVlInfo = retrieveVlInfoByDesc(ctxMgmtVld, ctxNsDf, ctxNsLvl);
           log.debug("Found VlInfo for ctxMgmtVld='{}' in ctxNsd.",
               ctxMgmtVld.getVirtualLinkDescId());
-        } catch (InvalidNsdException | VlNotFoundInLvlMapping e) {
+        } catch (NotExistingEntityException e) {
           log.error(e.getMessage());
           throw new InvalidNsdException(e.getMessage());
         }
