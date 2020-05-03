@@ -91,7 +91,7 @@ public class ExperimentsController {
 
       }
     } catch (InvalidVsbException | InvalidNsdException | InvalidContextException e) {
-      log.error(e.getMessage());
+      log.error(e.getMessage(), e);
       //TODO create and return a 422 response.
     }
 

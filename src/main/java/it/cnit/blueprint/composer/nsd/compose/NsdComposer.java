@@ -19,12 +19,10 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
 import java.util.Map;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
-import org.slf4j.helpers.MessageFormatter;
 
 @Slf4j
 @AllArgsConstructor
@@ -220,28 +218,35 @@ public abstract class NsdComposer {
             .buildGraph(expNsd.getSapd(), expNsDf, expNsLvl);
         log.debug("expG BEFORE composition :\n{}", nsdGraphService.export(expG));
         if (!nsdGraphService.isConnected(expG)) {
-          String m = MessageFormatter.format(
-              "Network topology for NsLevel='{}' is not connected", expNsLvl.getNsLevelId())
-              .getMessage();
-          log.error(m);
-          throw new InvalidNsdException(m);
+          throw new InvalidNsdException(
+              "Network topology not connected for NsDf " + expNsDf.getNsDfId() + " and NsLevel "
+                  + expNsLvl.getNsLevelId());
         }
 
         VlInfo ranVlInfo;
-        VlInfo expMgmtVlInfo;
-        VlInfo ctxMgmtVlInfo;
         try {
           ranVlInfo = retrieveVlInfoByDesc(ranVld, expNsDf, expNsLvl);
           log.debug("Found VlInfo for ranVld='{}' in expNsd.", ranVld.getVirtualLinkDescId());
+        } catch (NotExistingEntityException e) {
+          throw new InvalidNsdException("Error retrieving RAN VL info for VLD " + ranVld, e);
+        }
+        VlInfo expMgmtVlInfo;
+        try {
           expMgmtVlInfo = retrieveVlInfoByDesc(expMgmtVld, expNsDf, expNsLvl);
           log.debug("Found VlInfo for expMgmtVld='{}' in expNsd.",
               expMgmtVld.getVirtualLinkDescId());
+        } catch (NotExistingEntityException e) {
+          throw new InvalidNsdException(
+              "Error retrieving Experiment Management VL info for VLD " + ranVld, e);
+        }
+        VlInfo ctxMgmtVlInfo;
+        try {
           ctxMgmtVlInfo = retrieveVlInfoByDesc(ctxMgmtVld, ctxNsDf, ctxNsLvl);
           log.debug("Found VlInfo for ctxMgmtVld='{}' in ctxNsd.",
               ctxMgmtVld.getVirtualLinkDescId());
         } catch (NotExistingEntityException e) {
-          log.error(e.getMessage());
-          throw new InvalidNsdException(e.getMessage());
+          throw new InvalidNsdException(
+              "Error retrieving Context Management VL info for VLD " + ranVld, e);
         }
         composeWithStrategy(connectInput, ranVlInfo, expMgmtVlInfo, ctxMgmtVlInfo,
             expNsd, expNsDf, expNsLvl,
@@ -251,19 +256,15 @@ public abstract class NsdComposer {
         try {
           expNsd.isValid();
         } catch (MalformattedElementException e) {
-          String m = "Nsd looks not valid after composition";
-          log.error(m, e);
-          throw new InvalidNsdException(m);
+          throw new InvalidNsdException("Nsd not valid after composition", e);
         }
         expG = nsdGraphService.buildGraph(expNsd.getSapd(), expNsDf, expNsLvl);
         log.debug("Graph AFTER composition with {}:\n{}",
             ctxNsd.getNsdIdentifier(), nsdGraphService.export(expG));
         if (!nsdGraphService.isConnected(expG)) {
-          String m = MessageFormatter.format("Network topology not connected after composition",
-              expNsDf.getNsDfId(), expNsLvl.getNsLevelId())
-              .getMessage();
-          log.error(m);
-          throw new InvalidNsdException(m);
+          throw new InvalidNsdException(
+              "Network topology not connected for NsDf " + expNsDf.getNsDfId() + " and NsLevel "
+                  + expNsLvl.getNsLevelId());
         }
         log.info("Completed composition for nsDf='{}' and nsLvl='{}'",
             expNsDf.getNsDfId(), expNsLvl.getNsLevelId());
