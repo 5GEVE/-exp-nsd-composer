@@ -204,7 +204,7 @@ public abstract class NsdComposer {
         .buildGraph(ctxNsd.getSapd(), ctxNsDf, ctxNsLvl);
     log.debug("ctxG graph:\n{}", nsdGraphService.export(ctxG));
 
-    log.info("Composing '{}' with <{}, {}, {}>.",
+    log.info("Composing {} with <{}, {}, {}>.",
         expNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
         ctxNsLvl.getNsLevelId());
     log.debug("Nsd BEFORE composition:\n{}", OBJECT_MAPPER.writeValueAsString(expNsd));
@@ -212,7 +212,7 @@ public abstract class NsdComposer {
     expNsd.setNsdName(expNsd.getNsdName() + " + " + ctxNsd.getNsdName());
     for (NsDf expNsDf : expNsd.getNsDf()) {
       for (NsLevel expNsLvl : expNsDf.getNsInstantiationLevel()) {
-        log.info("Start composition for nsDf='{}' and nsLvl='{}'",
+        log.info("Start composition for nsDf {} and nsLvl {}",
             expNsDf.getNsDfId(), expNsLvl.getNsLevelId());
         Graph<ProfileVertex, String> expG = nsdGraphService
             .buildGraph(expNsd.getSapd(), expNsDf, expNsLvl);
@@ -226,14 +226,14 @@ public abstract class NsdComposer {
         VlInfo ranVlInfo;
         try {
           ranVlInfo = retrieveVlInfoByDesc(ranVld, expNsDf, expNsLvl);
-          log.debug("Found VlInfo for ranVld='{}' in expNsd.", ranVld.getVirtualLinkDescId());
+          log.debug("Found VlInfo for ranVld {} in expNsd.", ranVld.getVirtualLinkDescId());
         } catch (NotExistingEntityException e) {
           throw new InvalidNsdException("Error retrieving RAN VL info for VLD " + ranVld, e);
         }
         VlInfo expMgmtVlInfo;
         try {
           expMgmtVlInfo = retrieveVlInfoByDesc(expMgmtVld, expNsDf, expNsLvl);
-          log.debug("Found VlInfo for expMgmtVld='{}' in expNsd.",
+          log.debug("Found VlInfo for expMgmtVld {} in expNsd.",
               expMgmtVld.getVirtualLinkDescId());
         } catch (NotExistingEntityException e) {
           throw new InvalidNsdException(
@@ -242,7 +242,7 @@ public abstract class NsdComposer {
         VlInfo ctxMgmtVlInfo;
         try {
           ctxMgmtVlInfo = retrieveVlInfoByDesc(ctxMgmtVld, ctxNsDf, ctxNsLvl);
-          log.debug("Found VlInfo for ctxMgmtVld='{}' in ctxNsd.",
+          log.debug("Found VlInfo for ctxMgmtVld {} in ctxNsd.",
               ctxMgmtVld.getVirtualLinkDescId());
         } catch (NotExistingEntityException e) {
           throw new InvalidNsdException(
@@ -266,13 +266,13 @@ public abstract class NsdComposer {
               "Network topology not connected for NsDf " + expNsDf.getNsDfId() + " and NsLevel "
                   + expNsLvl.getNsLevelId());
         }
-        log.info("Completed composition for nsDf='{}' and nsLvl='{}'",
+        log.info("Completed composition for nsDf {} and nsLvl {}",
             expNsDf.getNsDfId(), expNsLvl.getNsLevelId());
       }
     }
     log.debug("Nsd AFTER composition with {}:\n{}",
         ctxNsd.getNsdIdentifier(), OBJECT_MAPPER.writeValueAsString(expNsd));
-    log.info("Completed composition of '{}' with <{}, {}, {}>.",
+    log.info("Completed composition of {} with <{}, {}, {}>.",
         expNsd.getNsdIdentifier(), ctxNsd.getNsdIdentifier(), ctxNsDf.getNsDfId(),
         ctxNsLvl.getNsLevelId());
   }

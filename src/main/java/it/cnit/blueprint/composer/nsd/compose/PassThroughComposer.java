@@ -47,7 +47,7 @@ public class PassThroughComposer extends NsdComposer {
     VnfInfo ctxVnfInfo;
     try {
       ctxVnfInfo = retrieveVnfInfoByProfileId(ctxVnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
-      log.debug("Found VnfInfo for vnfpId='{}' in context.", ctxVnfpId);
+      log.debug("Found VnfInfo for vnfpId {} in context.", ctxVnfpId);
       ctxVnfInfo.setVlcLists(mgmtVlProfileIds);
     } catch (NotExistingEntityException e) {
       throw new InvalidNsdException(
@@ -91,27 +91,27 @@ public class PassThroughComposer extends NsdComposer {
       throw new InvalidNsdException(
           "Can't find a VNF close to ranVlInfo in nsLevel " + expNsLvl.getNsLevelId());
     }
-    log.debug("ranVnfProfile: '{}'", ranVnfProfile.getVnfProfileId());
-    log.debug("ranVnfCpd: '{}'", ranVnfCpd);
+    log.debug("ranVnfProfile: {}", ranVnfProfile.getVnfProfileId());
+    log.debug("ranVnfCpd: {}", ranVnfCpd);
 
     // Modify expNsd
     addVnf(ctxVnfInfo, expNsd, expNsDf, expNsLvl);
-    log.debug("Added VnfProfile='{}' in service (if not present).",
+    log.debug("Added VnfProfile {} in service (if not present).",
         ctxVnfInfo.getVnfProfile().getVnfProfileId());
     addVirtualLink(ctxNonMgmtVl, expNsd, expNsDf, expNsLvl);
-    log.debug("Added VlProfile='{}' in service (if not present).",
+    log.debug("Added VlProfile {} in service (if not present).",
         ctxNonMgmtVl.getVlProfile().getVirtualLinkProfileId());
     try {
       // Connect ranVnf to the new VL coming from ctx
       connectVnfToVL(ranVnfProfile, ranVnfCpd, ctxNonMgmtVl.getVlProfile());
-      log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
+      log.debug("Created connection between vnfProfile {} and vlProfile {}",
           ranVnfProfile.getVnfProfileId(),
           ctxNonMgmtVl.getVlProfile().getVirtualLinkProfileId());
       // Connect ctxVnf with RAN VL
       connectVnfToVL(ctxVnfInfo.getVnfProfile(),
           ctxVnfInfo.getDataVlcList().get(1).getCpdId().get(0),
           ranVlInfo.getVlProfile());
-      log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
+      log.debug("Created connection between vnfProfile {} and vlProfile {}",
           ctxVnfInfo.getVnfProfile().getVnfProfileId(),
           ranVlInfo.getVlProfile().getVirtualLinkProfileId());
       // Connect ctxVnf to expNsd mgmt VL
@@ -119,7 +119,7 @@ public class PassThroughComposer extends NsdComposer {
         connectVnfToVL(ctxVnfInfo.getVnfProfile(),
             ctxVnfInfo.getMgmtVlcList().get(0).getCpdId().get(0),
             expMgmtVlInfo.getVlProfile());
-        log.debug("Created connection between vnfProfile='{}' and vlProfile='{}'",
+        log.debug("Created connection between vnfProfile {} and vlProfile {}",
             ctxVnfInfo.getVnfProfile().getVnfProfileId(),
             expMgmtVlInfo.getVlProfile().getVirtualLinkProfileId());
       } else {
