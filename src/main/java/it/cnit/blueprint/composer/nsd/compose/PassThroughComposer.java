@@ -42,6 +42,7 @@ public class PassThroughComposer extends NsdComposer {
         expMgmtVlInfo.getVlProfile().getVirtualLinkProfileId());
 
     // Retrieve ctx VNF
+    // Assumption: a PASS_TROUGH context has only one VnfD and VnfProfile.
     String ctxVnfpId = ctxNsLvl.getVnfToLevelMapping().get(0).getVnfProfileId();
     VnfInfo ctxVnfInfo;
     try {
@@ -49,19 +50,19 @@ public class PassThroughComposer extends NsdComposer {
       log.debug("Found VnfInfo for vnfpId='{}' in context.", ctxVnfpId);
       ctxVnfInfo.setVlcLists(mgmtVlProfileIds);
     } catch (NotExistingEntityException e) {
-      log.error(e.getMessage());
-      throw new InvalidNsdException(e.getMessage(), e);
+      throw new InvalidNsdException(
+          "Error retrieving VNF info for VNF profile ID " + ctxVnfpId, e);
     }
 
     // Retrieve non-management VLs from ctx
     // Assumption: select the first Vl attached to ctxVnf
     VlInfo ctxNonMgmtVl;
     try {
-      ctxNonMgmtVl = retrieveVlInfoByProfileId(ctxVnfInfo.getDataVlcList().get(0).getVirtualLinkProfileId(),
+      ctxNonMgmtVl = retrieveVlInfoByProfileId(
+          ctxVnfInfo.getDataVlcList().get(0).getVirtualLinkProfileId(),
           ctxNsd, ctxNsDf, ctxNsLvl);
     } catch (NotExistingEntityException e) {
-      log.error(e.getMessage());
-      throw new InvalidNsdException(e.getMessage());
+      throw new InvalidNsdException("Error retrieving VL info for a non-management VL", e);
     }
 
     // Retrieve RAN closest VNF information from exp
@@ -70,26 +71,25 @@ public class PassThroughComposer extends NsdComposer {
     String ranVnfCpd = null;
     VnfProfile ranVnfProfile = null;
     for (VnfToLevelMapping vnfLvl : expNsLvl.getVnfToLevelMapping()) {
-      VnfInfo vnfInfo;
+      VnfProfile vnfProfile;
       try {
-        vnfInfo = retrieveVnfInfoByProfileId(vnfLvl.getVnfProfileId(), expNsd, expNsDf, expNsLvl);
+        vnfProfile = getVnfProfileById(vnfLvl.getVnfProfileId(), expNsDf);
       } catch (NotExistingEntityException e) {
-        log.error(e.getMessage());
-        throw new InvalidNsdException(e.getMessage());
+        throw new InvalidNsdException(
+            "Error retrieving VNF info for VNF profile ID " + vnfLvl.getVnfProfileId(), e);
       }
-      for (NsVirtualLinkConnectivity vlc : vnfInfo.getVnfProfile().getNsVirtualLinkConnectivity()) {
+      for (NsVirtualLinkConnectivity vlc : vnfProfile.getNsVirtualLinkConnectivity()) {
         if (vlc.getVirtualLinkProfileId()
             .equals(ranVlInfo.getVlProfile().getVirtualLinkProfileId())) {
           ranVnfCpd = vlc.getCpdId().get(0);
-          ranVnfProfile = vnfInfo.getVnfProfile();
+          ranVnfProfile = vnfProfile;
           break;
         }
       }
     }
     if (ranVnfCpd == null) {
-      String m = "Can't find a VNF close to ranVlInfo";
-      log.error(m);
-      throw new InvalidNsdException(m);
+      throw new InvalidNsdException(
+          "Can't find a VNF close to ranVlInfo in nsLevel " + expNsLvl.getNsLevelId());
     }
     log.debug("ranVnfProfile: '{}'", ranVnfProfile.getVnfProfileId());
     log.debug("ranVnfCpd: '{}'", ranVnfCpd);
@@ -130,8 +130,7 @@ public class PassThroughComposer extends NsdComposer {
         ctxVnfInfo.cleanUpVlc(ctxVnfInfo.getDataVlcList().get(i));
       }
     } catch (NotExistingEntityException e) {
-      log.error(e.getMessage());
-      throw new InvalidNsdException(e.getMessage());
+      throw new InvalidNsdException("Error in connecting VNF to VL.", e);
     }
   }
 }
