@@ -85,41 +85,68 @@ public class ConnectComposer extends NsdComposer {
     List<String> mgmtVlProfileIds = Arrays.asList(
         ctxMgmtVlInfo.getVlProfile().getVirtualLinkProfileId(),
         expMgmtVlInfo.getVlProfile().getVirtualLinkProfileId());
-    try {
-      if (connectInput.isEmpty()) {
-        // select all VNFs
-        boolean first = true;
-        for (VnfToLevelMapping vnfMap : ctxNsLvl.getVnfToLevelMapping()) {
-          String vnfpId = vnfMap.getVnfProfileId();
-          VnfInfo vnfInfo = retrieveVnfInfoByProfileId(vnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
+    if (connectInput.isEmpty()) {
+      // select all VNFs
+      boolean first = true;
+      for (VnfToLevelMapping vnfMap : ctxNsLvl.getVnfToLevelMapping()) {
+        String vnfpId = vnfMap.getVnfProfileId();
+        VnfInfo vnfInfo;
+        try {
+          vnfInfo = retrieveVnfInfoByProfileId(vnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
           vnfInfo.setVlcLists(mgmtVlProfileIds);
-          VlInfo vlInfo;
-          if (first) {
-            vlInfo = ranVlInfo;
-            first = false;
-          } else {
+        } catch (NotExistingEntityException e) {
+          throw new InvalidNsdException(
+              "Error retrieving VNF info for VNF profile ID " + vnfpId, e);
+        }
+        VlInfo vlInfo;
+        if (first) {
+          vlInfo = ranVlInfo;
+          first = false;
+        } else {
+          try {
             String nonMgmtVlpId = getNonMgmtVlProfileId(
                 expNsLvl,
                 expMgmtVlInfo.getVlProfile().getVirtualLinkProfileId(),
                 ranVlInfo.getVlProfile().getVirtualLinkProfileId());
             vlInfo = retrieveVlInfoByProfileId(nonMgmtVlpId, expNsd, expNsDf, expNsLvl);
+          } catch (NotExistingEntityException e) {
+            throw new InvalidNsdException("Error retrieving VL info for a non-management VL", e);
           }
-          addConnectVnfToVl(vnfInfo, vlInfo, expMgmtVlInfo, expNsd, expNsDf, expNsLvl);
         }
-      } else {
-        // only VNFs in connectInput
-        for (Entry<String, String> entry : connectInput.entrySet()) {
-          String vnfpId = getVnfProfileByDescId(entry.getKey(), ctxNsDf).getVnfProfileId();
-          VnfInfo vnfInfo = retrieveVnfInfoByProfileId(vnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
-          vnfInfo.setVlcLists(mgmtVlProfileIds);
-          String vlpId = getVlProfileByDescId(entry.getValue(), ctxNsDf).getVirtualLinkProfileId();
-          VlInfo vlInfo = retrieveVlInfoByProfileId(vlpId, ctxNsd, ctxNsDf, ctxNsLvl);
+        try {
           addConnectVnfToVl(vnfInfo, vlInfo, expMgmtVlInfo, expNsd, expNsDf, expNsLvl);
+        } catch (NotExistingEntityException e) {
+          throw new InvalidNsdException(
+              "Error connecting VNF profile " + vnfInfo.getVnfProfile().getVnfProfileId(), e);
         }
       }
-    } catch (NotExistingEntityException e) {
-      log.error(e.getMessage());
-      throw new InvalidNsdException("Nsd " + ctxNsd.getNsdIdentifier(), e);
+    } else {
+      // only VNFs in connectInput
+      for (Entry<String, String> entry : connectInput.entrySet()) {
+        VnfInfo vnfInfo;
+        try {
+          String vnfpId = getVnfProfileByDescId(entry.getKey(), ctxNsDf).getVnfProfileId();
+          vnfInfo = retrieveVnfInfoByProfileId(vnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
+          vnfInfo.setVlcLists(mgmtVlProfileIds);
+        } catch (NotExistingEntityException e) {
+          throw new InvalidNsdException(
+              "Error retrieving VNF info for VNFD ID " + entry.getKey(), e);
+        }
+        VlInfo vlInfo;
+        try {
+          String vlpId = getVlProfileByDescId(entry.getValue(), ctxNsDf).getVirtualLinkProfileId();
+          vlInfo = retrieveVlInfoByProfileId(vlpId, ctxNsd, ctxNsDf, ctxNsLvl);
+        } catch (NotExistingEntityException e) {
+          throw new InvalidNsdException(
+              "Error retrieving VL info for VLD ID " + entry.getValue(), e);
+        }
+        try {
+          addConnectVnfToVl(vnfInfo, vlInfo, expMgmtVlInfo, expNsd, expNsDf, expNsLvl);
+        } catch (NotExistingEntityException e) {
+          throw new InvalidNsdException(
+              "Error connecting VNF profile " + vnfInfo.getVnfProfile().getVnfProfileId(), e);
+        }
+      }
     }
   }
 }
