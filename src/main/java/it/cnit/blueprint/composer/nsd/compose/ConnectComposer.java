@@ -48,12 +48,12 @@ public class ConnectComposer extends NsdComposer {
     // Modify expNsd
     addVnf(vnfInfo, expNsd, expNsDf, expNsLvl);
     log.debug(
-        "Added VnfProfile='{}' in service (if not present).",
+        "Added VnfProfile {} in service (if not present).",
         vnfInfo.getVnfProfile().getVnfProfileId());
     connectVnfToVL(vnfInfo.getVnfProfile(), vnfInfo.getDataVlcList().get(0).getCpdId().get(0),
         dataVlInfo.getVlProfile());
     log.debug(
-        "Created connection between vnfProfile='{}' and vlProfile='{}'",
+        "Created connection between vnfProfile {} and vlProfile {}",
         vnfInfo.getVnfProfile().getVnfProfileId(),
         dataVlInfo.getVlProfile().getVirtualLinkProfileId());
     for (int i = 1; i < vnfInfo.getDataVlcList().size(); i++) {
