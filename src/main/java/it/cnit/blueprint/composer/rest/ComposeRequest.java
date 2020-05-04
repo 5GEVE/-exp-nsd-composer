@@ -5,16 +5,16 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NonNull;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ComposeRequest {
 
-  @NonNull
   @NotNull
   private OnBoardVsBlueprintRequest vsbRequest;
 
-  @NonNull
   @NotEmpty
   private Context[] contexts;
 }

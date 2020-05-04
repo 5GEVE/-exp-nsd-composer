@@ -5,12 +5,13 @@ import java.util.Map;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NonNull;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Context {
 
-  @NonNull
   @NotNull
   private OnboardCtxBlueprintRequest ctxbRequest;
 
