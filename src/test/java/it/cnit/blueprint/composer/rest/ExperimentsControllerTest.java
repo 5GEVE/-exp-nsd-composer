@@ -1,5 +1,7 @@
 package it.cnit.blueprint.composer.rest;
 
+import static org.junit.Assert.assertEquals;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,29 +15,51 @@ import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardCtxBlueprintRequ
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest
 @Slf4j
 public class ExperimentsControllerTest {
 
-  static ObjectMapper JSON_OM, YAML_OM;
+  private ObjectMapper JSON_OM, YAML_OM;
   static Properties urlProp;
 
-  @BeforeClass
+  @Autowired
+  WebApplicationContext webApplicationContext;
+
+  private MockMvc mvc;
+
+  @Autowired
+  private ExperimentsController experimentsController;
+
+  @Before
   @SneakyThrows
-  public static void setUp() {
+  public void setup() {
     // Test Setup
     urlProp = new Properties();
     InputStream input = ClassLoader.getSystemResourceAsStream("url.properties");
     urlProp.load(input);
     JSON_OM = new ObjectMapper(new JsonFactory()).enable(SerializationFeature.INDENT_OUTPUT);
     YAML_OM = new ObjectMapper(new YAMLFactory());
+    mvc = MockMvcBuilders
+        .webAppContextSetup(webApplicationContext)
+        .build();
   }
 
   @Test
@@ -63,9 +87,18 @@ public class ExperimentsControllerTest {
             new TypeReference<List<VsdNsdTranslationRule>>() {
             });
     OnboardCtxBlueprintRequest ctxbRequest = new OnboardCtxBlueprintRequest(ctxb, ctxbNsd, ctxbTr);
+    Context c = new Context(ctxbRequest, null);
 
-    ComposeRequest request = new ComposeRequest(vsbRequest, new Context[]{new Context(ctxbRequest)});
-    log.debug("Response:\n{}", JSON_OM.writeValueAsString(request));
+    ComposeRequest request = new ComposeRequest(vsbRequest, new Context[]{c});
+    String body = JSON_OM.writeValueAsString(request);
+    log.info("Request body:\n{}", body);
 
+    // When
+    MvcResult result = mvc.perform(MockMvcRequestBuilders.post("/experiments").contentType(
+        MediaType.APPLICATION_JSON).content(body)).andReturn();
+    assertEquals(200, result.getResponse().getStatus());
+    ComposeResponse response = JSON_OM
+        .readValue(result.getResponse().getContentAsString(), ComposeResponse.class);
+    log.info("Response body:\n{}", JSON_OM.writeValueAsString(response));
   }
 }
