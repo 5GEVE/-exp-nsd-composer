@@ -22,10 +22,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @Slf4j
@@ -93,8 +95,7 @@ public class ExperimentsController {
 
       }
     } catch (InvalidVsbException | InvalidNsdException | InvalidContextException e) {
-      log.error(e.getMessage(), e);
-      throw new UnprocessableEntityException(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     }
 
     List<VsdNsdTranslationRule> translationRules = null;
