@@ -109,7 +109,7 @@ public class ExperimentsController {
   private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd)
       throws InvalidNsdException, InvalidVsbException {
     Optional<VsbEndpoint> ranEp = b.getEndPoints().stream()
-        .filter(VsbEndpoint::isRanConnection)
+        .filter(e -> e.isRanConnection() && e.getEndPointId().contains("sap"))
         .findFirst();
     if (ranEp.isPresent()) {
       String epId = ranEp.get().getEndPointId();
@@ -120,7 +120,7 @@ public class ExperimentsController {
         return connectComposer.getRanVlDesc(ranSapd.get(), nsd);
       } else {
         throw new InvalidNsdException(
-            "RAN Sap with id=" + epId + "not found in NSD " + nsd.getNsdIdentifier() + ".");
+            "RAN Sap with ID " + epId + " not found in NSD " + nsd.getNsdIdentifier());
       }
     } else {
       throw new InvalidVsbException("No RAN endpoint found in VSB " + b.getBlueprintId() + ".");
