@@ -1,9 +1,9 @@
 package it.cnit.blueprint.composer.rest;
 
 import it.cnit.blueprint.composer.exceptions.InvalidContextException;
-import it.cnit.blueprint.composer.exceptions.InvalidNsdException;
-import it.cnit.blueprint.composer.exceptions.InvalidTranslationRuleException;
-import it.cnit.blueprint.composer.exceptions.InvalidVsbException;
+import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
+import it.cnit.blueprint.composer.exceptions.TransRuleInvalidException;
+import it.cnit.blueprint.composer.exceptions.VsbInvalidException;
 import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
 import it.cnit.blueprint.composer.rules.TranslationRulesComposer;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
@@ -97,7 +97,7 @@ public class ExperimentsController {
         }
 
       }
-    } catch (InvalidVsbException | InvalidNsdException | InvalidContextException e) {
+    } catch (VsbInvalidException | NsdInvalidException | InvalidContextException e) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     }
 
@@ -105,7 +105,7 @@ public class ExperimentsController {
     try {
       translationRules = translationRulesComposer
           .compose(expNsd, composeRequest.getVsbRequest().getTranslationRules());
-    } catch (InvalidTranslationRuleException e) {
+    } catch (TransRuleInvalidException e) {
       // TODO create proper error response.
       e.printStackTrace();
     }
@@ -113,7 +113,7 @@ public class ExperimentsController {
   }
 
   private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd)
-      throws InvalidNsdException, InvalidVsbException {
+      throws NsdInvalidException, VsbInvalidException {
     Optional<VsbEndpoint> ranEp = b.getEndPoints().stream()
         .filter(e -> e.isRanConnection() && e.getEndPointId().contains("sap"))
         .findFirst();
@@ -125,16 +125,16 @@ public class ExperimentsController {
       if (ranSapd.isPresent()) {
         return connectComposer.getRanVlDesc(ranSapd.get(), nsd);
       } else {
-        throw new InvalidNsdException(
+        throw new NsdInvalidException(
             "RAN Sap with ID " + epId + " not found in NSD " + nsd.getNsdIdentifier());
       }
     } else {
-      throw new InvalidVsbException("No RAN endpoint found in VSB " + b.getBlueprintId() + ".");
+      throw new VsbInvalidException("No RAN endpoint found in VSB " + b.getBlueprintId() + ".");
     }
   }
 
   private NsVirtualLinkDesc findMgmtVld(Blueprint b, Nsd nsd)
-      throws InvalidVsbException, InvalidNsdException {
+      throws VsbInvalidException, NsdInvalidException {
     Optional<VsbLink> optConnServ = b.getConnectivityServices().stream()
         .filter(VsbLink::isManagement)
         .findFirst();
@@ -146,11 +146,11 @@ public class ExperimentsController {
       if (optVld.isPresent()) {
         return optVld.get();
       } else {
-        throw new InvalidNsdException(
+        throw new NsdInvalidException(
             "Management Vld with id=" + name + "not found in NSD " + nsd.getNsdIdentifier() + ".");
       }
     } else {
-      throw new InvalidVsbException(
+      throw new VsbInvalidException(
           "No management connectivity service found in VSB " + b.getBlueprintId() + ".");
     }
   }
