@@ -6,6 +6,7 @@ import it.cnit.blueprint.composer.rules.TranslationRulesComposer;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CompositionStrategy;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
@@ -46,6 +47,7 @@ public class ExperimentsController {
   @PostMapping("/experiments")
   public ComposeResponse composeExperiment(@RequestBody ComposeRequest composeRequest) {
 
+    VsBlueprint vsb = composeRequest.getVsbRequest().getVsBlueprint();
     Nsd expNsd = composeRequest.getVsbRequest().getNsds().get(0);
     expNsd.setNsdIdentifier(UUID.randomUUID().toString());
     expNsd.setNsdInvariantId(UUID.randomUUID().toString());
@@ -58,15 +60,15 @@ public class ExperimentsController {
           expNsd);
       for (Context ctx : composeRequest.getContexts()) {
         // - The Ctx has only 1 Nsd.
-        Nsd ctxNsd = ctx.getCtxbRequest().getNsds().get(0);
         CtxBlueprint ctxB = ctx.getCtxbRequest().getCtxBlueprint();
+        Nsd ctxNsd = ctx.getCtxbRequest().getNsds().get(0);
 
         log.info("Current CtxB: {}", ctxB.getBlueprintId());
 
         if (ctx.getConnectInput() == null) {
           ctx.setConnectInput(new HashMap<>());
         }
-        NsVirtualLinkDesc expMgmtVld = findMgmtVld(ctxB, ctxNsd);
+        NsVirtualLinkDesc expMgmtVld = findMgmtVld(vsb, expNsd);
         NsVirtualLinkDesc ctxMgmtVld = findMgmtVld(ctxB, ctxNsd);
         if (ctxB.getCompositionStrategy().equals(CompositionStrategy.CONNECT)) {
           log.info("Strategy is CONNECT");
@@ -92,7 +94,7 @@ public class ExperimentsController {
       }
     } catch (InvalidVsbException | InvalidNsdException | InvalidContextException e) {
       log.error(e.getMessage(), e);
-      //TODO create and return a 422 response.
+      throw new UnprocessableEntityException(e.getMessage());
     }
 
     List<VsdNsdTranslationRule> translationRules = null;
