@@ -237,7 +237,8 @@ public abstract class NsdComposer {
               expMgmtVld.getVirtualLinkDescId());
         } catch (NotExistingEntityException e) {
           throw new InvalidNsdException(
-              "Error retrieving Experiment Management VL info for VLD " + ranVld, e);
+              "Error retrieving Experiment Management VL info for VLD " + ranVld
+                  .getVirtualLinkDescId(), e);
         }
         VlInfo ctxMgmtVlInfo;
         try {
