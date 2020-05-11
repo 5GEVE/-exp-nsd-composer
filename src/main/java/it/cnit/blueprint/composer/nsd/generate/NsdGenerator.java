@@ -178,9 +178,7 @@ public class NsdGenerator {
     try {
       nsd.isValid();
     } catch (MalformattedElementException e) {
-      String m = "Nsd looks not valid after composition";
-      log.error(m, e);
-      throw new InvalidNsdException(m);
+      throw new InvalidNsdException("Nsd looks not valid after generation", e);
     }
 
     Graph<ProfileVertex, String> g = nsdGraphService.buildGraph(nsd.getSapd(), nsDf, nsLevel);
