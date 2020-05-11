@@ -1,5 +1,6 @@
 package it.cnit.blueprint.composer.rules;
 
+import it.cnit.blueprint.composer.exceptions.InvalidTranslationRuleException;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;

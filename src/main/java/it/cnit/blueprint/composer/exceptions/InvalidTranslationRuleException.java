@@ -1,4 +1,4 @@
-package it.cnit.blueprint.composer.rules;
+package it.cnit.blueprint.composer.exceptions;
 
 public class InvalidTranslationRuleException extends Exception {
 

@@ -1,5 +1,6 @@
 package it.cnit.blueprint.composer.rest;
 
+import it.cnit.blueprint.composer.exceptions.InvalidNsdException;
 import it.cnit.blueprint.composer.nsd.generate.NsdGenerator;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;

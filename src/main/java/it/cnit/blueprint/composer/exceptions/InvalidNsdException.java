@@ -1,4 +1,4 @@
-package it.cnit.blueprint.composer.rest;
+package it.cnit.blueprint.composer.exceptions;
 
 public class InvalidNsdException extends Exception {
 

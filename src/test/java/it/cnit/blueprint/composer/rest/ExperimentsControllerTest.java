@@ -25,6 +25,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -71,6 +72,7 @@ public class ExperimentsControllerTest {
     List<Nsd> vsbNsd = YAML_OM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")),
         new TypeReference<List<Nsd>>() {
         });
+    vsbNsd.get(0).getVirtualLinkDesc().get(0).setVirtualLinkDescId("pippo");
     List<VsdNsdTranslationRule> vsbTr = YAML_OM
         .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_tr")),
             new TypeReference<List<VsdNsdTranslationRule>>() {
@@ -96,6 +98,8 @@ public class ExperimentsControllerTest {
     // When
     MvcResult result = mvc.perform(MockMvcRequestBuilders.post("/experiments").contentType(
         MediaType.APPLICATION_JSON).content(body)).andReturn();
+    MockHttpServletResponse resp = result.getResponse();
+    log.info("content {}", resp.getErrorMessage());
     assertEquals(200, result.getResponse().getStatus());
     ComposeResponse response = JSON_OM
         .readValue(result.getResponse().getContentAsString(), ComposeResponse.class);

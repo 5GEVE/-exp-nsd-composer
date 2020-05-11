@@ -1,7 +1,10 @@
 package it.cnit.blueprint.composer.rest;
 
+import it.cnit.blueprint.composer.exceptions.InvalidContextException;
+import it.cnit.blueprint.composer.exceptions.InvalidNsdException;
+import it.cnit.blueprint.composer.exceptions.InvalidTranslationRuleException;
+import it.cnit.blueprint.composer.exceptions.InvalidVsbException;
 import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
-import it.cnit.blueprint.composer.rules.InvalidTranslationRuleException;
 import it.cnit.blueprint.composer.rules.TranslationRulesComposer;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CompositionStrategy;
@@ -81,7 +84,7 @@ public class ExperimentsController {
           if (ctxNsd.getVnfdId().size() == 1) {
             log.debug("ctxNsd has only one vnfdId.");
           } else {
-            throw new InvalidContextException("More than one VNF found in Ctx for PASS_THROUGH");
+            throw new InvalidContextException("More than one VNFD ID found for PASS_THROUGH");
           }
           passThroughComposer
               .compose(ctx.getConnectInput(), ranVld, expMgmtVld, expNsd, ctxMgmtVld, ctxNsd);

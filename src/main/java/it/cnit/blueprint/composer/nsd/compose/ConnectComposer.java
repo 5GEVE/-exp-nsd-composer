@@ -1,7 +1,7 @@
 package it.cnit.blueprint.composer.nsd.compose;
 
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
-import it.cnit.blueprint.composer.rest.InvalidNsdException;
+import it.cnit.blueprint.composer.exceptions.InvalidNsdException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
