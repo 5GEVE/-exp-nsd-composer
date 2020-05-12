@@ -3,6 +3,7 @@ package it.cnit.blueprint.composer.nsd.compose;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import it.cnit.blueprint.composer.exceptions.NsdCompositionException;
 import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
@@ -196,7 +197,7 @@ public abstract class NsdComposer {
   @SneakyThrows(JsonProcessingException.class)
   public void compose(Map<String, String> connectInput, NsVirtualLinkDesc ranVld,
       NsVirtualLinkDesc expMgmtVld, Nsd expNsd, NsVirtualLinkDesc ctxMgmtVld, Nsd ctxNsd)
-      throws NsdInvalidException {
+      throws NsdInvalidException, NsdCompositionException {
     // We assume only one NsDf for the context
     NsDf ctxNsDf = ctxNsd.getNsDf().get(0);
     // We assume only one NsLevel for the context
@@ -259,14 +260,14 @@ public abstract class NsdComposer {
         try {
           expNsd.isValid();
         } catch (MalformattedElementException e) {
-          throw new NsdInvalidException(expNsd.getNsdIdentifier(),
+          throw new NsdCompositionException(expNsd.getNsdIdentifier(),
               "Nsd not valid after composition", e);
         }
         expG = nsdGraphService.buildGraph(expNsd.getSapd(), expNsDf, expNsLvl);
         log.debug("Graph AFTER composition with {}:\n{}",
             ctxNsd.getNsdIdentifier(), nsdGraphService.export(expG));
         if (!nsdGraphService.isConnected(expG)) {
-          throw new NsdInvalidException(expNsd.getNsdIdentifier(),
+          throw new NsdCompositionException(expNsd.getNsdIdentifier(),
               "Network topology not connected for NsDf " + expNsDf.getNsDfId() + " and NsLevel "
                   + expNsLvl.getNsLevelId());
         }

@@ -1,6 +1,7 @@
 package it.cnit.blueprint.composer.rest;
 
 import it.cnit.blueprint.composer.exceptions.ContextInvalidException;
+import it.cnit.blueprint.composer.exceptions.NsdCompositionException;
 import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.cnit.blueprint.composer.exceptions.TransRuleInvalidException;
 import it.cnit.blueprint.composer.exceptions.VsbInvalidException;
@@ -97,6 +98,8 @@ public class ExperimentsController {
       }
     } catch (VsbInvalidException | NsdInvalidException | ContextInvalidException e) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+    } catch (NsdCompositionException e){
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
     List<VsdNsdTranslationRule> expTransRules = null;
