@@ -3,6 +3,7 @@ package it.cnit.blueprint.composer.nsd.generate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import it.cnit.blueprint.composer.exceptions.NsdGenerationException;
 import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
@@ -55,7 +56,7 @@ public class NsdGenerator {
   private final NsdGraphService nsdGraphService;
 
   @SneakyThrows(JsonProcessingException.class)
-  public Nsd generate(Blueprint blueprint) throws NsdInvalidException {
+  public Nsd generate(Blueprint blueprint) throws NsdInvalidException, NsdGenerationException {
 
     log.debug("blueprint {}:\n{}", blueprint.getBlueprintId(),
         OBJECT_MAPPER.writeValueAsString(blueprint));
@@ -178,13 +179,17 @@ public class NsdGenerator {
     try {
       nsd.isValid();
     } catch (MalformattedElementException e) {
-      throw new NsdInvalidException(nsd.getNsdIdentifier(),
-          "Nsd looks not valid after generation", e);
+      throw new NsdGenerationException(nsd.getNsdIdentifier(),
+          "Nsd not valid after generation", e);
     }
-
     Graph<ProfileVertex, String> g = nsdGraphService.buildGraph(nsd.getSapd(), nsDf, nsLevel);
     log.debug("Graph AFTER generation with {}:\n{}",
         nsd.getNsdIdentifier(), nsdGraphService.export(g));
+    if (!nsdGraphService.isConnected(g)) {
+      throw new NsdGenerationException(nsd.getNsdIdentifier(),
+          "Network topology not connected for NsDf " + nsDf.getNsDfId() + " and NsLevel "
+              + nsLevel.getNsLevelId());
+    }
 
     return nsd;
   }
