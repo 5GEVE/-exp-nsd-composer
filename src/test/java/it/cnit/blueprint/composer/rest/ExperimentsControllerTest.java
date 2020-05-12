@@ -25,7 +25,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -46,9 +45,6 @@ public class ExperimentsControllerTest {
 
   private MockMvc mvc;
 
-  @Autowired
-  private ExperimentsController experimentsController;
-
   @Before
   @SneakyThrows
   public void setup() {
@@ -63,16 +59,13 @@ public class ExperimentsControllerTest {
         .build();
   }
 
-  @Test
   @SneakyThrows
-  public void composeExperiment() {
-    // Given
+  private ComposeRequest getRequest() {
     VsBlueprint vsb = YAML_OM
         .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker")), VsBlueprint.class);
     List<Nsd> vsbNsd = YAML_OM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")),
         new TypeReference<List<Nsd>>() {
         });
-//    vsbNsd.get(0).getVirtualLinkDesc().get(0).setVirtualLinkDescId("pippo");
     List<VsdNsdTranslationRule> vsbTr = YAML_OM
         .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_tr")),
             new TypeReference<List<VsdNsdTranslationRule>>() {
@@ -94,11 +87,21 @@ public class ExperimentsControllerTest {
     ComposeRequest request = new ComposeRequest(vsbRequest, new Context[]{c});
     String body = JSON_OM.writeValueAsString(request);
     log.info("Request body:\n{}", body);
+    return request;
+  }
+
+  @Test
+  @SneakyThrows
+  public void composeExperiment200() {
+    // Given
+    ComposeRequest request = getRequest();
 
     // When
-    MvcResult result = mvc.perform(MockMvcRequestBuilders.post("/experiments").contentType(
-        MediaType.APPLICATION_JSON).content(body)).andReturn();
-    MockHttpServletResponse resp = result.getResponse();
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/experiments")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(request)))
+        .andReturn();
 
     // Then
     assertEquals(200, result.getResponse().getStatus());
@@ -113,5 +116,69 @@ public class ExperimentsControllerTest {
     Nsd expectedNsd = YAML_OM.readValue(in, Nsd[].class)[0];
     assertEquals(YAML_OM.writeValueAsString(expectedNsd),
         YAML_OM.writeValueAsString(response.getExpNsd()));
+  }
+
+  @Test
+  @SneakyThrows
+  public void composeExperiment400Wrong() {
+    // Given
+    ComposeRequest request = getRequest();
+
+    // When
+    // We pass only the VsbRequest as body to make the REST fail
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/experiments")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(request.getVsbRequest())))
+        .andReturn();
+
+    // Then
+    assertEquals(400, result.getResponse().getStatus());
+    if (result.getResolvedException() != null) {
+      log.info("Error message: {}", result.getResolvedException().getMessage());
+    }
+  }
+
+  @Test
+  @SneakyThrows
+  public void composeExperiment400Empty() {
+    // Given
+
+    // When
+    // We pass only the VsbRequest as body to make the REST fail
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/experiments")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(""))
+        .andReturn();
+
+    // Then
+    assertEquals(400, result.getResponse().getStatus());
+    if (result.getResolvedException() != null) {
+      log.info("Error message: {}", result.getResolvedException().getMessage());
+    }
+  }
+
+  @Test
+  @SneakyThrows
+  public void composeExperiment422() {
+    // Given
+    ComposeRequest request = getRequest();
+
+    // When
+    // We change the request to make it unprocessable
+    request.getVsbRequest().getNsds().get(0).getVirtualLinkDesc().get(0)
+        .setVirtualLinkDescId("wrong-vld-id");
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/experiments")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(request)))
+        .andReturn();
+
+    // Then
+    assertEquals(422, result.getResponse().getStatus());
+    if (result.getResolvedException() != null) {
+      log.info("Error message: {}", result.getResolvedException().getMessage());
+    }
   }
 }

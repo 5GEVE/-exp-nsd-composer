@@ -54,16 +54,19 @@ public class ExperimentsController {
 
     VsBlueprint vsb = composeRequest.getVsbRequest().getVsBlueprint();
     Nsd expNsd = composeRequest.getVsbRequest().getNsds().get(0);
+    List<VsdNsdTranslationRule> vsbTransRules = composeRequest.getVsbRequest()
+        .getTranslationRules();
     expNsd.setNsdIdentifier(UUID.randomUUID().toString());
     expNsd.setNsdInvariantId(UUID.randomUUID().toString());
     expNsd.setDesigner(expNsd.getDesigner() + " + NSD Composer");
 
+    Context[] contexts = composeRequest.getContexts();
+
     try {
       // Assumptions:
       // - The Vsb has only 1 Nsd.
-      NsVirtualLinkDesc ranVld = findRanVld(composeRequest.getVsbRequest().getVsBlueprint(),
-          expNsd);
-      for (Context ctx : composeRequest.getContexts()) {
+      NsVirtualLinkDesc ranVld = findRanVld(vsb, expNsd);
+      for (Context ctx : contexts) {
         // - The Ctx has only 1 Nsd.
         CtxBlueprint ctxB = ctx.getCtxbRequest().getCtxBlueprint();
         Nsd ctxNsd = ctx.getCtxbRequest().getNsds().get(0);
@@ -101,15 +104,14 @@ public class ExperimentsController {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     }
 
-    List<VsdNsdTranslationRule> translationRules = null;
+    List<VsdNsdTranslationRule> expTransRules = null;
     try {
-      translationRules = translationRulesComposer
-          .compose(expNsd, composeRequest.getVsbRequest().getTranslationRules());
+      expTransRules = translationRulesComposer.compose(expNsd, vsbTransRules);
     } catch (TransRuleInvalidException e) {
       // TODO create proper error response.
       e.printStackTrace();
     }
-    return new ComposeResponse(expNsd, translationRules);
+    return new ComposeResponse(expNsd, expTransRules);
   }
 
   private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd)
