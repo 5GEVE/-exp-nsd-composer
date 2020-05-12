@@ -44,11 +44,6 @@ public class ExperimentsController {
 
   private final TranslationRulesComposer translationRulesComposer;
 
-  @GetMapping("/experiments")
-  public OnboardExpBlueprintRequest retrieveExperiment() {
-    return null;
-  }
-
   @PostMapping("/experiments")
   public ComposeResponse composeExperiment(@RequestBody ComposeRequest composeRequest) {
 
