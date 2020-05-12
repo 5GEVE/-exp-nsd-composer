@@ -72,7 +72,7 @@ public class ExperimentsControllerTest {
     List<Nsd> vsbNsd = YAML_OM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")),
         new TypeReference<List<Nsd>>() {
         });
-    vsbNsd.get(0).getVirtualLinkDesc().get(0).setVirtualLinkDescId("pippo");
+//    vsbNsd.get(0).getVirtualLinkDesc().get(0).setVirtualLinkDescId("pippo");
     List<VsdNsdTranslationRule> vsbTr = YAML_OM
         .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_tr")),
             new TypeReference<List<VsdNsdTranslationRule>>() {
@@ -99,10 +99,19 @@ public class ExperimentsControllerTest {
     MvcResult result = mvc.perform(MockMvcRequestBuilders.post("/experiments").contentType(
         MediaType.APPLICATION_JSON).content(body)).andReturn();
     MockHttpServletResponse resp = result.getResponse();
-    log.info("content {}", resp.getErrorMessage());
+
+    // Then
     assertEquals(200, result.getResponse().getStatus());
     ComposeResponse response = JSON_OM
         .readValue(result.getResponse().getContentAsString(), ComposeResponse.class);
     log.info("Response body:\n{}", JSON_OM.writeValueAsString(response));
+    Nsd actualNsd = response.getExpNsd();
+    actualNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
+    actualNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
+    InputStream in = getClass().getResourceAsStream(
+        "/expb_ares2t_tracker_delay_nsds_passthrough.yaml");
+    Nsd expectedNsd = YAML_OM.readValue(in, Nsd[].class)[0];
+    assertEquals(YAML_OM.writeValueAsString(expectedNsd),
+        YAML_OM.writeValueAsString(response.getExpNsd()));
   }
 }
