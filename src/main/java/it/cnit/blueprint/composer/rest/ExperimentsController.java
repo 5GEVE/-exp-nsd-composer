@@ -15,7 +15,6 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
-import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardExpBlueprintRequest;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
@@ -24,12 +23,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -100,11 +99,11 @@ public class ExperimentsController {
       }
     } catch (VsbInvalidException | NsdInvalidException | ContextInvalidException e) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
-    } catch (NsdCompositionException e){
+    } catch (NsdCompositionException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
-    List<VsdNsdTranslationRule> expTransRules = null;
+    List<VsdNsdTranslationRule> expTransRules;
     try {
       expTransRules = translationRulesComposer.compose(expNsd, vsbTransRules);
     } catch (TransRuleInvalidException | TransRuleCompositionException e) {
@@ -116,24 +115,26 @@ public class ExperimentsController {
 
   private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd)
       throws NsdInvalidException, VsbInvalidException {
-    Optional<VsbEndpoint> ranEp = b.getEndPoints().stream()
-        .filter(e -> e.isRanConnection() && e.getEndPointId().contains("sap"))
-        .findFirst();
-    if (ranEp.isPresent()) {
-      String epId = ranEp.get().getEndPointId();
-      Optional<Sapd> ranSapd = nsd.getSapd().stream()
-          .filter(sapd -> sapd.getCpdId().equals(epId))
-          .findFirst();
-      if (ranSapd.isPresent()) {
-        return connectComposer.getRanVlDesc(ranSapd.get(), nsd);
-      } else {
-        throw new NsdInvalidException(nsd.getNsdIdentifier(),
-            "RAN Sap with ID " + epId + " not found");
-      }
-    } else {
+    List<VsbEndpoint> ranEps = b.getEndPoints().stream()
+        .filter(VsbEndpoint::isRanConnection)
+        .collect(Collectors.toList());
+    if (ranEps.isEmpty()) {
       throw new VsbInvalidException(b.getBlueprintId(),
           "No RAN endpoint found in VSB " + b.getBlueprintId() + ".");
     }
+    for (VsbEndpoint rep : ranEps) {
+      for (Sapd sapd : nsd.getSapd()) {
+        if (rep.getEndPointId().equals(sapd.getCpdId())) {
+          return connectComposer.getRanVlDesc(sapd, nsd);
+        }
+      }
+    }
+    throw new NsdInvalidException(nsd.getNsdIdentifier(),
+        "RAN Sap not found for endpoints " +
+            ranEps.stream()
+                .map(VsbEndpoint::getEndPointId)
+                .collect(Collectors.toList())
+                .toString());
   }
 
   private NsVirtualLinkDesc findMgmtVld(Blueprint b, Nsd nsd)
