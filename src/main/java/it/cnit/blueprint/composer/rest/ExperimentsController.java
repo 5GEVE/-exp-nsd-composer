@@ -3,6 +3,7 @@ package it.cnit.blueprint.composer.rest;
 import it.cnit.blueprint.composer.exceptions.ContextInvalidException;
 import it.cnit.blueprint.composer.exceptions.NsdCompositionException;
 import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
+import it.cnit.blueprint.composer.exceptions.TransRuleCompositionException;
 import it.cnit.blueprint.composer.exceptions.TransRuleInvalidException;
 import it.cnit.blueprint.composer.exceptions.VsbInvalidException;
 import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
@@ -18,6 +19,7 @@ import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardExpBlueprintRequ
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -105,9 +107,9 @@ public class ExperimentsController {
     List<VsdNsdTranslationRule> expTransRules = null;
     try {
       expTransRules = translationRulesComposer.compose(expNsd, vsbTransRules);
-    } catch (TransRuleInvalidException e) {
-      // TODO create proper error response.
-      e.printStackTrace();
+    } catch (TransRuleInvalidException | TransRuleCompositionException e) {
+      log.warn("{}. Return empty translation rules.", e.getMessage());
+      expTransRules = new ArrayList<>();
     }
     return new ComposeResponse(expNsd, expTransRules);
   }

@@ -1,7 +1,9 @@
 package it.cnit.blueprint.composer.rules;
 
+import it.cnit.blueprint.composer.exceptions.TransRuleCompositionException;
 import it.cnit.blueprint.composer.exceptions.TransRuleInvalidException;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.util.ArrayList;
@@ -18,10 +20,16 @@ import org.springframework.stereotype.Service;
 public class TranslationRulesComposer {
 
   public List<VsdNsdTranslationRule> compose(Nsd expNsd,
-      List<VsdNsdTranslationRule> translationRules) throws TransRuleInvalidException {
+      List<VsdNsdTranslationRule> translationRules)
+      throws TransRuleInvalidException, TransRuleCompositionException {
     log.info("Compose and check translation rules for expNsd: '{}'", expNsd.getNsdIdentifier());
     List<VsdNsdTranslationRule> newTranslationRules = new ArrayList<>();
     for (VsdNsdTranslationRule tr : translationRules) {
+      try {
+        tr.isValid();
+      } catch (MalformattedElementException e) {
+        throw new TransRuleInvalidException("Invalid translation rule " + tr.toString());
+      }
       Optional<NsDf> optNsDf = expNsd.getNsDf().stream()
           .filter(nsDf -> nsDf.getNsDfId().equals(tr.getNsFlavourId())).findFirst();
       if (optNsDf.isPresent()) {
@@ -39,8 +47,16 @@ public class TranslationRulesComposer {
         log.error(m);
         throw new TransRuleInvalidException(m);
       }
-      newTranslationRules.add(new VsdNsdTranslationRule(tr.getInput(), expNsd.getNsdIdentifier(),
-          expNsd.getVersion(), tr.getNsFlavourId(), tr.getNsInstantiationLevelId()));
+      VsdNsdTranslationRule newTr = new VsdNsdTranslationRule(tr.getInput(),
+          expNsd.getNsdIdentifier(), expNsd.getVersion(), tr.getNsFlavourId(),
+          tr.getNsInstantiationLevelId());
+      try {
+        newTr.isValid();
+      } catch (MalformattedElementException e) {
+        throw new TransRuleCompositionException(
+            "Invalid translation rule after composition " + newTr.toString());
+      }
+      newTranslationRules.add(newTr);
     }
     return newTranslationRules;
   }
