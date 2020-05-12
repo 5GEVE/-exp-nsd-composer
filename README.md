@@ -3,7 +3,7 @@ A REST API module to compose the NSD of a VSB and multiple CBs.
 
 ## Install
 
-Some dependencies are not available in Maven repository. Check [pom.xml].
+Some dependencies are not available in Maven repository. Check `pom.xml`.
 
 Compile the project with:
 
