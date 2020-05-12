@@ -21,7 +21,6 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -119,8 +118,7 @@ public class ExperimentsController {
         .filter(VsbEndpoint::isRanConnection)
         .collect(Collectors.toList());
     if (ranEps.isEmpty()) {
-      throw new VsbInvalidException(b.getBlueprintId(),
-          "No RAN endpoint found in VSB " + b.getBlueprintId() + ".");
+      throw new VsbInvalidException(b.getBlueprintId(), "No RAN endpoint found in VSB");
     }
     for (VsbEndpoint rep : ranEps) {
       for (Sapd sapd : nsd.getSapd()) {
@@ -139,23 +137,25 @@ public class ExperimentsController {
 
   private NsVirtualLinkDesc findMgmtVld(Blueprint b, Nsd nsd)
       throws VsbInvalidException, NsdInvalidException {
-    Optional<VsbLink> optConnServ = b.getConnectivityServices().stream()
+    List<VsbLink> mgmtConnServs = b.getConnectivityServices().stream()
         .filter(VsbLink::isManagement)
-        .findFirst();
-    if (optConnServ.isPresent()) {
-      String name = optConnServ.get().getName();
-      Optional<NsVirtualLinkDesc> optVld = nsd.getVirtualLinkDesc().stream()
-          .filter(vld -> vld.getVirtualLinkDescId().equals(name))
-          .findFirst();
-      if (optVld.isPresent()) {
-        return optVld.get();
-      } else {
-        throw new NsdInvalidException(nsd.getNsdIdentifier(),
-            "Management Vld with id=" + name + "not found");
-      }
-    } else {
+        .collect(Collectors.toList());
+    if (mgmtConnServs.isEmpty()) {
       throw new VsbInvalidException(b.getBlueprintId(),
-          "No management connectivity service found in VSB " + b.getBlueprintId() + ".");
+          "No management connectivity service found in VSB");
     }
+    for (VsbLink cs : mgmtConnServs) {
+      for (NsVirtualLinkDesc vld : nsd.getVirtualLinkDesc()) {
+        if (cs.getName().equals(vld.getVirtualLinkDescId())) {
+          return vld;
+        }
+      }
+    }
+    throw new NsdInvalidException(nsd.getNsdIdentifier(),
+        "Management VLD not found for connectivity services " +
+            mgmtConnServs.stream()
+                .map(VsbLink::getName)
+                .collect(Collectors.toList())
+                .toString());
   }
 }
