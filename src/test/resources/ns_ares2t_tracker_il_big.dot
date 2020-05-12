@@ -1,19 +1,23 @@
 strict graph G {
   splines=false;
   overlap=false;
-  mindist=2.0;
+  mindist=0.5;
   -1503706314 [ label="vnfp_big_Ares2T_Tracker" shape="box" style="filled" fillcolor="yellowgreen" ];
   1169940735 [ label="vnfp_Ares2T_Vis" shape="box" style="filled" fillcolor="yellowgreen" ];
   1228317574 [ label="vlp_vl_tracking_mobile" shape="oval" style="filled" fillcolor="dodgerblue" ];
   -1844810866 [ label="vlp_vl_tracking_data" shape="oval" style="filled" fillcolor="dodgerblue" ];
-  -2137711178 [ label="vlp_vl_tracking_mgt" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  -1844537179 [ label="vlp_vl_tracking_mgmt" shape="oval" style="filled" fillcolor="dodgerblue" ];
+  -1844287569 [ label="vlp_vl_tracking_user" shape="oval" style="filled" fillcolor="dodgerblue" ];
   -734211891 [ label="sap_tracking_mobile" shape="oval" style="filled" fillcolor="darksalmon" ];
-  1141657039 [ label="sap_tracking_mgt" shape="oval" style="filled" fillcolor="darksalmon" ];
-  -1503706314 -- 1228317574 [ label="cp_tracker_ext_in" ];
-  -1503706314 -- -1844810866 [ label="cp_tracker_data" ];
-  -1503706314 -- -2137711178 [ label="cp_tracker_mgt" ];
-  1169940735 -- -1844810866 [ label="cp_vis_data" ];
-  1169940735 -- -2137711178 [ label="cp_vis_mgt" ];
+  1031629740 [ label="sap_tracking_mgmt" shape="oval" style="filled" fillcolor="darksalmon" ];
+  585344071 [ label="sap_vis_user" shape="oval" style="filled" fillcolor="darksalmon" ];
+  -1503706314 -- 1228317574 [ label="vnfp_big_Ares2T_Tracker_cp_tracker_ext_in" ];
+  -1503706314 -- -1844810866 [ label="vnfp_big_Ares2T_Tracker_cp_tracker_data" ];
+  -1503706314 -- -1844537179 [ label="vnfp_big_Ares2T_Tracker_cp_tracker_mgmt" ];
+  1169940735 -- -1844810866 [ label="vnfp_Ares2T_Vis_cp_vis_data" ];
+  1169940735 -- -1844537179 [ label="vnfp_Ares2T_Vis_cp_vis_mgmt" ];
+  1169940735 -- -1844287569 [ label="vnfp_Ares2T_Vis_cp_vis_user" ];
   -734211891 -- 1228317574 [ label="sap_tracking_mobile" ];
-  1141657039 -- -2137711178 [ label="sap_tracking_mgt" ];
+  1031629740 -- -1844537179 [ label="sap_tracking_mgmt" ];
+  585344071 -- -1844287569 [ label="sap_vis_user" ];
 }

@@ -11,17 +11,14 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>it.cnit.blueprint</groupId>
-  <artifactId>expbuilder</artifactId>
-  <version>0.0.1</version>
-  <description>A REST API module to compose VSD and CDs.</description>
-  <url>https://github.com/TheWall89/5geve-experiment-builder</url>
-  <packaging>docker-build</packaging>
+  <artifactId>composer</artifactId>
+  <version>0.0.2</version>
+  <description>A REST API module to compose NSDs.</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
-    <docker.repository>mpergolesi</docker.repository>
     <jgrapht.version>1.3.0</jgrapht.version>
   </properties>
 
@@ -129,87 +126,7 @@
         </exclusion>
       </exclusions>
     </dependency>
-
   </dependencies>
-
-  <profiles>
-    <profile>
-      <id>dev</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>io.fabric8</groupId>
-            <artifactId>docker-maven-plugin</artifactId>
-            <configuration>
-              <images>
-                <image>
-                  <alias>expbuilder-dev</alias>
-                  <name>${docker.repository}/${project.name}:${project.version}</name>
-                  <build>
-                    <dockerFileDir>${project.basedir}</dockerFileDir>
-                    <args>
-                      <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
-                    </args>
-                    <buildOptions>
-                      <target>dev</target>
-                    </buildOptions>
-                  </build>
-                </image>
-              </images>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>prod</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>io.fabric8</groupId>
-            <artifactId>docker-maven-plugin</artifactId>
-            <configuration>
-              <images>
-                <image>
-                  <alias>expbuilder-prod</alias>
-                  <name>${docker.repository}/${project.name}:${project.version}</name>
-                  <build>
-                    <dockerFileDir>${project.basedir}</dockerFileDir>
-                    <args>
-                      <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
-                      <!-- Labels -->
-                      <BUILD_DATE>${maven.build.timestamp}</BUILD_DATE>
-                      <REPOSITORY>${project.name}</REPOSITORY>
-                      <DESCRIPTION>${project.description}</DESCRIPTION>
-                      <VERSION>${project.version}</VERSION>
-                      <!--suppress UnresolvedMavenProperty -->
-                      <VCS_URL>${git.remote.origin.url}</VCS_URL>
-                      <!--suppress UnresolvedMavenProperty -->
-                      <VCS_REF>${git.commit.id}</VCS_REF>
-                      <COMMAND>java -jar ${project.build.finalName}.jar</COMMAND>
-                    </args>
-                    <buildOptions>
-                      <target>prod</target>
-                    </buildOptions>
-                  </build>
-                </image>
-              </images>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>pl.project13.maven</groupId>
-            <artifactId>git-commit-id-plugin</artifactId>
-            <configuration>
-              <injectAllReactorProjects>true</injectAllReactorProjects>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
   <build>
     <plugins>
@@ -272,29 +189,6 @@
         <plugin>
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.0.0</version>
-        </plugin>
-        <!-- maven-docker-plugin,
-        see https://github.com/fabric8io/docker-maven-plugin -->
-        <plugin>
-          <groupId>io.fabric8</groupId>
-          <artifactId>docker-maven-plugin</artifactId>
-          <version>0.28.0</version>
-          <extensions>true</extensions>
-        </plugin>
-        <plugin>
-          <groupId>pl.project13.maven</groupId>
-          <artifactId>git-commit-id-plugin</artifactId>
-          <version>2.2.5</version>
-          <executions>
-            <execution>
-              <id>get-the-git-infos</id>
-              <goals>
-                <goal>revision</goal>
-              </goals>
-              <!-- *NOTE*: The default phase of revision is initialize, but in case you want to change it, you can do so by adding the phase here -->
-              <phase>initialize</phase>
-            </execution>
-          </executions>
         </plugin>
       </plugins>
     </pluginManagement>

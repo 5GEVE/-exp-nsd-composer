@@ -1,0 +1,197 @@
+package it.cnit.blueprint.composer.nsd.generate;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import it.cnit.blueprint.composer.exceptions.NsdGenerationException;
+import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
+import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
+import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
+import it.nextworks.nfvmano.libs.ifa.common.enums.AddressType;
+import it.nextworks.nfvmano.libs.ifa.common.enums.CpRole;
+import it.nextworks.nfvmano.libs.ifa.common.enums.IpVersion;
+import it.nextworks.nfvmano.libs.ifa.common.enums.LayerProtocol;
+import it.nextworks.nfvmano.libs.ifa.common.enums.ServiceAvailabilityLevel;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.AddressData;
+import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.ConnectivityType;
+import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.LinkBitrateRequirements;
+import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkDf;
+import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.SecurityParameters;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.jgrapht.Graph;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.WebApplicationContext;
+
+@Service
+@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Slf4j
+@AllArgsConstructor
+public class NsdGenerator {
+
+  protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
+
+  private final NsdGraphService nsdGraphService;
+
+  @SneakyThrows(JsonProcessingException.class)
+  public Nsd generate(Blueprint blueprint) throws NsdInvalidException, NsdGenerationException {
+
+    log.debug("blueprint {}:\n{}", blueprint.getBlueprintId(),
+        OBJECT_MAPPER.writeValueAsString(blueprint));
+
+    Nsd nsd = new Nsd();
+    nsd.setNsdIdentifier(blueprint.getBlueprintId() + "_nsd");
+    nsd.setDesigner("NSD generator");
+    nsd.setNsdInvariantId(blueprint.getBlueprintId() + "_nsd");
+    nsd.setVersion(blueprint.getVersion());
+    nsd.setNsdName(blueprint.getName() + " NSD");
+    nsd.setSecurity(new SecurityParameters(
+        "FC_NSD_SIGNATURE",
+        "FC_NSD_ALGORITHM",
+        "FC_NSD_CERTIFICATE"
+    ));
+
+    NsDf nsDf = new NsDf();
+    nsDf.setNsDfId(blueprint.getBlueprintId() + "_df");
+    nsDf.setFlavourKey(blueprint.getBlueprintId() + "_df_fk");
+
+    NsLevel nsLevel = new NsLevel();
+    nsLevel.setNsLevelId(blueprint.getBlueprintId() + "_il_default");
+    nsLevel.setDescription("Default Instantiation Level");
+
+    for (VsbLink connService : blueprint.getConnectivityServices()) {
+      NsVirtualLinkDesc vld = new NsVirtualLinkDesc();
+      vld.setVirtualLinkDescId(connService.getName());
+      vld.setVirtualLinkDescProvider(nsd.getDesigner());
+      vld.setVirtuaLinkDescVersion(nsd.getVersion());
+      vld.setConnectivityType(new ConnectivityType(LayerProtocol.IPV4, ""));
+      VirtualLinkDf vldf = new VirtualLinkDf();
+      vldf.setFlavourId(vld.getVirtualLinkDescId() + "_df");
+      vldf.setServiceAvaibilityLevel(ServiceAvailabilityLevel.LEVEL_1);
+      vld.setVirtualLinkDf(Collections.singletonList(vldf));
+      nsd.getVirtualLinkDesc().add(vld);
+
+      VirtualLinkProfile vlp = new VirtualLinkProfile();
+      vlp.setVirtualLinkProfileId(vld.getVirtualLinkDescId() + "_vlp");
+      vlp.setVirtualLinkDescId(vld.getVirtualLinkDescId());
+      vlp.setFlavourId(vldf.getFlavourId());
+      vlp.setMaxBitrateRequirements(new LinkBitrateRequirements("1", "1"));
+      vlp.setMinBitrateRequirements(new LinkBitrateRequirements("1", "1"));
+      nsDf.getVirtualLinkProfile().add(vlp);
+
+      VirtualLinkToLevelMapping vlMap = new VirtualLinkToLevelMapping();
+      vlMap.setVirtualLinkProfileId(vlp.getVirtualLinkProfileId());
+      vlMap.setBitRateRequirements(new LinkBitrateRequirements("1", "1"));
+      nsLevel.getVirtualLinkToLevelMapping().add(vlMap);
+    }
+
+    List<Sapd> sapdList = new ArrayList<>();
+    for (VsbEndpoint e : blueprint.getEndPoints()) {
+      if (e.isExternal() && e.getEndPointId().contains("sap")) {
+        Sapd sapd = new Sapd();
+        sapd.setCpdId(e.getEndPointId());
+        sapd.setLayerProtocol(LayerProtocol.IPV4);
+        sapd.setCpRole(CpRole.ROOT);
+        sapd.setSapAddressAssignment(false);
+        for (VsbLink cs : blueprint.getConnectivityServices()) {
+          for (String ep : cs.getEndPointIds()) {
+            if (ep.equals(sapd.getCpdId())) {
+              sapd.setNsVirtualLinkDescId(cs.getName());
+              break;
+            }
+          }
+        }
+        AddressData addressData = new AddressData();
+        addressData.setAddressType(AddressType.IP_ADDRESS);
+        addressData.setiPAddressType(IpVersion.IPv4);
+        addressData.setiPAddressAssignment(false);
+        addressData.setFloatingIpActivated(true);
+        addressData.setNumberOfIpAddress(1);
+        sapd.setAddressData(Collections.singletonList(addressData));
+
+        sapdList.add(sapd);
+      }
+    }
+    nsd.setSapd(sapdList);
+
+    for (VsComponent vsc : blueprint.getAtomicComponents()) {
+      nsd.getVnfdId().add(vsc.getComponentId());
+      VnfProfile vnfp = new VnfProfile();
+      vnfp.setVnfProfileId(vsc.getComponentId() + "_vnfp");
+      vnfp.setVnfdId(vsc.getComponentId());
+      vnfp.setFlavourId(vsc.getComponentId() + "_vnf_df");
+      vnfp.setInstantiationLevel(vsc.getComponentId() + "_vnf_il");
+      vnfp.setMinNumberOfInstances(1);
+      vnfp.setMaxNumberOfInstances(1);
+      List<NsVirtualLinkConnectivity> nsVirtualLinkConnectivities = new ArrayList<>();
+      for (String ep : vsc.getEndPointsIds()) {
+        for (VsbLink cs : blueprint.getConnectivityServices()) {
+          for (String csEp : cs.getEndPointIds()) {
+            if (csEp.equals(ep)) {
+              NsVirtualLinkConnectivity nsVLC = new NsVirtualLinkConnectivity();
+              String vldId = cs.getName();
+              Optional<VirtualLinkProfile> optVlp = nsDf.getVirtualLinkProfile().stream()
+                  .filter(vlp -> vlp.getVirtualLinkDescId().equals(vldId)).findFirst();
+              if (optVlp.isPresent()) {
+                nsVLC.setVirtualLinkProfileId(optVlp.get().getVirtualLinkProfileId());
+                nsVLC.setCpdId(Collections.singletonList(ep));
+                nsVirtualLinkConnectivities.add(nsVLC);
+              }
+            }
+          }
+        }
+      }
+      vnfp.setNsVirtualLinkConnectivity(nsVirtualLinkConnectivities);
+      nsDf.getVnfProfile().add(vnfp);
+      nsLevel.getVnfToLevelMapping().add(new VnfToLevelMapping(vnfp.getVnfProfileId(), 1));
+    }
+
+    nsDf.setNsInstantiationLevel(Collections.singletonList(nsLevel));
+    nsDf.setDefaultNsInstantiationLevelId(nsLevel.getNsLevelId());
+    nsd.setNsDf(Collections.singletonList(nsDf));
+
+    log.debug("Nsd AFTER generation with {}:\n{}",
+        nsd.getNsdIdentifier(), OBJECT_MAPPER.writeValueAsString(nsd));
+
+    // Nsd validation and logging
+    try {
+      nsd.isValid();
+    } catch (MalformattedElementException e) {
+      throw new NsdGenerationException(nsd.getNsdIdentifier(),
+          "Nsd not valid after generation", e);
+    }
+    Graph<ProfileVertex, String> g = nsdGraphService.buildGraph(nsd.getSapd(), nsDf, nsLevel);
+    log.debug("Graph AFTER generation with {}:\n{}",
+        nsd.getNsdIdentifier(), nsdGraphService.export(g));
+    if (!nsdGraphService.isConnected(g)) {
+      throw new NsdGenerationException(nsd.getNsdIdentifier(),
+          "Network topology not connected for NsDf " + nsDf.getNsDfId() + " and NsLevel "
+              + nsLevel.getNsLevelId());
+    }
+
+    return nsd;
+  }
+
+}
