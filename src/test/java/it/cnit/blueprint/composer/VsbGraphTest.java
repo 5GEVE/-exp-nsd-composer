@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.io.ExportException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 @Slf4j
@@ -16,6 +17,7 @@ public class VsbGraphTest {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
+  @Ignore
   @Test
   public void Ares2tTrackerTestYAML()
       throws IOException, MalformattedElementException, ExportException {
