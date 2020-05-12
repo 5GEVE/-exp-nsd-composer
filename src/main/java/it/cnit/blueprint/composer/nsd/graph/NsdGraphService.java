@@ -49,7 +49,7 @@ public class NsdGraphService {
             new String[]{vnfToLevelMapping.getVnfProfileId(), nsDf.getNsDfId(),
                 nsLevel.getNsLevelId()}).getMessage();
         log.error(message);
-        throw new NsdInvalidException(message);
+        throw new NsdInvalidException(nsDf.getNsDfId(), message);
       }
       // TODO handle the number of instances to build the graph
       vnfPVertices.add(v);
@@ -71,7 +71,7 @@ public class NsdGraphService {
             new String[]{vlToLevelMapping.getVirtualLinkProfileId(), nsDf.getNsDfId(),
                 nsLevel.getNsLevelId()}).getMessage();
         log.error(message);
-        throw new NsdInvalidException(message);
+        throw new NsdInvalidException(nsDf.getNsDfId(), message);
       }
       vlPVertices.add(v);
       g.addVertex(v);

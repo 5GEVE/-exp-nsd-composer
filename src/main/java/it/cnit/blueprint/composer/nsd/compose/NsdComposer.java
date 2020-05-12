@@ -3,9 +3,9 @@ package it.cnit.blueprint.composer.nsd.compose;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
-import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.common.elements.VirtualLinkProfile;
@@ -188,7 +188,8 @@ public abstract class NsdComposer {
       return getVlDescriptor(ranSapd.getNsVirtualLinkDescId(), expNsd);
     } catch (NotExistingEntityException e) {
       log.error(e.getMessage());
-      throw new NsdInvalidException("VLD not found for SAP " + ranSapd.getCpdId(), e);
+      throw new NsdInvalidException(expNsd.getNsdIdentifier(),
+          "VLD not found for SAP " + ranSapd.getCpdId(), e);
     }
   }
 
@@ -218,7 +219,7 @@ public abstract class NsdComposer {
             .buildGraph(expNsd.getSapd(), expNsDf, expNsLvl);
         log.debug("expG BEFORE composition :\n{}", nsdGraphService.export(expG));
         if (!nsdGraphService.isConnected(expG)) {
-          throw new NsdInvalidException(
+          throw new NsdInvalidException(expNsd.getNsdIdentifier(),
               "Network topology not connected for NsDf " + expNsDf.getNsDfId() + " and NsLevel "
                   + expNsLvl.getNsLevelId());
         }
@@ -228,7 +229,8 @@ public abstract class NsdComposer {
           ranVlInfo = retrieveVlInfoByDesc(ranVld, expNsDf, expNsLvl);
           log.debug("Found VlInfo for ranVld {} in expNsd.", ranVld.getVirtualLinkDescId());
         } catch (NotExistingEntityException e) {
-          throw new NsdInvalidException("Error retrieving RAN VL info for VLD " + ranVld, e);
+          throw new NsdInvalidException(expNsd.getNsdIdentifier(),
+              "Error retrieving RAN VL info for VLD " + ranVld, e);
         }
         VlInfo expMgmtVlInfo;
         try {
@@ -236,7 +238,7 @@ public abstract class NsdComposer {
           log.debug("Found VlInfo for expMgmtVld {} in expNsd.",
               expMgmtVld.getVirtualLinkDescId());
         } catch (NotExistingEntityException e) {
-          throw new NsdInvalidException(
+          throw new NsdInvalidException(expNsd.getNsdIdentifier(),
               "Error retrieving Experiment Management VL info for VLD " + ranVld
                   .getVirtualLinkDescId(), e);
         }
@@ -246,7 +248,7 @@ public abstract class NsdComposer {
           log.debug("Found VlInfo for ctxMgmtVld {} in ctxNsd.",
               ctxMgmtVld.getVirtualLinkDescId());
         } catch (NotExistingEntityException e) {
-          throw new NsdInvalidException(
+          throw new NsdInvalidException(ctxNsd.getNsdIdentifier(),
               "Error retrieving Context Management VL info for VLD " + ranVld, e);
         }
         composeWithStrategy(connectInput, ranVlInfo, expMgmtVlInfo, ctxMgmtVlInfo,
@@ -257,13 +259,14 @@ public abstract class NsdComposer {
         try {
           expNsd.isValid();
         } catch (MalformattedElementException e) {
-          throw new NsdInvalidException("Nsd not valid after composition", e);
+          throw new NsdInvalidException(expNsd.getNsdIdentifier(),
+              "Nsd not valid after composition", e);
         }
         expG = nsdGraphService.buildGraph(expNsd.getSapd(), expNsDf, expNsLvl);
         log.debug("Graph AFTER composition with {}:\n{}",
             ctxNsd.getNsdIdentifier(), nsdGraphService.export(expG));
         if (!nsdGraphService.isConnected(expG)) {
-          throw new NsdInvalidException(
+          throw new NsdInvalidException(expNsd.getNsdIdentifier(),
               "Network topology not connected for NsDf " + expNsDf.getNsDfId() + " and NsLevel "
                   + expNsLvl.getNsLevelId());
         }

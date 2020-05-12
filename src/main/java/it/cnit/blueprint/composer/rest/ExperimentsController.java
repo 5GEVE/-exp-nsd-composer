@@ -125,8 +125,8 @@ public class ExperimentsController {
       if (ranSapd.isPresent()) {
         return connectComposer.getRanVlDesc(ranSapd.get(), nsd);
       } else {
-        throw new NsdInvalidException(
-            "RAN Sap with ID " + epId + " not found in NSD " + nsd.getNsdIdentifier());
+        throw new NsdInvalidException(nsd.getNsdIdentifier(),
+            "RAN Sap with ID " + epId + " not found");
       }
     } else {
       throw new VsbInvalidException("No RAN endpoint found in VSB " + b.getBlueprintId() + ".");
@@ -146,8 +146,8 @@ public class ExperimentsController {
       if (optVld.isPresent()) {
         return optVld.get();
       } else {
-        throw new NsdInvalidException(
-            "Management Vld with id=" + name + "not found in NSD " + nsd.getNsdIdentifier() + ".");
+        throw new NsdInvalidException(nsd.getNsdIdentifier(),
+            "Management Vld with id=" + name + "not found");
       }
     } else {
       throw new VsbInvalidException(

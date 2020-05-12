@@ -3,9 +3,9 @@ package it.cnit.blueprint.composer.nsd.generate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
-import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
@@ -178,7 +178,8 @@ public class NsdGenerator {
     try {
       nsd.isValid();
     } catch (MalformattedElementException e) {
-      throw new NsdInvalidException("Nsd looks not valid after generation", e);
+      throw new NsdInvalidException(nsd.getNsdIdentifier(),
+          "Nsd looks not valid after generation", e);
     }
 
     Graph<ProfileVertex, String> g = nsdGraphService.buildGraph(nsd.getSapd(), nsDf, nsLevel);

@@ -50,7 +50,7 @@ public class PassThroughComposer extends NsdComposer {
       log.debug("Found VnfInfo for vnfpId {} in context.", ctxVnfpId);
       ctxVnfInfo.setVlcLists(mgmtVlProfileIds);
     } catch (NotExistingEntityException e) {
-      throw new NsdInvalidException(
+      throw new NsdInvalidException(ctxNsd.getNsdIdentifier(),
           "Error retrieving VNF info for VNF profile ID " + ctxVnfpId, e);
     }
 
@@ -62,7 +62,8 @@ public class PassThroughComposer extends NsdComposer {
           ctxVnfInfo.getDataVlcList().get(0).getVirtualLinkProfileId(),
           ctxNsd, ctxNsDf, ctxNsLvl);
     } catch (NotExistingEntityException e) {
-      throw new NsdInvalidException("Error retrieving VL info for a non-management VL", e);
+      throw new NsdInvalidException(ctxNsd.getNsdIdentifier(),
+          "Error retrieving VL info for a non-management VL", e);
     }
 
     // Retrieve RAN closest VNF information from exp
@@ -75,7 +76,7 @@ public class PassThroughComposer extends NsdComposer {
       try {
         vnfProfile = getVnfProfileById(vnfLvl.getVnfProfileId(), expNsDf);
       } catch (NotExistingEntityException e) {
-        throw new NsdInvalidException(
+        throw new NsdInvalidException(expNsd.getNsdIdentifier(),
             "Error retrieving VNF info for VNF profile ID " + vnfLvl.getVnfProfileId(), e);
       }
       for (NsVirtualLinkConnectivity vlc : vnfProfile.getNsVirtualLinkConnectivity()) {
@@ -88,7 +89,7 @@ public class PassThroughComposer extends NsdComposer {
       }
     }
     if (ranVnfCpd == null) {
-      throw new NsdInvalidException(
+      throw new NsdInvalidException(expNsd.getNsdIdentifier(),
           "Can't find a VNF close to ranVlInfo in nsLevel " + expNsLvl.getNsLevelId());
     }
     log.debug("ranVnfProfile: {}", ranVnfProfile.getVnfProfileId());
@@ -130,7 +131,7 @@ public class PassThroughComposer extends NsdComposer {
         ctxVnfInfo.cleanUpVlc(ctxVnfInfo.getDataVlcList().get(i));
       }
     } catch (NotExistingEntityException e) {
-      throw new NsdInvalidException("Error in connecting VNF to VL.", e);
+      throw new NsdInvalidException(expNsd.getNsdIdentifier(), "Error in connecting VNF to VL.", e);
     }
   }
 }
