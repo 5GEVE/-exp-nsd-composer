@@ -1,7 +1,7 @@
 package it.cnit.blueprint.composer.nsd.compose;
 
+import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
-import it.cnit.blueprint.composer.rest.InvalidNsdException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
@@ -80,7 +80,7 @@ public class ConnectComposer extends NsdComposer {
       Nsd ctxNsd,
       NsDf ctxNsDf,
       NsLevel ctxNsLvl)
-      throws InvalidNsdException {
+      throws NsdInvalidException {
     log.info("Compose with CONNECT.");
     List<String> mgmtVlProfileIds = Arrays.asList(
         ctxMgmtVlInfo.getVlProfile().getVirtualLinkProfileId(),
@@ -95,7 +95,7 @@ public class ConnectComposer extends NsdComposer {
           vnfInfo = retrieveVnfInfoByProfileId(vnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
           vnfInfo.setVlcLists(mgmtVlProfileIds);
         } catch (NotExistingEntityException e) {
-          throw new InvalidNsdException(
+          throw new NsdInvalidException(ctxNsd.getNsdIdentifier(),
               "Error retrieving VNF info for VNF profile ID " + vnfpId, e);
         }
         VlInfo vlInfo;
@@ -110,13 +110,14 @@ public class ConnectComposer extends NsdComposer {
                 ranVlInfo.getVlProfile().getVirtualLinkProfileId());
             vlInfo = retrieveVlInfoByProfileId(nonMgmtVlpId, expNsd, expNsDf, expNsLvl);
           } catch (NotExistingEntityException e) {
-            throw new InvalidNsdException("Error retrieving VL info for a non-management VL", e);
+            throw new NsdInvalidException(expNsd.getNsdIdentifier(),
+                "Error retrieving VL info for a non-management VL", e);
           }
         }
         try {
           addConnectVnfToVl(vnfInfo, vlInfo, expMgmtVlInfo, expNsd, expNsDf, expNsLvl);
         } catch (NotExistingEntityException e) {
-          throw new InvalidNsdException(
+          throw new NsdInvalidException(expNsd.getNsdIdentifier(),
               "Error connecting VNF profile " + vnfInfo.getVnfProfile().getVnfProfileId(), e);
         }
       }
@@ -129,7 +130,7 @@ public class ConnectComposer extends NsdComposer {
           vnfInfo = retrieveVnfInfoByProfileId(vnfpId, ctxNsd, ctxNsDf, ctxNsLvl);
           vnfInfo.setVlcLists(mgmtVlProfileIds);
         } catch (NotExistingEntityException e) {
-          throw new InvalidNsdException(
+          throw new NsdInvalidException(ctxNsd.getNsdIdentifier(),
               "Error retrieving VNF info for VNFD ID " + entry.getKey(), e);
         }
         VlInfo vlInfo;
@@ -137,13 +138,13 @@ public class ConnectComposer extends NsdComposer {
           String vlpId = getVlProfileByDescId(entry.getValue(), ctxNsDf).getVirtualLinkProfileId();
           vlInfo = retrieveVlInfoByProfileId(vlpId, ctxNsd, ctxNsDf, ctxNsLvl);
         } catch (NotExistingEntityException e) {
-          throw new InvalidNsdException(
+          throw new NsdInvalidException(ctxNsd.getNsdIdentifier(),
               "Error retrieving VL info for VLD ID " + entry.getValue(), e);
         }
         try {
           addConnectVnfToVl(vnfInfo, vlInfo, expMgmtVlInfo, expNsd, expNsDf, expNsLvl);
         } catch (NotExistingEntityException e) {
-          throw new InvalidNsdException(
+          throw new NsdInvalidException(expNsd.getNsdIdentifier(),
               "Error connecting VNF profile " + vnfInfo.getVnfProfile().getVnfProfileId(), e);
         }
       }

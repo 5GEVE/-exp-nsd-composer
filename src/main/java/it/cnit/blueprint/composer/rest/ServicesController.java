@@ -1,5 +1,6 @@
 package it.cnit.blueprint.composer.rest;
 
+import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.cnit.blueprint.composer.nsd.generate.NsdGenerator;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
@@ -25,7 +26,7 @@ public class ServicesController {
     Nsd nsd;
     try {
       nsd = nsdGenerator.generate(vsb);
-    } catch (InvalidNsdException e) {
+    } catch (NsdInvalidException e) {
       //TODO handle exception
       nsd = null;
       e.printStackTrace();

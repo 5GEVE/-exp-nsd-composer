@@ -1,11 +1,15 @@
 package it.cnit.blueprint.composer.rest;
 
+import it.cnit.blueprint.composer.exceptions.ContextInvalidException;
+import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
+import it.cnit.blueprint.composer.exceptions.TransRuleInvalidException;
+import it.cnit.blueprint.composer.exceptions.VsbInvalidException;
 import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
-import it.cnit.blueprint.composer.rules.InvalidTranslationRuleException;
 import it.cnit.blueprint.composer.rules.TranslationRulesComposer;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CompositionStrategy;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
@@ -21,10 +25,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @Slf4j
@@ -46,10 +52,11 @@ public class ExperimentsController {
   @PostMapping("/experiments")
   public ComposeResponse composeExperiment(@RequestBody ComposeRequest composeRequest) {
 
+    VsBlueprint vsb = composeRequest.getVsbRequest().getVsBlueprint();
     Nsd expNsd = composeRequest.getVsbRequest().getNsds().get(0);
     expNsd.setNsdIdentifier(UUID.randomUUID().toString());
     expNsd.setNsdInvariantId(UUID.randomUUID().toString());
-    expNsd.setDesigner(expNsd.getDesigner() + " + NSD Generator");
+    expNsd.setDesigner(expNsd.getDesigner() + " + NSD Composer");
 
     try {
       // Assumptions:
@@ -58,15 +65,15 @@ public class ExperimentsController {
           expNsd);
       for (Context ctx : composeRequest.getContexts()) {
         // - The Ctx has only 1 Nsd.
-        Nsd ctxNsd = ctx.getCtxbRequest().getNsds().get(0);
         CtxBlueprint ctxB = ctx.getCtxbRequest().getCtxBlueprint();
+        Nsd ctxNsd = ctx.getCtxbRequest().getNsds().get(0);
 
         log.info("Current CtxB: {}", ctxB.getBlueprintId());
 
         if (ctx.getConnectInput() == null) {
           ctx.setConnectInput(new HashMap<>());
         }
-        NsVirtualLinkDesc expMgmtVld = findMgmtVld(ctxB, ctxNsd);
+        NsVirtualLinkDesc expMgmtVld = findMgmtVld(vsb, expNsd);
         NsVirtualLinkDesc ctxMgmtVld = findMgmtVld(ctxB, ctxNsd);
         if (ctxB.getCompositionStrategy().equals(CompositionStrategy.CONNECT)) {
           log.info("Strategy is CONNECT");
@@ -77,7 +84,7 @@ public class ExperimentsController {
           if (ctxNsd.getVnfdId().size() == 1) {
             log.debug("ctxNsd has only one vnfdId.");
           } else {
-            throw new InvalidContextException("More than one VNF found in Ctx for PASS_THROUGH");
+            throw new ContextInvalidException("More than one VNFD ID found for PASS_THROUGH");
           }
           passThroughComposer
               .compose(ctx.getConnectInput(), ranVld, expMgmtVld, expNsd, ctxMgmtVld, ctxNsd);
@@ -86,20 +93,19 @@ public class ExperimentsController {
               ctxB.getCompositionStrategy().name())
               .getMessage();
           log.error(m);
-          throw new InvalidContextException(m);
+          throw new ContextInvalidException(m);
         }
 
       }
-    } catch (InvalidVsbException | InvalidNsdException | InvalidContextException e) {
-      log.error(e.getMessage(), e);
-      //TODO create and return a 422 response.
+    } catch (VsbInvalidException | NsdInvalidException | ContextInvalidException e) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     }
 
     List<VsdNsdTranslationRule> translationRules = null;
     try {
       translationRules = translationRulesComposer
           .compose(expNsd, composeRequest.getVsbRequest().getTranslationRules());
-    } catch (InvalidTranslationRuleException e) {
+    } catch (TransRuleInvalidException e) {
       // TODO create proper error response.
       e.printStackTrace();
     }
@@ -107,9 +113,9 @@ public class ExperimentsController {
   }
 
   private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd)
-      throws InvalidNsdException, InvalidVsbException {
+      throws NsdInvalidException, VsbInvalidException {
     Optional<VsbEndpoint> ranEp = b.getEndPoints().stream()
-        .filter(VsbEndpoint::isRanConnection)
+        .filter(e -> e.isRanConnection() && e.getEndPointId().contains("sap"))
         .findFirst();
     if (ranEp.isPresent()) {
       String epId = ranEp.get().getEndPointId();
@@ -119,16 +125,17 @@ public class ExperimentsController {
       if (ranSapd.isPresent()) {
         return connectComposer.getRanVlDesc(ranSapd.get(), nsd);
       } else {
-        throw new InvalidNsdException(
-            "RAN Sap with id=" + epId + "not found in NSD " + nsd.getNsdIdentifier() + ".");
+        throw new NsdInvalidException(nsd.getNsdIdentifier(),
+            "RAN Sap with ID " + epId + " not found");
       }
     } else {
-      throw new InvalidVsbException("No RAN endpoint found in VSB " + b.getBlueprintId() + ".");
+      throw new VsbInvalidException(b.getBlueprintId(),
+          "No RAN endpoint found in VSB " + b.getBlueprintId() + ".");
     }
   }
 
   private NsVirtualLinkDesc findMgmtVld(Blueprint b, Nsd nsd)
-      throws InvalidVsbException, InvalidNsdException {
+      throws VsbInvalidException, NsdInvalidException {
     Optional<VsbLink> optConnServ = b.getConnectivityServices().stream()
         .filter(VsbLink::isManagement)
         .findFirst();
@@ -140,11 +147,11 @@ public class ExperimentsController {
       if (optVld.isPresent()) {
         return optVld.get();
       } else {
-        throw new InvalidNsdException(
-            "Management Vld with id=" + name + "not found in NSD " + nsd.getNsdIdentifier() + ".");
+        throw new NsdInvalidException(nsd.getNsdIdentifier(),
+            "Management Vld with id=" + name + "not found");
       }
     } else {
-      throw new InvalidVsbException(
+      throw new VsbInvalidException(b.getBlueprintId(),
           "No management connectivity service found in VSB " + b.getBlueprintId() + ".");
     }
   }

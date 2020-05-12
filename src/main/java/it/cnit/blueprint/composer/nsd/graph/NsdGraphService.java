@@ -1,6 +1,6 @@
 package it.cnit.blueprint.composer.nsd.graph;
 
-import it.cnit.blueprint.composer.rest.InvalidNsdException;
+import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
@@ -30,7 +30,7 @@ public class NsdGraphService {
   private GraphExporter graphExporter;
 
   public Graph<ProfileVertex, String> buildGraph(List<Sapd> sapdList, NsDf nsDf, NsLevel nsLevel)
-      throws InvalidNsdException {
+      throws NsdInvalidException {
     Graph<ProfileVertex, String> g = new SimpleGraph<>(String.class);
     List<VnfProfileVertex> vnfPVertices = new ArrayList<>();
     List<PnfProfileVertex> pnfPVertices = new ArrayList<>();
@@ -49,7 +49,7 @@ public class NsdGraphService {
             new String[]{vnfToLevelMapping.getVnfProfileId(), nsDf.getNsDfId(),
                 nsLevel.getNsLevelId()}).getMessage();
         log.error(message);
-        throw new InvalidNsdException(message);
+        throw new NsdInvalidException(nsDf.getNsDfId(), message);
       }
       // TODO handle the number of instances to build the graph
       vnfPVertices.add(v);
@@ -71,7 +71,7 @@ public class NsdGraphService {
             new String[]{vlToLevelMapping.getVirtualLinkProfileId(), nsDf.getNsDfId(),
                 nsLevel.getNsLevelId()}).getMessage();
         log.error(message);
-        throw new InvalidNsdException(message);
+        throw new NsdInvalidException(nsDf.getNsDfId(), message);
       }
       vlPVertices.add(v);
       g.addVertex(v);
