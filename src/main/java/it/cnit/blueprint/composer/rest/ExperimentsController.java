@@ -15,21 +15,19 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
-import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardExpBlueprintRequest;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -100,11 +98,11 @@ public class ExperimentsController {
       }
     } catch (VsbInvalidException | NsdInvalidException | ContextInvalidException e) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
-    } catch (NsdCompositionException e){
+    } catch (NsdCompositionException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
-    List<VsdNsdTranslationRule> expTransRules = null;
+    List<VsdNsdTranslationRule> expTransRules;
     try {
       expTransRules = translationRulesComposer.compose(expNsd, vsbTransRules);
     } catch (TransRuleInvalidException | TransRuleCompositionException e) {
@@ -116,45 +114,48 @@ public class ExperimentsController {
 
   private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd)
       throws NsdInvalidException, VsbInvalidException {
-    Optional<VsbEndpoint> ranEp = b.getEndPoints().stream()
-        .filter(e -> e.isRanConnection() && e.getEndPointId().contains("sap"))
-        .findFirst();
-    if (ranEp.isPresent()) {
-      String epId = ranEp.get().getEndPointId();
-      Optional<Sapd> ranSapd = nsd.getSapd().stream()
-          .filter(sapd -> sapd.getCpdId().equals(epId))
-          .findFirst();
-      if (ranSapd.isPresent()) {
-        return connectComposer.getRanVlDesc(ranSapd.get(), nsd);
-      } else {
-        throw new NsdInvalidException(nsd.getNsdIdentifier(),
-            "RAN Sap with ID " + epId + " not found");
-      }
-    } else {
-      throw new VsbInvalidException(b.getBlueprintId(),
-          "No RAN endpoint found in VSB " + b.getBlueprintId() + ".");
+    List<VsbEndpoint> ranEps = b.getEndPoints().stream()
+        .filter(VsbEndpoint::isRanConnection)
+        .collect(Collectors.toList());
+    if (ranEps.isEmpty()) {
+      throw new VsbInvalidException(b.getBlueprintId(), "No RAN endpoint found in VSB");
     }
+    for (VsbEndpoint rep : ranEps) {
+      for (Sapd sapd : nsd.getSapd()) {
+        if (rep.getEndPointId().equals(sapd.getCpdId())) {
+          return connectComposer.getRanVlDesc(sapd, nsd);
+        }
+      }
+    }
+    throw new NsdInvalidException(nsd.getNsdIdentifier(),
+        "RAN Sap not found for endpoints " +
+            ranEps.stream()
+                .map(VsbEndpoint::getEndPointId)
+                .collect(Collectors.toList())
+                .toString());
   }
 
   private NsVirtualLinkDesc findMgmtVld(Blueprint b, Nsd nsd)
       throws VsbInvalidException, NsdInvalidException {
-    Optional<VsbLink> optConnServ = b.getConnectivityServices().stream()
+    List<VsbLink> mgmtConnServs = b.getConnectivityServices().stream()
         .filter(VsbLink::isManagement)
-        .findFirst();
-    if (optConnServ.isPresent()) {
-      String name = optConnServ.get().getName();
-      Optional<NsVirtualLinkDesc> optVld = nsd.getVirtualLinkDesc().stream()
-          .filter(vld -> vld.getVirtualLinkDescId().equals(name))
-          .findFirst();
-      if (optVld.isPresent()) {
-        return optVld.get();
-      } else {
-        throw new NsdInvalidException(nsd.getNsdIdentifier(),
-            "Management Vld with id=" + name + "not found");
-      }
-    } else {
+        .collect(Collectors.toList());
+    if (mgmtConnServs.isEmpty()) {
       throw new VsbInvalidException(b.getBlueprintId(),
-          "No management connectivity service found in VSB " + b.getBlueprintId() + ".");
+          "No management connectivity service found in VSB");
     }
+    for (VsbLink cs : mgmtConnServs) {
+      for (NsVirtualLinkDesc vld : nsd.getVirtualLinkDesc()) {
+        if (cs.getName().equals(vld.getVirtualLinkDescId())) {
+          return vld;
+        }
+      }
+    }
+    throw new NsdInvalidException(nsd.getNsdIdentifier(),
+        "Management VLD not found for connectivity services " +
+            mgmtConnServs.stream()
+                .map(VsbLink::getName)
+                .collect(Collectors.toList())
+                .toString());
   }
 }
