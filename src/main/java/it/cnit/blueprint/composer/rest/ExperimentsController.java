@@ -1,6 +1,6 @@
 package it.cnit.blueprint.composer.rest;
 
-import it.cnit.blueprint.composer.exceptions.InvalidContextException;
+import it.cnit.blueprint.composer.exceptions.ContextInvalidException;
 import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.cnit.blueprint.composer.exceptions.TransRuleInvalidException;
 import it.cnit.blueprint.composer.exceptions.VsbInvalidException;
@@ -84,7 +84,7 @@ public class ExperimentsController {
           if (ctxNsd.getVnfdId().size() == 1) {
             log.debug("ctxNsd has only one vnfdId.");
           } else {
-            throw new InvalidContextException("More than one VNFD ID found for PASS_THROUGH");
+            throw new ContextInvalidException("More than one VNFD ID found for PASS_THROUGH");
           }
           passThroughComposer
               .compose(ctx.getConnectInput(), ranVld, expMgmtVld, expNsd, ctxMgmtVld, ctxNsd);
@@ -93,11 +93,11 @@ public class ExperimentsController {
               ctxB.getCompositionStrategy().name())
               .getMessage();
           log.error(m);
-          throw new InvalidContextException(m);
+          throw new ContextInvalidException(m);
         }
 
       }
-    } catch (VsbInvalidException | NsdInvalidException | InvalidContextException e) {
+    } catch (VsbInvalidException | NsdInvalidException | ContextInvalidException e) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     }
 
