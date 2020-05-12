@@ -56,7 +56,7 @@ public class ExperimentsController {
     Nsd expNsd = composeRequest.getVsbRequest().getNsds().get(0);
     expNsd.setNsdIdentifier(UUID.randomUUID().toString());
     expNsd.setNsdInvariantId(UUID.randomUUID().toString());
-    expNsd.setDesigner(expNsd.getDesigner() + " + NSD Generator");
+    expNsd.setDesigner(expNsd.getDesigner() + " + NSD Composer");
 
     try {
       // Assumptions:
