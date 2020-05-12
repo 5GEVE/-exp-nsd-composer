@@ -129,7 +129,8 @@ public class ExperimentsController {
             "RAN Sap with ID " + epId + " not found");
       }
     } else {
-      throw new VsbInvalidException("No RAN endpoint found in VSB " + b.getBlueprintId() + ".");
+      throw new VsbInvalidException(b.getBlueprintId(),
+          "No RAN endpoint found in VSB " + b.getBlueprintId() + ".");
     }
   }
 
@@ -150,7 +151,7 @@ public class ExperimentsController {
             "Management Vld with id=" + name + "not found");
       }
     } else {
-      throw new VsbInvalidException(
+      throw new VsbInvalidException(b.getBlueprintId(),
           "No management connectivity service found in VSB " + b.getBlueprintId() + ".");
     }
   }
