@@ -1,0 +1,54 @@
+package it.cnit.blueprint.composer.vsb.graph;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Properties;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.jgrapht.Graph;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+@Slf4j
+public class VsbGraphServiceTest {
+
+  static Properties prop;
+  static ObjectMapper oM;
+  static VsbGraphService vsbGraphService;
+
+  @BeforeClass
+  @SneakyThrows
+  public static void setUp() {
+    // Test Setup
+    prop = new Properties();
+    InputStream input = ClassLoader.getSystemResourceAsStream("url.properties");
+    prop.load(input);
+    oM = new ObjectMapper(new YAMLFactory());
+    vsbGraphService = new VsbGraphService();
+  }
+
+  @Test
+  @SneakyThrows
+  public void buildGraph() {
+    // Given
+    Blueprint b = oM
+        .readValue(new URL(prop.getProperty("vsb_polito_smartcity")), VsBlueprint.class);
+
+    // When
+    Graph<VsbVertex, String> graph = vsbGraphService.buildGraph(b);
+    String actual = vsbGraphService.export(graph);
+    log.debug("actual graph:\n{}", actual);
+
+    // Then
+    // TODO read expected file
+    // TODO assert
+    assertNotEquals("export", actual);
+  }
+}
