@@ -1,7 +1,6 @@
 package it.cnit.blueprint.composer.vsb.graph;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -9,7 +8,9 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+import java.util.Scanner;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
@@ -46,9 +47,16 @@ public class VsbGraphServiceTest {
     String actual = vsbGraphService.export(graph);
     log.debug("actual graph:\n{}", actual);
 
+    log.debug("Graph is connected: {}", vsbGraphService.isConnected(graph));
+
     // Then
-    // TODO read expected file
-    // TODO assert
-    assertNotEquals("export", actual);
+    String expected;
+    //noinspection ConstantConditions
+    try (Scanner scanner = new Scanner(
+        ClassLoader.getSystemResourceAsStream("vsb_polito_smartcity" + ".dot"),
+        StandardCharsets.UTF_8.name())) {
+      expected = scanner.useDelimiter("\\A").next();
+    }
+    assertEquals(expected, actual);
   }
 }
