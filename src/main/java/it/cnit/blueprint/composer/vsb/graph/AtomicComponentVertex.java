@@ -1,29 +1,17 @@
 package it.cnit.blueprint.composer.vsb.graph;
 
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@AllArgsConstructor
 public class AtomicComponentVertex extends VsbVertex {
 
+  @Getter
   private final VsComponent vsComponent;
 
-  AtomicComponentVertex(VsComponent vsComponent) {
-    this.vsComponent = vsComponent;
+  @Override
+  public String getElementId() {
+    return this.vsComponent.getComponentId();
   }
-
-  public String toString() {
-    return "AC_" + this.vsComponent.getComponentId();
-  }
-
-  public int hashCode() {
-    return toString().hashCode();
-  }
-
-  public boolean equals(Object o) {
-    return (o instanceof AtomicComponentVertex) && (toString().equals(o.toString()));
-  }
-
-  public VsComponent getVsComponent() {
-    return vsComponent;
-  }
-
 }

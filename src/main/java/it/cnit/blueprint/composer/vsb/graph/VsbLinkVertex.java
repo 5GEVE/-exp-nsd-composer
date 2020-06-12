@@ -1,34 +1,17 @@
 package it.cnit.blueprint.composer.vsb.graph;
 
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
-import java.util.concurrent.atomic.AtomicLong;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@AllArgsConstructor
 public class VsbLinkVertex extends VsbVertex {
 
-  private static final AtomicLong NEXT_ID = new AtomicLong(0);
-
+  @Getter
   private final VsbLink vsbLink;
-  private final String id;
 
-  VsbLinkVertex(VsbLink vsbLink) {
-    this.vsbLink = vsbLink;
-    this.id = Long.toString(NEXT_ID.getAndIncrement());
+  @Override
+  public String getElementId() {
+    return this.vsbLink.getName();
   }
-
-  public String toString() {
-    return "VL_" + String.join("_", this.vsbLink.getEndPointIds());
-  }
-
-  public int hashCode() {
-    return toString().hashCode();
-  }
-
-  public boolean equals(Object o) {
-    return (o instanceof VsbLinkVertex) && (toString().equals(o.toString()));
-  }
-
-  public VsbLink getVsbLink() {
-    return vsbLink;
-  }
-
 }

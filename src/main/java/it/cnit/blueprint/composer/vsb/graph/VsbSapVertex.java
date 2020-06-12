@@ -1,34 +1,17 @@
 package it.cnit.blueprint.composer.vsb.graph;
 
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
-import java.util.concurrent.atomic.AtomicLong;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@AllArgsConstructor
 public class VsbSapVertex extends VsbVertex {
 
-  private static final AtomicLong NEXT_ID = new AtomicLong(0);
-
+  @Getter
   private final VsbEndpoint vsbEndpoint;
-  private final String id;
 
-  public VsbSapVertex(VsbEndpoint vsbEndpoint) {
-    this.vsbEndpoint = vsbEndpoint;
-    this.id = Long.toString(NEXT_ID.getAndIncrement());
+  @Override
+  public String getElementId() {
+    return this.vsbEndpoint.getEndPointId();
   }
-
-  public String toString() {
-    return "SAP_" + String.join("_", this.vsbEndpoint.getEndPointId());
-  }
-
-  public int hashCode() {
-    return toString().hashCode();
-  }
-
-  public boolean equals(Object o) {
-    return (o instanceof VsbSapVertex) && (toString().equals(o.toString()));
-  }
-
-  public VsbEndpoint getVsbEndpoint() {
-    return vsbEndpoint;
-  }
-
 }
