@@ -39,6 +39,28 @@ public class VsbGraphService {
       }
     }
 
+    // Edges
+    for (AtomicComponentVertex v1 : compVList) {
+      for (String acEp : v1.getVsComponent().getEndPointsIds()) {
+        for (VsbLinkVertex v2 : linkVList) {
+          for (String vlEp : v2.getVsbLink().getEndPointIds()) {
+            if (!acEp.contains("sap") && !vlEp.contains("sap") && acEp.equals(vlEp)) {
+              g.addEdge(v1, v2, vlEp);
+            }
+          }
+        }
+      }
+    }
+    for (VsbSapVertex v1 : sapVList) {
+      String sapEp = v1.getVsbEndpoint().getEndPointId();
+      for (VsbLinkVertex v2 : linkVList) {
+        for (String vlEp : v2.getVsbLink().getEndPointIds()) {
+          if (sapEp.equals(vlEp)) {
+            g.addEdge(v1, v2, sapEp);
+          }
+        }
+      }
+    }
     return g;
   }
 
