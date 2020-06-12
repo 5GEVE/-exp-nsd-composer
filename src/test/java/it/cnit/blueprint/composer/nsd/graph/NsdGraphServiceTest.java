@@ -51,7 +51,6 @@ public class NsdGraphServiceTest {
     log.debug("actual graph:\n{}", actual);
 
     // Then
-    InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
     String expected;
     //noinspection ConstantConditions
     try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
@@ -74,7 +73,6 @@ public class NsdGraphServiceTest {
     log.debug("actual graph:\n{}", actual);
 
     // Then
-    InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
     String expected;
     //noinspection ConstantConditions
     try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
@@ -97,7 +95,6 @@ public class NsdGraphServiceTest {
     log.debug("actual graph:\n{}", actual);
 
     // Then
-    InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
     String expected;
     //noinspection ConstantConditions
     try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
@@ -120,7 +117,6 @@ public class NsdGraphServiceTest {
     log.debug("actual graph:\n{}", actual);
 
     // Then
-    InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
     String expected;
     //noinspection ConstantConditions
     try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
