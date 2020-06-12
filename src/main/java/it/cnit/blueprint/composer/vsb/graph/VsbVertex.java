@@ -1,4 +1,4 @@
-package it.cnit.blueprint.composer.vsbgraph;
+package it.cnit.blueprint.composer.vsb.graph;
 
 public abstract class VsbVertex {
 

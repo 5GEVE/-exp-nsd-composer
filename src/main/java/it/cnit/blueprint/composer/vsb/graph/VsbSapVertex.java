@@ -1,4 +1,4 @@
-package it.cnit.blueprint.composer.vsbgraph;
+package it.cnit.blueprint.composer.vsb.graph;
 
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import java.util.concurrent.atomic.AtomicLong;
