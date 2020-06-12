@@ -32,7 +32,7 @@ public class VsbGraphService {
     }
     for (VsbEndpoint e : b.getEndPoints()) {
       // An insecure way to determine sap endpoints.
-      if (e.getEndPointId().toLowerCase().contains("sap")) {
+      if (e.isExternal() && e.getEndPointId().toLowerCase().contains("sap")) {
         VsbSapVertex v = new VsbSapVertex(e);
         sapVList.add(v);
         g.addVertex(v);
