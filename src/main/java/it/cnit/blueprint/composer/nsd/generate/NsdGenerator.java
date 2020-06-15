@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -63,16 +64,7 @@ public class NsdGenerator {
 
     boolean mgmt = b.getConnectivityServices().stream().anyMatch(VsbLink::isManagement);
     if (!mgmt) {
-      log.info("Generate a mgmt connectivity service");
-      VsbLink mgmtCS = new VsbLink(
-          b,
-          new ArrayList<>(), // TODO endpoints
-          true,
-          null,
-          "vl_" + b.getBlueprintId() + "_mgmt",
-          true
-      );
-      b.getConnectivityServices().add(mgmtCS);
+      log.info("Generate a mgmt sap and connectivity service");
       VsbEndpoint mgmtSap = new VsbEndpoint(
           "sap_" + b.getBlueprintId() + "_mgmt",
           true,
@@ -80,6 +72,20 @@ public class NsdGenerator {
           false
       );
       b.getEndPoints().add(mgmtSap);
+      List<String> mgmtEps = b.getEndPoints().stream()
+          .filter(VsbEndpoint::isManagement)
+          .collect(Collectors.toList()).stream()
+          .map(VsbEndpoint::getEndPointId)
+          .collect(Collectors.toList());
+      VsbLink mgmtCS = new VsbLink(
+          b,
+          mgmtEps,
+          true,
+          null,
+          "vl_" + b.getBlueprintId() + "_mgmt",
+          true
+      );
+      b.getConnectivityServices().add(mgmtCS);
     }
 
     Nsd nsd = new Nsd();
