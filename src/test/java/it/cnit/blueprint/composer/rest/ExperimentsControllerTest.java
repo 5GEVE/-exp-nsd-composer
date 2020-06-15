@@ -61,7 +61,7 @@ public class ExperimentsControllerTest {
   }
 
   @SneakyThrows
-  private ComposeRequest getRequest() {
+  private ComposeRequest getAres2TRequest() {
     VsBlueprint vsb = YAML_OM
         .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker")), VsBlueprint.class);
     Nsd vsbNsd = YAML_OM
@@ -91,11 +91,16 @@ public class ExperimentsControllerTest {
     return request;
   }
 
+  @SneakyThrows
+  private ComposeRequest getPolitoRequest() {
+    return new ComposeRequest();
+  }
+
   @Test
   @SneakyThrows
-  public void composeExperiment200() {
+  public void composeExperimentAres2T200() {
     // Given
-    ComposeRequest request = getRequest();
+    ComposeRequest request = getAres2TRequest();
 
     // When
     MvcResult result = mvc.perform(
@@ -121,9 +126,15 @@ public class ExperimentsControllerTest {
 
   @Test
   @SneakyThrows
+  public void composeExperimentPolito200() {
+
+  }
+
+  @Test
+  @SneakyThrows
   public void composeExperiment400Wrong() {
     // Given
-    ComposeRequest request = getRequest();
+    ComposeRequest request = getAres2TRequest();
 
     // When
     // We pass only the VsbRequest as body to make the REST fail
@@ -164,7 +175,7 @@ public class ExperimentsControllerTest {
   @SneakyThrows
   public void composeExperiment422() {
     // Given
-    ComposeRequest request = getRequest();
+    ComposeRequest request = getAres2TRequest();
 
     // When
     // We change the request to make it unprocessable
