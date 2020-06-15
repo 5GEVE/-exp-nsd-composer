@@ -93,7 +93,37 @@ public class ExperimentsControllerTest {
 
   @SneakyThrows
   private ComposeRequest getPolitoRequest() {
-    return new ComposeRequest();
+    VsBlueprint vsb;
+    try (InputStream inVsb = getClass().getResourceAsStream("/vsb_polito_smartcity_nomgmt.yml")) {
+      vsb = YAML_OM.readValue(inVsb, VsBlueprint.class);
+    }
+    Nsd vsbNsd;
+    try (InputStream inNsd = getClass().getResourceAsStream("/vsb_polito_smartcity_nsd.yaml")) {
+      vsbNsd = YAML_OM.readValue(inNsd, Nsd.class);
+    }
+    List<VsdNsdTranslationRule> vsbTr = YAML_OM
+        .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_tr")),
+            new TypeReference<List<VsdNsdTranslationRule>>() {
+            });
+    OnBoardVsBlueprintRequest vsbRequest = new OnBoardVsBlueprintRequest(vsb,
+        Collections.singletonList(vsbNsd), vsbTr);
+
+    CtxBlueprint ctxb = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_delay")), CtxBlueprint.class);
+    Nsd ctxbNsd = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_delay_nsds")), Nsd.class);
+    List<VsdNsdTranslationRule> ctxbTr = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_delay_tr")),
+            new TypeReference<List<VsdNsdTranslationRule>>() {
+            });
+    OnboardCtxBlueprintRequest ctxbRequest = new OnboardCtxBlueprintRequest(ctxb,
+        Collections.singletonList(ctxbNsd), ctxbTr);
+    Context c = new Context(ctxbRequest, null);
+
+    ComposeRequest request = new ComposeRequest(vsbRequest, new Context[]{c});
+    String body = JSON_OM.writeValueAsString(request);
+    log.info("Request body:\n{}", body);
+    return request;
   }
 
   @Test
@@ -127,7 +157,29 @@ public class ExperimentsControllerTest {
   @Test
   @SneakyThrows
   public void composeExperimentPolito200() {
+    // Given
+    ComposeRequest request = getPolitoRequest();
 
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/experiments")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(request)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+    ComposeResponse response = JSON_OM
+        .readValue(result.getResponse().getContentAsString(), ComposeResponse.class);
+    log.info("Response body:\n{}", JSON_OM.writeValueAsString(response));
+    Nsd actualNsd = response.getExpNsd();
+    actualNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
+    actualNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
+//    InputStream in = getClass().getResourceAsStream(
+//        "/expb_ares2t_tracker_delay_nsds_passthrough.yaml");
+//    Nsd expectedNsd = YAML_OM.readValue(in, Nsd[].class)[0];
+//    assertEquals(YAML_OM.writeValueAsString(expectedNsd),
+//        YAML_OM.writeValueAsString(response.getExpNsd()));
   }
 
   @Test
