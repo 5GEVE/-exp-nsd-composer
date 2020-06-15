@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.exceptions.NsdGenerationException;
+import it.cnit.blueprint.composer.vsb.VsbService;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
@@ -50,6 +51,8 @@ public class NsdGenerator {
 
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
+  private final VsbService vsbService;
+
   @SneakyThrows(JsonProcessingException.class)
   public Nsd generate(Blueprint b) throws NsdGenerationException {
 
@@ -58,28 +61,7 @@ public class NsdGenerator {
 
     boolean mgmt = b.getConnectivityServices().stream().anyMatch(VsbLink::isManagement);
     if (!mgmt) {
-      log.info("Generate a mgmt sap and connectivity service");
-      VsbEndpoint mgmtSap = new VsbEndpoint(
-          "sap_" + b.getBlueprintId() + "_mgmt",
-          true,
-          true,
-          false
-      );
-      b.getEndPoints().add(mgmtSap);
-      List<String> mgmtEps = b.getEndPoints().stream()
-          .filter(VsbEndpoint::isManagement)
-          .collect(Collectors.toList()).stream()
-          .map(VsbEndpoint::getEndPointId)
-          .collect(Collectors.toList());
-      VsbLink mgmtCS = new VsbLink(
-          b,
-          mgmtEps,
-          true,
-          null,
-          "vl_" + b.getBlueprintId() + "_mgmt",
-          true
-      );
-      b.getConnectivityServices().add(mgmtCS);
+      b = vsbService.addMgmtConnServ(b);
     }
 
     Nsd nsd = new Nsd();
