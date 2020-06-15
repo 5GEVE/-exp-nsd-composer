@@ -56,17 +56,17 @@ public class NsdGenerator {
   private final NsdGraphService nsdGraphService;
 
   @SneakyThrows(JsonProcessingException.class)
-  public Nsd generate(Blueprint blueprint) throws NsdInvalidException, NsdGenerationException {
+  public Nsd generate(Blueprint b) throws NsdInvalidException, NsdGenerationException {
 
-    log.debug("blueprint {}:\n{}", blueprint.getBlueprintId(),
-        OBJECT_MAPPER.writeValueAsString(blueprint));
+    log.debug("blueprint {}:\n{}", b.getBlueprintId(),
+        OBJECT_MAPPER.writeValueAsString(b));
 
     Nsd nsd = new Nsd();
-    nsd.setNsdIdentifier(blueprint.getBlueprintId() + "_nsd");
+    nsd.setNsdIdentifier(b.getBlueprintId() + "_nsd");
     nsd.setDesigner("NSD generator");
-    nsd.setNsdInvariantId(blueprint.getBlueprintId() + "_nsd");
-    nsd.setVersion(blueprint.getVersion());
-    nsd.setNsdName(blueprint.getName() + " NSD");
+    nsd.setNsdInvariantId(b.getBlueprintId() + "_nsd");
+    nsd.setVersion(b.getVersion());
+    nsd.setNsdName(b.getName() + " NSD");
     nsd.setSecurity(new SecurityParameters(
         "FC_NSD_SIGNATURE",
         "FC_NSD_ALGORITHM",
@@ -74,14 +74,29 @@ public class NsdGenerator {
     ));
 
     NsDf nsDf = new NsDf();
-    nsDf.setNsDfId(blueprint.getBlueprintId() + "_df");
-    nsDf.setFlavourKey(blueprint.getBlueprintId() + "_df_fk");
+    nsDf.setNsDfId(b.getBlueprintId() + "_df");
+    nsDf.setFlavourKey(b.getBlueprintId() + "_df_fk");
 
     NsLevel nsLevel = new NsLevel();
-    nsLevel.setNsLevelId(blueprint.getBlueprintId() + "_il_default");
+    nsLevel.setNsLevelId(b.getBlueprintId() + "_il_default");
     nsLevel.setDescription("Default Instantiation Level");
 
-    for (VsbLink connService : blueprint.getConnectivityServices()) {
+    boolean mgmt = b.getConnectivityServices().stream().anyMatch(VsbLink::isManagement);
+    if (!mgmt) {
+      log.info("Generate a mgmt connectivity service");
+      VsbLink mgmtCS = new VsbLink(
+          b,
+          new ArrayList<>(), // TODO endpoints
+          true,
+          null,
+          "vl_" + b.getBlueprintId() + "mgmt",
+          true
+      );
+      b.getConnectivityServices().add(mgmtCS);
+      // TODO add Sap
+    }
+
+    for (VsbLink connService : b.getConnectivityServices()) {
       NsVirtualLinkDesc vld = new NsVirtualLinkDesc();
       vld.setVirtualLinkDescId(connService.getName());
       vld.setVirtualLinkDescProvider(nsd.getDesigner());
@@ -108,7 +123,7 @@ public class NsdGenerator {
     }
 
     List<Sapd> sapdList = new ArrayList<>();
-    for (VsbEndpoint e : blueprint.getEndPoints()) {
+    for (VsbEndpoint e : b.getEndPoints()) {
       // An insecure way to determine sap endpoints.
       if (e.isExternal() && e.getEndPointId().toLowerCase().contains("sap")) {
         Sapd sapd = new Sapd();
@@ -116,7 +131,7 @@ public class NsdGenerator {
         sapd.setLayerProtocol(LayerProtocol.IPV4);
         sapd.setCpRole(CpRole.ROOT);
         sapd.setSapAddressAssignment(false);
-        for (VsbLink cs : blueprint.getConnectivityServices()) {
+        for (VsbLink cs : b.getConnectivityServices()) {
           for (String ep : cs.getEndPointIds()) {
             if (ep.equals(sapd.getCpdId())) {
               sapd.setNsVirtualLinkDescId(cs.getName());
@@ -137,7 +152,7 @@ public class NsdGenerator {
     }
     nsd.setSapd(sapdList);
 
-    for (VsComponent vsc : blueprint.getAtomicComponents()) {
+    for (VsComponent vsc : b.getAtomicComponents()) {
       nsd.getVnfdId().add(vsc.getComponentId());
       VnfProfile vnfp = new VnfProfile();
       vnfp.setVnfProfileId(vsc.getComponentId() + "_vnfp");
@@ -148,7 +163,7 @@ public class NsdGenerator {
       vnfp.setMaxNumberOfInstances(1);
       List<NsVirtualLinkConnectivity> nsVirtualLinkConnectivities = new ArrayList<>();
       for (String ep : vsc.getEndPointsIds()) {
-        for (VsbLink cs : blueprint.getConnectivityServices()) {
+        for (VsbLink cs : b.getConnectivityServices()) {
           for (String csEp : cs.getEndPointIds()) {
             if (csEp.equals(ep)) {
               NsVirtualLinkConnectivity nsVLC = new NsVirtualLinkConnectivity();
