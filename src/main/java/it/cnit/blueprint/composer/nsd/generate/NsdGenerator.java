@@ -61,6 +61,27 @@ public class NsdGenerator {
     log.debug("blueprint {}:\n{}", b.getBlueprintId(),
         OBJECT_MAPPER.writeValueAsString(b));
 
+    boolean mgmt = b.getConnectivityServices().stream().anyMatch(VsbLink::isManagement);
+    if (!mgmt) {
+      log.info("Generate a mgmt connectivity service");
+      VsbLink mgmtCS = new VsbLink(
+          b,
+          new ArrayList<>(), // TODO endpoints
+          true,
+          null,
+          "vl_" + b.getBlueprintId() + "_mgmt",
+          true
+      );
+      b.getConnectivityServices().add(mgmtCS);
+      VsbEndpoint mgmtSap = new VsbEndpoint(
+          "sap_" + b.getBlueprintId() + "_mgmt",
+          true,
+          true,
+          false
+      );
+      b.getEndPoints().add(mgmtSap);
+    }
+
     Nsd nsd = new Nsd();
     nsd.setNsdIdentifier(b.getBlueprintId() + "_nsd");
     nsd.setDesigner("NSD generator");
@@ -80,27 +101,6 @@ public class NsdGenerator {
     NsLevel nsLevel = new NsLevel();
     nsLevel.setNsLevelId(b.getBlueprintId() + "_il_default");
     nsLevel.setDescription("Default Instantiation Level");
-
-    boolean mgmt = b.getConnectivityServices().stream().anyMatch(VsbLink::isManagement);
-    if (!mgmt) {
-      log.info("Generate a mgmt connectivity service");
-      VsbLink mgmtCS = new VsbLink(
-          b,
-          new ArrayList<>(), // TODO endpoints
-          true,
-          null,
-          "vl_" + b.getBlueprintId() + "_mgmt",
-          true
-      );
-      b.getConnectivityServices().add(mgmtCS);
-      VsbEndpoint mgmtSap = new VsbEndpoint(
-          "sap_"+ b.getBlueprintId() + "_mgmt",
-          true,
-          true,
-          false
-      );
-      b.getEndPoints().add(mgmtSap);
-    }
 
     for (VsbLink connService : b.getConnectivityServices()) {
       NsVirtualLinkDesc vld = new NsVirtualLinkDesc();
