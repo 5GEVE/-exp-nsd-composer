@@ -109,7 +109,8 @@ public class NsdGenerator {
 
     List<Sapd> sapdList = new ArrayList<>();
     for (VsbEndpoint e : blueprint.getEndPoints()) {
-      if (e.isExternal() && e.getEndPointId().contains("sap")) {
+      // An insecure way to determine sap endpoints.
+      if (e.isExternal() && e.getEndPointId().toLowerCase().contains("sap")) {
         Sapd sapd = new Sapd();
         sapd.setCpdId(e.getEndPointId());
         sapd.setLayerProtocol(LayerProtocol.IPV4);
