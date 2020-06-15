@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.exceptions.NsdGenerationException;
-import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
-import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
@@ -52,10 +50,8 @@ public class NsdGenerator {
 
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
-  private final NsdGraphService nsdGraphService;
-
   @SneakyThrows(JsonProcessingException.class)
-  public Nsd generate(Blueprint b) throws NsdInvalidException, NsdGenerationException {
+  public Nsd generate(Blueprint b) throws NsdGenerationException {
 
     log.debug("blueprint {}:\n{}", b.getBlueprintId(),
         OBJECT_MAPPER.writeValueAsString(b));
