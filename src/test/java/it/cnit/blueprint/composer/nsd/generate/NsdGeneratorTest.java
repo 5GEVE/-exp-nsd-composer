@@ -49,8 +49,10 @@ public class NsdGeneratorTest {
   public void generateVsbPolitoSmartCity() {
 
     // Given
-    InputStream in = getClass().getResourceAsStream("/vsb_polito_smartcity_nomgmt.yml");
-    VsBlueprint vsb = oM.readValue(in, VsBlueprint.class);
+    VsBlueprint vsb;
+    try (InputStream inVsb = getClass().getResourceAsStream("/vsb_polito_smartcity_nomgmt.yml")) {
+      vsb = oM.readValue(inVsb, VsBlueprint.class);
+    }
     Graph<VsbVertex, String> vsbGraph = vsbGraphService.buildGraph(vsb);
     String vsbgraphExport = vsbGraphService.export(vsbGraph);
     log.debug("vsb graph:\n{}", vsbgraphExport);
@@ -59,8 +61,10 @@ public class NsdGeneratorTest {
     Nsd actualNsd = nsdGenerator.generate(vsb);
 
     //Then
-    Nsd expectedNsd = oM
-        .readValue(new URL(urlProp.getProperty("vsb_polito_smartcity_nsds")), Nsd.class);
+    Nsd expectedNsd;
+    try (InputStream inNsd = getClass().getResourceAsStream("/vsb_polito_smartcity_nsd.yaml")) {
+      expectedNsd = oM.readValue(inNsd, Nsd.class);
+    }
     assertEquals(oM.writeValueAsString(expectedNsd), oM.writeValueAsString(actualNsd));
   }
 
