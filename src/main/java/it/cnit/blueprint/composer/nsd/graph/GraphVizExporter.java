@@ -46,10 +46,20 @@ public class GraphVizExporter implements GraphExporter {
       }
       return map;
     };
+    ComponentNameProvider<String> edgeProvider = new ComponentNameProvider<String>() {
+      @Override
+      public String getName(String component) {
+        if (component.toLowerCase().contains("sap")) {
+          return "";
+        } else {
+          return component;
+        }
+      }
+    };
     DOTExporter<ProfileVertex, String> exporter = new DOTExporter<>(
         vertexIdProvider,
         vertexLabelProvider,
-        new StringComponentNameProvider<>(),
+        edgeProvider,
         vertexAttributeProvider,
         null);
     exporter.putGraphAttribute("splines", "false");
