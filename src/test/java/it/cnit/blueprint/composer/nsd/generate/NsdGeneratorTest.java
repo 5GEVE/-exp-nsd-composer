@@ -41,7 +41,7 @@ public class NsdGeneratorTest {
     urlProp.load(input);
     oM = new ObjectMapper(new YAMLFactory());
     nsdGraphService = new NsdGraphService(new GraphVizExporter());
-    nsdGenerator = new NsdGenerator(nsdGraphService);
+    nsdGenerator = new NsdGenerator();
     vsbGraphService = new VsbGraphService();
   }
 
