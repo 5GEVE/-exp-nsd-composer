@@ -1,11 +1,13 @@
 package it.cnit.blueprint.composer.nsd.generate;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.nsd.graph.GraphVizExporter;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
+import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.composer.vsb.graph.VsbGraphService;
 import it.cnit.blueprint.composer.vsb.graph.VsbVertex;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
@@ -54,13 +56,16 @@ public class NsdGeneratorTest {
       vsb = oM.readValue(inVsb, VsBlueprint.class);
     }
     Graph<VsbVertex, String> vsbGraph = vsbGraphService.buildGraph(vsb);
-    String vsbgraphExport = vsbGraphService.export(vsbGraph);
-    log.debug("vsb graph:\n{}", vsbgraphExport);
+    log.debug("vsb graph:\n{}", vsbGraphService.export(vsbGraph));
 
     //When
     Nsd actualNsd = nsdGenerator.generate(vsb);
+    Graph<ProfileVertex, String> nsdGraph = nsdGraphService.buildGraph(actualNsd.getSapd(),
+        actualNsd.getNsDf().get(0), actualNsd.getNsDf().get(0).getDefaultInstantiationLevel());
+    log.debug("Graph AFTER generation:\n{}", nsdGraphService.export(nsdGraph));
 
     //Then
+    assertTrue(nsdGraphService.isConnected(nsdGraph));
     Nsd expectedNsd;
     try (InputStream inNsd = getClass().getResourceAsStream("/vsb_polito_smartcity_nsd.yaml")) {
       expectedNsd = oM.readValue(inNsd, Nsd.class);

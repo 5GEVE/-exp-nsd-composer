@@ -6,7 +6,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.exceptions.NsdGenerationException;
 import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
-import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
@@ -40,7 +39,6 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.jgrapht.Graph;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
@@ -200,8 +198,7 @@ public class NsdGenerator {
     nsDf.setDefaultNsInstantiationLevelId(nsLevel.getNsLevelId());
     nsd.setNsDf(Collections.singletonList(nsDf));
 
-    log.debug("Nsd AFTER generation with {}:\n{}",
-        nsd.getNsdIdentifier(), OBJECT_MAPPER.writeValueAsString(nsd));
+    log.debug("Generated NSD:\n{}", OBJECT_MAPPER.writeValueAsString(nsd));
 
     // Nsd validation and logging
     try {
@@ -209,14 +206,6 @@ public class NsdGenerator {
     } catch (MalformattedElementException e) {
       throw new NsdGenerationException(nsd.getNsdIdentifier(),
           "Nsd not valid after generation", e);
-    }
-    Graph<ProfileVertex, String> g = nsdGraphService.buildGraph(nsd.getSapd(), nsDf, nsLevel);
-    log.debug("Graph AFTER generation with {}:\n{}",
-        nsd.getNsdIdentifier(), nsdGraphService.export(g));
-    if (!nsdGraphService.isConnected(g)) {
-      throw new NsdGenerationException(nsd.getNsdIdentifier(),
-          "Network topology not connected for NsDf " + nsDf.getNsDfId() + " and NsLevel "
-              + nsLevel.getNsLevelId());
     }
 
     return nsd;
