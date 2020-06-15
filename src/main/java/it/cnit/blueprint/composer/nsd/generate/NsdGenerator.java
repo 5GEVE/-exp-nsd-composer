@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -59,8 +58,7 @@ public class NsdGenerator {
     log.debug("blueprint {}:\n{}", b.getBlueprintId(),
         OBJECT_MAPPER.writeValueAsString(b));
 
-    boolean mgmt = b.getConnectivityServices().stream().anyMatch(VsbLink::isManagement);
-    if (!mgmt) {
+    if (b.getConnectivityServices().stream().anyMatch(VsbLink::isManagement)) {
       b = vsbService.addMgmtConnServ(b);
     }
 
