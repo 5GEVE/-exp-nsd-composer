@@ -65,6 +65,7 @@ public class NsdGeneratorTest {
     log.debug("Graph AFTER generation:\n{}", nsdGraphService.export(nsdGraph));
 
     //Then
+    // A NSD from a VSB should always be a connected graph.
     assertTrue(nsdGraphService.isConnected(nsdGraph));
     Nsd expectedNsd;
     try (InputStream inNsd = getClass().getResourceAsStream("/vsb_polito_smartcity_nsd.yaml")) {
@@ -83,10 +84,12 @@ public class NsdGeneratorTest {
 
     //When
     Nsd actualNsd = nsdGenerator.generate(ctxB);
+    Graph<ProfileVertex, String> nsdGraph = nsdGraphService.buildGraph(actualNsd.getSapd(),
+        actualNsd.getNsDf().get(0), actualNsd.getNsDf().get(0).getDefaultInstantiationLevel());
+    log.debug("Graph AFTER generation:\n{}", nsdGraphService.export(nsdGraph));
 
     //Then
-    Nsd expectedNsd = oM
-        .readValue(new URL(urlProp.getProperty("ctx_bg_traffic_nsds")), Nsd[].class)[0];
+    Nsd expectedNsd = oM.readValue(new URL(urlProp.getProperty("ctx_bg_traffic_nsds")), Nsd.class);
     assertEquals(oM.writeValueAsString(expectedNsd), oM.writeValueAsString(actualNsd));
   }
 }
