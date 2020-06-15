@@ -58,7 +58,7 @@ public class NsdGenerator {
     log.debug("blueprint {}:\n{}", b.getBlueprintId(),
         OBJECT_MAPPER.writeValueAsString(b));
 
-    if (b.getConnectivityServices().stream().anyMatch(VsbLink::isManagement)) {
+    if (b.getConnectivityServices().stream().noneMatch(VsbLink::isManagement)) {
       b = vsbService.addMgmtConnServ(b);
     }
 
