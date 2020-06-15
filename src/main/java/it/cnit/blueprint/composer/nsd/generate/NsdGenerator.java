@@ -59,7 +59,7 @@ public class NsdGenerator {
         OBJECT_MAPPER.writeValueAsString(b));
 
     if (b.getConnectivityServices().stream().noneMatch(VsbLink::isManagement)) {
-      b = vsbService.addMgmtConnServ(b);
+      vsbService.addMgmtConnServ(b);
     }
 
     Nsd nsd = new Nsd();

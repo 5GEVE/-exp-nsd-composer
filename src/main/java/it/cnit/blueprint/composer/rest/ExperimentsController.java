@@ -141,7 +141,7 @@ public class ExperimentsController {
       throws VsbInvalidException, NsdInvalidException {
 
     if (b.getConnectivityServices().stream().noneMatch(VsbLink::isManagement)) {
-      b = vsbService.addMgmtConnServ(b);
+      vsbService.addMgmtConnServ(b);
     }
     List<VsbLink> mgmtConnServs = b.getConnectivityServices().stream()
         .filter(VsbLink::isManagement)

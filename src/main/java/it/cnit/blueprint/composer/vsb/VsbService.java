@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class VsbService {
 
-  public Blueprint addMgmtConnServ(Blueprint b) {
+  public void addMgmtConnServ(Blueprint b) {
     VsbEndpoint mgmtSap = new VsbEndpoint(
         "sap_" + b.getBlueprintId() + "_mgmt",
         true,
@@ -36,6 +36,5 @@ public class VsbService {
         true
     );
     b.getConnectivityServices().add(mgmtCS);
-    return b;
   }
 }
