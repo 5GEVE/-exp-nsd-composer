@@ -15,6 +15,7 @@ import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardCtxBlueprintRequ
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import lombok.SneakyThrows;
@@ -63,25 +64,25 @@ public class ExperimentsControllerTest {
   private ComposeRequest getRequest() {
     VsBlueprint vsb = YAML_OM
         .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker")), VsBlueprint.class);
-    List<Nsd> vsbNsd = YAML_OM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")),
-        new TypeReference<List<Nsd>>() {
-        });
+    Nsd vsbNsd = YAML_OM
+        .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
     List<VsdNsdTranslationRule> vsbTr = YAML_OM
         .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_tr")),
             new TypeReference<List<VsdNsdTranslationRule>>() {
             });
-    OnBoardVsBlueprintRequest vsbRequest = new OnBoardVsBlueprintRequest(vsb, vsbNsd, vsbTr);
+    OnBoardVsBlueprintRequest vsbRequest = new OnBoardVsBlueprintRequest(vsb,
+        Collections.singletonList(vsbNsd), vsbTr);
 
     CtxBlueprint ctxb = YAML_OM
         .readValue(new URL(urlProp.getProperty("ctx_delay")), CtxBlueprint.class);
-    List<Nsd> ctxbNsd = YAML_OM.readValue(new URL(urlProp.getProperty("ctx_delay_nsds")),
-        new TypeReference<List<Nsd>>() {
-        });
+    Nsd ctxbNsd = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_delay_nsds")), Nsd.class);
     List<VsdNsdTranslationRule> ctxbTr = YAML_OM
         .readValue(new URL(urlProp.getProperty("ctx_delay_tr")),
             new TypeReference<List<VsdNsdTranslationRule>>() {
             });
-    OnboardCtxBlueprintRequest ctxbRequest = new OnboardCtxBlueprintRequest(ctxb, ctxbNsd, ctxbTr);
+    OnboardCtxBlueprintRequest ctxbRequest = new OnboardCtxBlueprintRequest(ctxb,
+        Collections.singletonList(ctxbNsd), ctxbTr);
     Context c = new Context(ctxbRequest, null);
 
     ComposeRequest request = new ComposeRequest(vsbRequest, new Context[]{c});
