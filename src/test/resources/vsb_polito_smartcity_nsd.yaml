@@ -21,18 +21,6 @@ sapd:
         numberOfIpAddress: 1
     sapAddressAssignment: false
     nsVirtualLinkDescId: "vl_smartcity_ext"
-  - cpdId: "sap_tracker_mgmt"
-    layerProtocol: "IPV4"
-    cpRole: "ROOT"
-    addressData:
-      - addressType: "IP_ADDRESS"
-        iPAddressAssignment: false
-        floatingIpActivated: true
-        management: false
-        iPAddressType: "IPv4"
-        numberOfIpAddress: 1
-    sapAddressAssignment: false
-    nsVirtualLinkDescId: "vl_smartcity_mgmt"
   - cpdId: "sap_vis_user"
     layerProtocol: "IPV4"
     cpRole: "ROOT"
@@ -45,6 +33,18 @@ sapd:
         numberOfIpAddress: 1
     sapAddressAssignment: false
     nsVirtualLinkDescId: "vl_smartcity_user"
+  - cpdId: "sap_vsb_polito_smartcity_mgmt"
+    layerProtocol: "IPV4"
+    cpRole: "ROOT"
+    addressData:
+      - addressType: "IP_ADDRESS"
+        iPAddressAssignment: false
+        floatingIpActivated: true
+        management: false
+        iPAddressType: "IPv4"
+        numberOfIpAddress: 1
+    sapAddressAssignment: false
+    nsVirtualLinkDescId: "vl_vsb_polito_smartcity_mgmt"
 virtualLinkDesc:
   - virtualLinkDescId: "vl_smartcity_ext"
     virtualLinkDescProvider: "NSD generator"
@@ -64,15 +64,6 @@ virtualLinkDesc:
     virtualLinkDf:
       - flavourId: "vl_smartcity_data_df"
         serviceAvaibilityLevel: "LEVEL_1"
-  - virtualLinkDescId: "vl_vsb_polito_smartcity_mgmt"
-    virtualLinkDescProvider: "NSD generator"
-    virtuaLinkDescVersion: "1.0"
-    connectivityType:
-      layerProtocol: "IPV4"
-      flowPattern: ""
-    virtualLinkDf:
-      - flavourId: "vl_vsb_polito_smartcity_mgmt_df"
-        serviceAvaibilityLevel: "LEVEL_1"
   - virtualLinkDescId: "vl_smartcity_user"
     virtualLinkDescProvider: "NSD generator"
     virtuaLinkDescVersion: "1.0"
@@ -81,6 +72,15 @@ virtualLinkDesc:
       flowPattern: ""
     virtualLinkDf:
       - flavourId: "vl_smartcity_user_df"
+        serviceAvaibilityLevel: "LEVEL_1"
+  - virtualLinkDescId: "vl_vsb_polito_smartcity_mgmt"
+    virtualLinkDescProvider: "NSD generator"
+    virtuaLinkDescVersion: "1.0"
+    connectivityType:
+      layerProtocol: "IPV4"
+      flowPattern: ""
+    virtualLinkDf:
+      - flavourId: "vl_vsb_polito_smartcity_mgmt_df"
         serviceAvaibilityLevel: "LEVEL_1"
 nsDf:
   - nsDfId: "vsb_polito_smartcity_df"
@@ -137,18 +137,18 @@ nsDf:
         minBitrateRequirements:
           root: "1"
           leaf: "1"
-      - virtualLinkProfileId: "vl_vsb_polito_smartcity_mgmt_vlp"
-        virtualLinkDescId: "vl_vsb_polito_smartcity_mgmt"
-        flavourId: "vl_vsb_polito_smartcity_mgmt_df"
+      - virtualLinkProfileId: "vl_smartcity_user_vlp"
+        virtualLinkDescId: "vl_smartcity_user"
+        flavourId: "vl_smartcity_user_df"
         maxBitrateRequirements:
           root: "1"
           leaf: "1"
         minBitrateRequirements:
           root: "1"
           leaf: "1"
-      - virtualLinkProfileId: "vl_smartcity_user_vlp"
-        virtualLinkDescId: "vl_smartcity_user"
-        flavourId: "vl_smartcity_user_df"
+      - virtualLinkProfileId: "vl_vsb_polito_smartcity_mgmt_vlp"
+        virtualLinkDescId: "vl_vsb_polito_smartcity_mgmt"
+        flavourId: "vl_vsb_polito_smartcity_mgmt_df"
         maxBitrateRequirements:
           root: "1"
           leaf: "1"
@@ -172,11 +172,11 @@ nsDf:
             bitRateRequirements:
               root: "1"
               leaf: "1"
-          - virtualLinkProfileId: "vl_vsb_polito_smartcity_mgmt_vlp"
+          - virtualLinkProfileId: "vl_smartcity_user_vlp"
             bitRateRequirements:
               root: "1"
               leaf: "1"
-          - virtualLinkProfileId: "vl_smartcity_user_vlp"
+          - virtualLinkProfileId: "vl_vsb_polito_smartcity_mgmt_vlp"
             bitRateRequirements:
               root: "1"
               leaf: "1"
