@@ -89,11 +89,17 @@ public class NsdGenerator {
           new ArrayList<>(), // TODO endpoints
           true,
           null,
-          "vl_" + b.getBlueprintId() + "mgmt",
+          "vl_" + b.getBlueprintId() + "_mgmt",
           true
       );
       b.getConnectivityServices().add(mgmtCS);
-      // TODO add Sap
+      VsbEndpoint mgmtSap = new VsbEndpoint(
+          "sap_"+ b.getBlueprintId() + "_mgmt",
+          true,
+          true,
+          false
+      );
+      b.getEndPoints().add(mgmtSap);
     }
 
     for (VsbLink connService : b.getConnectivityServices()) {
