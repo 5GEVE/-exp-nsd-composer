@@ -177,13 +177,12 @@ public class ExperimentsControllerTest {
         .readValue(result.getResponse().getContentAsString(), ComposeResponse.class);
     log.info("Response body:\n{}", JSON_OM.writeValueAsString(response));
     Nsd actualNsd = response.getExpNsd();
-    actualNsd.setNsdIdentifier("58886b95-cd29-4b7b-aca0-e884caaa5c68");
-    actualNsd.setNsdInvariantId("ae66294b-8dae-406c-af70-f8516e310965");
-//    InputStream in = getClass().getResourceAsStream(
-//        "/expb_ares2t_tracker_delay_nsds_passthrough.yaml");
-//    Nsd expectedNsd = YAML_OM.readValue(in, Nsd[].class)[0];
-//    assertEquals(YAML_OM.writeValueAsString(expectedNsd),
-//        YAML_OM.writeValueAsString(response.getExpNsd()));
+    actualNsd.setNsdIdentifier("0176eb11-f613-4b40-bd71-c7a4ea4f0896");
+    actualNsd.setNsdInvariantId("71544f81-653a-4dc1-a49c-a34bc1e17976");
+    InputStream in = getClass().getResourceAsStream("/expb_polito_smartcity_nsd.yaml");
+    Nsd expectedNsd = YAML_OM.readValue(in, Nsd.class);
+    assertEquals(YAML_OM.writeValueAsString(expectedNsd),
+        YAML_OM.writeValueAsString(response.getExpNsd()));
   }
 
   @Test
