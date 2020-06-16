@@ -101,26 +101,30 @@ public class ExperimentsControllerTest {
     try (InputStream inNsd = getClass().getResourceAsStream("/vsb_polito_smartcity_nsd.yaml")) {
       vsbNsd = YAML_OM.readValue(inNsd, Nsd.class);
     }
-    List<VsdNsdTranslationRule> vsbTr = YAML_OM
-        .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_tr")),
-            new TypeReference<List<VsdNsdTranslationRule>>() {
-            });
     OnBoardVsBlueprintRequest vsbRequest = new OnBoardVsBlueprintRequest(vsb,
-        Collections.singletonList(vsbNsd), vsbTr);
+        Collections.singletonList(vsbNsd), null);
 
-    CtxBlueprint ctxb = YAML_OM
+    CtxBlueprint delayCtxB = YAML_OM
         .readValue(new URL(urlProp.getProperty("ctx_delay")), CtxBlueprint.class);
-    Nsd ctxbNsd = YAML_OM
+    Nsd delayNsd = YAML_OM
         .readValue(new URL(urlProp.getProperty("ctx_delay_nsds")), Nsd.class);
-    List<VsdNsdTranslationRule> ctxbTr = YAML_OM
+    List<VsdNsdTranslationRule> delayTr = YAML_OM
         .readValue(new URL(urlProp.getProperty("ctx_delay_tr")),
             new TypeReference<List<VsdNsdTranslationRule>>() {
             });
-    OnboardCtxBlueprintRequest ctxbRequest = new OnboardCtxBlueprintRequest(ctxb,
-        Collections.singletonList(ctxbNsd), ctxbTr);
-    Context c = new Context(ctxbRequest, null);
+    OnboardCtxBlueprintRequest delayRequest = new OnboardCtxBlueprintRequest(delayCtxB,
+        Collections.singletonList(delayNsd), delayTr);
+    Context delay = new Context(delayRequest, null);
 
-    ComposeRequest request = new ComposeRequest(vsbRequest, new Context[]{c});
+    CtxBlueprint trafficCtxB = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_smartcity_traffic")), CtxBlueprint.class);
+    Nsd trafficNsd = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_smartcity_traffic_nsd")), Nsd.class);
+    OnboardCtxBlueprintRequest trafficRequest = new OnboardCtxBlueprintRequest(trafficCtxB,
+        Collections.singletonList(trafficNsd), null);
+    Context traffic = new Context(trafficRequest, null);
+
+    ComposeRequest request = new ComposeRequest(vsbRequest, new Context[]{delay, traffic});
     String body = JSON_OM.writeValueAsString(request);
     log.info("Request body:\n{}", body);
     return request;
