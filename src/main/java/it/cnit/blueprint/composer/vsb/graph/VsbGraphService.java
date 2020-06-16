@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.jgrapht.graph.SimpleGraph;
@@ -18,7 +20,11 @@ import org.jgrapht.io.ComponentAttributeProvider;
 import org.jgrapht.io.ComponentNameProvider;
 import org.jgrapht.io.DOTExporter;
 import org.jgrapht.io.DefaultAttribute;
+import org.springframework.stereotype.Service;
 
+@Service
+@Slf4j
+@AllArgsConstructor
 public class VsbGraphService {
 
   public Graph<VsbVertex, String> buildGraph(Blueprint b) {

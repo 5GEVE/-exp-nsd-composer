@@ -24,8 +24,6 @@ public class ServicesController {
     Nsd nsd;
     try {
       nsd = nsdGenerator.generate(vsb);
-    } catch (NsdInvalidException e) {
-      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     } catch (NsdGenerationException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }

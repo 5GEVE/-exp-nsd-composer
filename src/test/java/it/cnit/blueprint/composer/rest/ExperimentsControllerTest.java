@@ -15,6 +15,7 @@ import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardCtxBlueprintRequ
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import lombok.SneakyThrows;
@@ -60,28 +61,28 @@ public class ExperimentsControllerTest {
   }
 
   @SneakyThrows
-  private ComposeRequest getRequest() {
+  private ComposeRequest getAres2TRequest() {
     VsBlueprint vsb = YAML_OM
         .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker")), VsBlueprint.class);
-    List<Nsd> vsbNsd = YAML_OM.readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")),
-        new TypeReference<List<Nsd>>() {
-        });
+    Nsd vsbNsd = YAML_OM
+        .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
     List<VsdNsdTranslationRule> vsbTr = YAML_OM
         .readValue(new URL(urlProp.getProperty("vsb_ares2t_tracker_tr")),
             new TypeReference<List<VsdNsdTranslationRule>>() {
             });
-    OnBoardVsBlueprintRequest vsbRequest = new OnBoardVsBlueprintRequest(vsb, vsbNsd, vsbTr);
+    OnBoardVsBlueprintRequest vsbRequest = new OnBoardVsBlueprintRequest(vsb,
+        Collections.singletonList(vsbNsd), vsbTr);
 
     CtxBlueprint ctxb = YAML_OM
         .readValue(new URL(urlProp.getProperty("ctx_delay")), CtxBlueprint.class);
-    List<Nsd> ctxbNsd = YAML_OM.readValue(new URL(urlProp.getProperty("ctx_delay_nsds")),
-        new TypeReference<List<Nsd>>() {
-        });
+    Nsd ctxbNsd = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_delay_nsds")), Nsd.class);
     List<VsdNsdTranslationRule> ctxbTr = YAML_OM
         .readValue(new URL(urlProp.getProperty("ctx_delay_tr")),
             new TypeReference<List<VsdNsdTranslationRule>>() {
             });
-    OnboardCtxBlueprintRequest ctxbRequest = new OnboardCtxBlueprintRequest(ctxb, ctxbNsd, ctxbTr);
+    OnboardCtxBlueprintRequest ctxbRequest = new OnboardCtxBlueprintRequest(ctxb,
+        Collections.singletonList(ctxbNsd), ctxbTr);
     Context c = new Context(ctxbRequest, null);
 
     ComposeRequest request = new ComposeRequest(vsbRequest, new Context[]{c});
@@ -90,11 +91,50 @@ public class ExperimentsControllerTest {
     return request;
   }
 
+  @SneakyThrows
+  private ComposeRequest getPolitoRequest() {
+    VsBlueprint vsb;
+    try (InputStream inVsb = getClass().getResourceAsStream("/vsb_polito_smartcity_nomgmt.yml")) {
+      vsb = YAML_OM.readValue(inVsb, VsBlueprint.class);
+    }
+    Nsd vsbNsd;
+    try (InputStream inNsd = getClass().getResourceAsStream("/vsb_polito_smartcity_nsd.yaml")) {
+      vsbNsd = YAML_OM.readValue(inNsd, Nsd.class);
+    }
+    OnBoardVsBlueprintRequest vsbRequest = new OnBoardVsBlueprintRequest(vsb,
+        Collections.singletonList(vsbNsd), null);
+
+    CtxBlueprint delayCtxB = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_delay")), CtxBlueprint.class);
+    Nsd delayNsd = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_delay_nsds")), Nsd.class);
+    List<VsdNsdTranslationRule> delayTr = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_delay_tr")),
+            new TypeReference<List<VsdNsdTranslationRule>>() {
+            });
+    OnboardCtxBlueprintRequest delayRequest = new OnboardCtxBlueprintRequest(delayCtxB,
+        Collections.singletonList(delayNsd), delayTr);
+    Context delay = new Context(delayRequest, null);
+
+    CtxBlueprint trafficCtxB = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_smartcity_traffic")), CtxBlueprint.class);
+    Nsd trafficNsd = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_smartcity_traffic_nsd")), Nsd.class);
+    OnboardCtxBlueprintRequest trafficRequest = new OnboardCtxBlueprintRequest(trafficCtxB,
+        Collections.singletonList(trafficNsd), null);
+    Context traffic = new Context(trafficRequest, null);
+
+    ComposeRequest request = new ComposeRequest(vsbRequest, new Context[]{delay, traffic});
+    String body = JSON_OM.writeValueAsString(request);
+    log.info("Request body:\n{}", body);
+    return request;
+  }
+
   @Test
   @SneakyThrows
-  public void composeExperiment200() {
+  public void composeExperimentAres2T200() {
     // Given
-    ComposeRequest request = getRequest();
+    ComposeRequest request = getAres2TRequest();
 
     // When
     MvcResult result = mvc.perform(
@@ -120,9 +160,36 @@ public class ExperimentsControllerTest {
 
   @Test
   @SneakyThrows
+  public void composeExperimentPolito200() {
+    // Given
+    ComposeRequest request = getPolitoRequest();
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/experiments")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(request)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+    ComposeResponse response = JSON_OM
+        .readValue(result.getResponse().getContentAsString(), ComposeResponse.class);
+    log.info("Response body:\n{}", JSON_OM.writeValueAsString(response));
+    Nsd actualNsd = response.getExpNsd();
+    actualNsd.setNsdIdentifier("0176eb11-f613-4b40-bd71-c7a4ea4f0896");
+    actualNsd.setNsdInvariantId("71544f81-653a-4dc1-a49c-a34bc1e17976");
+    InputStream in = getClass().getResourceAsStream("/expb_polito_smartcity_nsd.yaml");
+    Nsd expectedNsd = YAML_OM.readValue(in, Nsd.class);
+    assertEquals(YAML_OM.writeValueAsString(expectedNsd),
+        YAML_OM.writeValueAsString(response.getExpNsd()));
+  }
+
+  @Test
+  @SneakyThrows
   public void composeExperiment400Wrong() {
     // Given
-    ComposeRequest request = getRequest();
+    ComposeRequest request = getAres2TRequest();
 
     // When
     // We pass only the VsbRequest as body to make the REST fail
@@ -163,7 +230,7 @@ public class ExperimentsControllerTest {
   @SneakyThrows
   public void composeExperiment422() {
     // Given
-    ComposeRequest request = getRequest();
+    ComposeRequest request = getAres2TRequest();
 
     // When
     // We change the request to make it unprocessable

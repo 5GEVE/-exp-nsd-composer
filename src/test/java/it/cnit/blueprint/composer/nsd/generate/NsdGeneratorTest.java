@@ -8,6 +8,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.nsd.graph.GraphVizExporter;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
+import it.cnit.blueprint.composer.vsb.VsbService;
 import it.cnit.blueprint.composer.vsb.graph.VsbGraphService;
 import it.cnit.blueprint.composer.vsb.graph.VsbVertex;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
@@ -31,6 +32,7 @@ public class NsdGeneratorTest {
   static VsbGraphService vsbGraphService;
   static NsdGraphService nsdGraphService;
   static NsdGenerator nsdGenerator;
+  static VsbService vsbService;
 
   @BeforeClass
   @SneakyThrows
@@ -41,7 +43,8 @@ public class NsdGeneratorTest {
     urlProp.load(input);
     oM = new ObjectMapper(new YAMLFactory());
     nsdGraphService = new NsdGraphService(new GraphVizExporter());
-    nsdGenerator = new NsdGenerator(nsdGraphService);
+    vsbService = new VsbService();
+    nsdGenerator = new NsdGenerator(vsbService);
     vsbGraphService = new VsbGraphService();
   }
 

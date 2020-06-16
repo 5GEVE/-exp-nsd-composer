@@ -4,8 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.exceptions.NsdGenerationException;
-import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
-import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
+import it.cnit.blueprint.composer.vsb.VsbService;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
@@ -35,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -52,38 +50,16 @@ public class NsdGenerator {
 
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
-  private final NsdGraphService nsdGraphService;
+  private final VsbService vsbService;
 
   @SneakyThrows(JsonProcessingException.class)
-  public Nsd generate(Blueprint b) throws NsdInvalidException, NsdGenerationException {
+  public Nsd generate(Blueprint b) throws NsdGenerationException {
 
     log.debug("blueprint {}:\n{}", b.getBlueprintId(),
         OBJECT_MAPPER.writeValueAsString(b));
 
-    boolean mgmt = b.getConnectivityServices().stream().anyMatch(VsbLink::isManagement);
-    if (!mgmt) {
-      log.info("Generate a mgmt sap and connectivity service");
-      VsbEndpoint mgmtSap = new VsbEndpoint(
-          "sap_" + b.getBlueprintId() + "_mgmt",
-          true,
-          true,
-          false
-      );
-      b.getEndPoints().add(mgmtSap);
-      List<String> mgmtEps = b.getEndPoints().stream()
-          .filter(VsbEndpoint::isManagement)
-          .collect(Collectors.toList()).stream()
-          .map(VsbEndpoint::getEndPointId)
-          .collect(Collectors.toList());
-      VsbLink mgmtCS = new VsbLink(
-          b,
-          mgmtEps,
-          true,
-          null,
-          "vl_" + b.getBlueprintId() + "_mgmt",
-          true
-      );
-      b.getConnectivityServices().add(mgmtCS);
+    if (b.getConnectivityServices().stream().noneMatch(VsbLink::isManagement)) {
+      vsbService.addMgmtConnServ(b);
     }
 
     Nsd nsd = new Nsd();

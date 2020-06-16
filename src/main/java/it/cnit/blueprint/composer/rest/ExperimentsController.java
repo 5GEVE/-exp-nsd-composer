@@ -8,6 +8,7 @@ import it.cnit.blueprint.composer.exceptions.TransRuleInvalidException;
 import it.cnit.blueprint.composer.exceptions.VsbInvalidException;
 import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
 import it.cnit.blueprint.composer.rules.TranslationRulesComposer;
+import it.cnit.blueprint.composer.vsb.VsbService;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CompositionStrategy;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
@@ -43,6 +44,7 @@ public class ExperimentsController {
   @Qualifier("CONNECT")
   private final NsdComposer connectComposer;
 
+  private final VsbService vsbService;
   private final TranslationRulesComposer translationRulesComposer;
 
   @PostMapping("/experiments")
@@ -137,6 +139,10 @@ public class ExperimentsController {
 
   private NsVirtualLinkDesc findMgmtVld(Blueprint b, Nsd nsd)
       throws VsbInvalidException, NsdInvalidException {
+
+    if (b.getConnectivityServices().stream().noneMatch(VsbLink::isManagement)) {
+      vsbService.addMgmtConnServ(b);
+    }
     List<VsbLink> mgmtConnServs = b.getConnectivityServices().stream()
         .filter(VsbLink::isManagement)
         .collect(Collectors.toList());
