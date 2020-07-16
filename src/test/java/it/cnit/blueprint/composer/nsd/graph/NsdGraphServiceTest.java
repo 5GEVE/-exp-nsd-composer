@@ -108,7 +108,7 @@ public class NsdGraphServiceTest {
   @SneakyThrows
   public void buildGraphAres2TDelayExperimentSmall() {
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("expb_ares2t_tracker_delay_nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("expb_ares2t_tracker_delay_nsds")), Nsd.class);
     String nsLevel = "ns_ares2t_tracker_exp_il_small";
 
     // When
