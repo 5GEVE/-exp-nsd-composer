@@ -74,4 +74,46 @@ public class NsdControllerTest {
         .readValue(new URL(urlProp.getProperty("vsb_polito_smartcity_nsds")), Nsd.class);
     assertEquals(YAML_OM.writeValueAsString(expectedNsd), YAML_OM.writeValueAsString(actualNsd));
   }
+
+  @Test
+  @SneakyThrows
+  public void composeExperiment400Wrong() {
+    // Given
+    VsBlueprint vsb = YAML_OM
+        .readValue(new URL(urlProp.getProperty("vsb_polito_smartcity")), VsBlueprint.class);
+
+    // When
+    // We pass only the VsbRequest as body to make the REST fail
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/generate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(vsb.getCompatibleSites())))
+        .andReturn();
+
+    // Then
+    assertEquals(400, result.getResponse().getStatus());
+    if (result.getResolvedException() != null) {
+      log.info("Error message: {}", result.getResolvedException().getMessage());
+    }
+  }
+
+  @Test
+  @SneakyThrows
+  public void composeExperiment400Empty() {
+    // Given
+
+    // When
+    // We pass only the VsbRequest as body to make the REST fail
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/generate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(""))
+        .andReturn();
+
+    // Then
+    assertEquals(400, result.getResponse().getStatus());
+    if (result.getResolvedException() != null) {
+      log.info("Error message: {}", result.getResolvedException().getMessage());
+    }
+  }
 }
