@@ -71,7 +71,7 @@ public class ServicesControllerTest {
     assertEquals(200, result.getResponse().getStatus());
     Nsd actualNsd = JSON_OM.readValue(result.getResponse().getContentAsString(), Nsd.class);
     Nsd expectedNsd = YAML_OM
-        .readValue(new URL(urlProp.getProperty("vsb_polito_smartcity_nsds")), Nsd[].class)[0];
+        .readValue(new URL(urlProp.getProperty("vsb_polito_smartcity_nsds")), Nsd.class);
     assertEquals(YAML_OM.writeValueAsString(expectedNsd), YAML_OM.writeValueAsString(actualNsd));
   }
 
