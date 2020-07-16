@@ -131,6 +131,11 @@ public class NsdController {
     return false;
   }
 
+  @PostMapping("/nsd/schema")
+  public String schema() {
+    return "schema";
+  }
+
   @PostMapping("/nsd/graph")
   public String graph(@RequestBody Nsd nsd) {
     return null;
