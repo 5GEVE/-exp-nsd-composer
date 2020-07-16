@@ -64,7 +64,7 @@ public class NsdGraphServiceTest {
   @SneakyThrows
   public void buildGraphAres2TTrackerSmall() {
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
     String nsLevel = "ns_ares2t_tracker_il_small";
 
     // When
