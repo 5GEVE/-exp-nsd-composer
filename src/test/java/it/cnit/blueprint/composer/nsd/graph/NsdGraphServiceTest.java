@@ -131,7 +131,7 @@ public class NsdGraphServiceTest {
   public void isConnectedAres2TTrackerSmallTest() {
 
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
     String nsLevel = "ns_ares2t_tracker_il_small";
 
     // When
@@ -147,7 +147,7 @@ public class NsdGraphServiceTest {
   public void isNotConnectedAres2TTrackerSmallTest() {
 
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
     String nsLevel = "ns_ares2t_tracker_il_small";
 
     // When
