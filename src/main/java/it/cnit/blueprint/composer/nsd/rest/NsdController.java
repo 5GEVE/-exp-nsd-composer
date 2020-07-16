@@ -18,6 +18,7 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
@@ -126,8 +127,20 @@ public class NsdController {
     return new ComposeResponse(expNsd, expTransRules);
   }
 
+  /**
+   * Validate an NSD. Serialization errors are handled by Spring
+   *
+   * @param nsd nsd to validate
+   * @return 200 if valid, 400 with validation errors if invalid
+   */
   @PostMapping("/nsd/validate")
   public boolean validate(@RequestBody Nsd nsd) {
+    try {
+      nsd.isValid();
+    } catch (MalformattedElementException e) {
+      log.debug("invalid: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
     return false;
   }
 
