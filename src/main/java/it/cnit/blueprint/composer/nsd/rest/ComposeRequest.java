@@ -1,4 +1,4 @@
-package it.cnit.blueprint.composer.rest;
+package it.cnit.blueprint.composer.nsd.rest;
 
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnBoardVsBlueprintRequest;
 import javax.validation.constraints.NotEmpty;
