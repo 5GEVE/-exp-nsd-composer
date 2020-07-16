@@ -2,6 +2,7 @@ package it.cnit.blueprint.composer.nsd.rest;
 
 import it.cnit.blueprint.composer.exceptions.NsdGenerationException;
 import it.cnit.blueprint.composer.nsd.generate.NsdGenerator;
+import it.cnit.blueprint.composer.rest.ComposeRequest;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import lombok.AllArgsConstructor;
@@ -18,12 +19,27 @@ public class NsdController {
   private final NsdGenerator nsdGenerator;
 
   @PostMapping("/nsd/generate")
-  public Nsd generateService(@RequestBody VsBlueprint vsb) {
+  public Nsd generate(@RequestBody VsBlueprint vsb) {
     try {
       return nsdGenerator.generate(vsb);
     } catch (NsdGenerationException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
+  }
+
+  @PostMapping("/nsd/compose")
+  public Nsd compose(@RequestBody ComposeRequest composeRequest){
+    return null;
+  }
+
+  @PostMapping("/nsd/validate")
+  public boolean validate (@RequestBody Nsd nsd){
+    return false;
+  }
+
+  @PostMapping("/nsd/graph")
+  public String graph(@RequestBody Nsd nsd){
+    return null;
   }
 
 }
