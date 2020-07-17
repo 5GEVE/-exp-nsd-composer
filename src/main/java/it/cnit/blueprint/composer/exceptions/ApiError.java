@@ -20,16 +20,14 @@ public class ApiError {
 
   @JsonFormat(shape = JsonFormat.Shape.STRING)
   private LocalDateTime timestamp;
-  private HttpStatus status;
+  private int status;
   private String error;
   private String message;
-  private String path;
 
-  public ApiError(HttpStatus status, String error, String message, String path) {
+  public ApiError(HttpStatus status, String message) {
     this.timestamp = LocalDateTime.now();
-    this.status = status;
-    this.error = error;
+    this.status = status.value();
+    this.error = status.getReasonPhrase();
     this.message = message;
-    this.path = path;
   }
 }
