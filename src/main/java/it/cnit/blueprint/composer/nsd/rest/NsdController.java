@@ -134,14 +134,13 @@ public class NsdController {
    * @return 200 if valid, 400 with validation errors if invalid
    */
   @PostMapping("/nsd/validate")
-  public boolean validate(@RequestBody Nsd nsd) {
+  public void validate(@RequestBody Nsd nsd) {
     try {
       nsd.isValid();
     } catch (MalformattedElementException e) {
-      log.debug("invalid: " + e.getMessage());
+      log.debug("Invalid NSD: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
-    return false;
   }
 
   @PostMapping("/nsd/schema")
