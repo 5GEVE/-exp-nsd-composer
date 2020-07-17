@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class ExceptionConfiguration {
 
   @ExceptionHandler(JsonProcessingException.class)
-  protected ResponseEntity<ApiError> handleJsonProcessingException(
-      JsonProcessingException ex) {
+  protected ResponseEntity<ApiError> handleJsonProcessingException(JsonProcessingException ex) {
     ApiError err = new ApiError(
         HttpStatus.BAD_REQUEST,
         ex.getOriginalMessage() + ". Error at line " + ex.getLocation().getLineNr() + ", column " +
