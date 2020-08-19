@@ -1,7 +1,7 @@
 package it.cnit.blueprint.composer.nsd.rest;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
@@ -157,10 +157,14 @@ public class NsdController {
   }
 
   @GetMapping("/nsd/schema")
-  public JsonSchema schema() throws JsonProcessingException {
+  public JsonSchema schema() {
     ObjectMapper J_OBJECT_MAPPER = new ObjectMapper(new JsonFactory())
         .enable(SerializationFeature.INDENT_OUTPUT);
-    return new JsonSchemaGenerator(J_OBJECT_MAPPER).generateSchema(Nsd.class);
+    try {
+      return new JsonSchemaGenerator(J_OBJECT_MAPPER).generateSchema(Nsd.class);
+    } catch (JsonMappingException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
   @PostMapping("/nsd/graph")
