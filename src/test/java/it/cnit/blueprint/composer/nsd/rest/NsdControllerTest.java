@@ -364,4 +364,22 @@ public class NsdControllerTest {
     // Then
     assertEquals(200, result.getResponse().getStatus());
   }
+
+  @Test
+  @SneakyThrows
+  public void graph200() {
+    // Given
+    Nsd nsd = getPolitoRequest().getVsbRequest().getNsds().get(0);
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/graph")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(nsd)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+    JSON_OM.readValue(result.getResponse().getContentAsString(), GraphResponse[].class);
+  }
 }
