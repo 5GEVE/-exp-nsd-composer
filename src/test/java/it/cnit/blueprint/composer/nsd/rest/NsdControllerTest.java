@@ -350,4 +350,18 @@ public class NsdControllerTest {
       log.info("Error message: {}", result.getResolvedException().getMessage());
     }
   }
+
+  @Test
+  @SneakyThrows
+  public void schema200() {
+    // Given
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.get("/nsd/schema"))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+  }
 }
