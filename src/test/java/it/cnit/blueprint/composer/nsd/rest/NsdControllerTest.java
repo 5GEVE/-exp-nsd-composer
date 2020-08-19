@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
@@ -363,6 +364,7 @@ public class NsdControllerTest {
 
     // Then
     assertEquals(200, result.getResponse().getStatus());
+    JSON_OM.readValue(result.getResponse().getContentAsString(), ObjectSchema.class);
   }
 
   @Test
