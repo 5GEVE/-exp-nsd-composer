@@ -42,7 +42,8 @@ public class VsbControllerTest {
   private MockMvc mvc;
 
   @Before
-  public void setUp() throws Exception {
+  @SneakyThrows
+  public void setUp() {
     // Test Setup
     urlProp = new Properties();
     InputStream input = ClassLoader.getSystemResourceAsStream("url.properties");
