@@ -15,6 +15,8 @@ import it.cnit.blueprint.composer.exceptions.TransRuleInvalidException;
 import it.cnit.blueprint.composer.exceptions.VsbInvalidException;
 import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
 import it.cnit.blueprint.composer.nsd.generate.NsdGenerator;
+import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
+import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.composer.rules.TranslationRulesComposer;
 import it.cnit.blueprint.composer.vsb.VsbService;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
@@ -25,6 +27,8 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
@@ -35,6 +39,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jgrapht.Graph;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -50,6 +55,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class NsdController {
 
   private final NsdGenerator nsdGenerator;
+  private final NsdGraphService nsdGraphService;
 
   @Qualifier("PASS_THROUGH")
   private final NsdComposer passThroughComposer;
@@ -158,8 +164,22 @@ public class NsdController {
   }
 
   @PostMapping("/nsd/graph")
-  public String graph(@RequestBody Nsd nsd) {
-    return null;
+  public List<GraphResponse> graph(@RequestBody Nsd nsd) {
+    ArrayList<GraphResponse> graphs = new ArrayList<>();
+    for (NsDf nsDf : nsd.getNsDf()) {
+      for (NsLevel nsLvl : nsDf.getNsInstantiationLevel()) {
+        try {
+          Graph<ProfileVertex, String> graph = nsdGraphService
+              .buildGraph(nsd.getSapd(), nsDf, nsLvl);
+          graphs.add(
+              new GraphResponse(nsDf.getNsDfId(), nsLvl.getNsLevelId(),
+                  nsdGraphService.export(graph).replace("\n", "").replace("\r", "")));
+        } catch (NsdInvalidException e) {
+          throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+        }
+      }
+    }
+    return graphs;
   }
 
   private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd)
