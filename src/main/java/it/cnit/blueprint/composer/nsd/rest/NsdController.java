@@ -1,5 +1,11 @@
 package it.cnit.blueprint.composer.nsd.rest;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import it.cnit.blueprint.composer.exceptions.ContextInvalidException;
 import it.cnit.blueprint.composer.exceptions.NsdCompositionException;
 import it.cnit.blueprint.composer.exceptions.NsdGenerationException;
@@ -32,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -143,9 +150,11 @@ public class NsdController {
     }
   }
 
-  @PostMapping("/nsd/schema")
-  public String schema() {
-    return "schema";
+  @GetMapping("/nsd/schema")
+  public JsonSchema schema() throws JsonProcessingException {
+    ObjectMapper J_OBJECT_MAPPER = new ObjectMapper(new JsonFactory())
+        .enable(SerializationFeature.INDENT_OUTPUT);
+    return new JsonSchemaGenerator(J_OBJECT_MAPPER).generateSchema(Nsd.class);
   }
 
   @PostMapping("/nsd/graph")

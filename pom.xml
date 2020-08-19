@@ -91,6 +91,13 @@
       <version>2.9.8</version>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-module-jsonSchema -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-jsonSchema</artifactId>
+      <version>2.9.8</version>
+    </dependency>
+
     <!-- https://github.com/nextworks-it/slicer-catalogue/tree/5geve-release -->
     <dependency>
       <groupId>it.nextworks.nfvmano</groupId>
