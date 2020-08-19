@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.ExpBlueprint;
-import it.nextworks.nfvmano.catalogue.blueprint.elements.KeyPerformanceIndicator;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
@@ -42,7 +41,7 @@ public class ExpControllerTest {
 
   @Before
   @SneakyThrows
-  public void setUp() throws Exception {
+  public void setUp() {
     // Test Setup
     urlProp = new Properties();
     InputStream input = ClassLoader.getSystemResourceAsStream("url.properties");
