@@ -1,6 +1,6 @@
 package it.cnit.blueprint.composer.nsd.rest;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -313,4 +313,41 @@ public class NsdControllerTest {
     }
   }
 
+  @Test
+  @SneakyThrows
+  public void validate200() {
+    // Given
+    Nsd nsd = getPolitoRequest().getVsbRequest().getNsds().get(0);
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/validate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(nsd)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+  }
+
+  @Test
+  @SneakyThrows
+  public void validate400() {
+    // Given
+    Nsd nsd = getPolitoRequest().getVsbRequest().getNsds().get(0);
+    nsd.setNsdIdentifier(null);
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/validate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(nsd)))
+        .andReturn();
+
+    // Then
+    assertEquals(400, result.getResponse().getStatus());
+    if (result.getResolvedException() != null) {
+      log.info("Error message: {}", result.getResolvedException().getMessage());
+    }
+  }
 }
