@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
-import it.cnit.blueprint.composer.vsb.graph.VsbGraphService;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.ExpBlueprint;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import lombok.AllArgsConstructor;
@@ -22,8 +21,6 @@ import org.springframework.web.server.ResponseStatusException;
 @Slf4j
 @AllArgsConstructor
 public class ExpController {
-
-  private final VsbGraphService vsbGraphService;
 
   /**
    * Validate method. Serialization errors are handled by Spring
