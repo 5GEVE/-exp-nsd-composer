@@ -1,12 +1,22 @@
-package it.cnit.blueprint.composer.rest;
+package it.cnit.blueprint.composer.nsd.rest;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import it.cnit.blueprint.composer.exceptions.ContextInvalidException;
 import it.cnit.blueprint.composer.exceptions.NsdCompositionException;
+import it.cnit.blueprint.composer.exceptions.NsdGenerationException;
 import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.cnit.blueprint.composer.exceptions.TransRuleCompositionException;
 import it.cnit.blueprint.composer.exceptions.TransRuleInvalidException;
 import it.cnit.blueprint.composer.exceptions.VsbInvalidException;
 import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
+import it.cnit.blueprint.composer.nsd.generate.NsdGenerator;
+import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
+import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.composer.rules.TranslationRulesComposer;
 import it.cnit.blueprint.composer.vsb.VsbService;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
@@ -16,6 +26,9 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
@@ -26,9 +39,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jgrapht.Graph;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +52,10 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @Slf4j
 @AllArgsConstructor
-public class ExperimentsController {
+public class NsdController {
+
+  private final NsdGenerator nsdGenerator;
+  private final NsdGraphService nsdGraphService;
 
   @Qualifier("PASS_THROUGH")
   private final NsdComposer passThroughComposer;
@@ -47,9 +65,17 @@ public class ExperimentsController {
   private final VsbService vsbService;
   private final TranslationRulesComposer translationRulesComposer;
 
-  @PostMapping("/experiments")
-  public ComposeResponse composeExperiment(@RequestBody ComposeRequest composeRequest) {
+  @PostMapping("/nsd/generate")
+  public Nsd generate(@RequestBody VsBlueprint vsb) {
+    try {
+      return nsdGenerator.generate(vsb);
+    } catch (NsdGenerationException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 
+  @PostMapping("/nsd/compose")
+  public ComposeResponse compose(@RequestBody ComposeRequest composeRequest) {
     VsBlueprint vsb = composeRequest.getVsbRequest().getVsBlueprint();
     Nsd expNsd = composeRequest.getVsbRequest().getNsds().get(0);
     List<VsdNsdTranslationRule> vsbTransRules = composeRequest.getVsbRequest()
@@ -112,6 +138,52 @@ public class ExperimentsController {
       expTransRules = new ArrayList<>();
     }
     return new ComposeResponse(expNsd, expTransRules);
+  }
+
+  /**
+   * Validate an NSD. Serialization errors are handled by Spring
+   *
+   * @param nsd nsd to validate
+   * @return 200 if valid, 400 with validation errors if invalid
+   */
+  @PostMapping("/nsd/validate")
+  public void validate(@RequestBody Nsd nsd) {
+    try {
+      nsd.isValid();
+    } catch (MalformattedElementException e) {
+      log.debug("Invalid NSD: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+  }
+
+  @GetMapping("/nsd/schema")
+  public JsonSchema schema() {
+    ObjectMapper J_OBJECT_MAPPER = new ObjectMapper(new JsonFactory())
+        .enable(SerializationFeature.INDENT_OUTPUT);
+    try {
+      return new JsonSchemaGenerator(J_OBJECT_MAPPER).generateSchema(Nsd.class);
+    } catch (JsonMappingException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  @PostMapping("/nsd/graph")
+  public List<GraphResponse> graph(@RequestBody Nsd nsd) {
+    ArrayList<GraphResponse> graphs = new ArrayList<>();
+    for (NsDf nsDf : nsd.getNsDf()) {
+      for (NsLevel nsLvl : nsDf.getNsInstantiationLevel()) {
+        try {
+          Graph<ProfileVertex, String> graph = nsdGraphService
+              .buildGraph(nsd.getSapd(), nsDf, nsLvl);
+          graphs.add(
+              new GraphResponse(nsDf.getNsDfId(), nsLvl.getNsLevelId(),
+                  nsdGraphService.export(graph).replace("\n", "").replace("\r", "")));
+        } catch (NsdInvalidException e) {
+          throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+        }
+      }
+    }
+    return graphs;
   }
 
   private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd)

@@ -1,4 +1,4 @@
-package it.cnit.blueprint.composer.rest;
+package it.cnit.blueprint.composer.nsd.rest;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
@@ -36,7 +37,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 @Slf4j
-public class ExperimentsControllerTest {
+public class NsdControllerTest {
 
   private ObjectMapper JSON_OM, YAML_OM;
   static Properties urlProp;
@@ -58,6 +59,70 @@ public class ExperimentsControllerTest {
     mvc = MockMvcBuilders
         .webAppContextSetup(webApplicationContext)
         .build();
+  }
+
+  @Test
+  @SneakyThrows
+  public void generate() {
+    // Given
+    VsBlueprint vsb = YAML_OM
+        .readValue(new URL(urlProp.getProperty("vsb_polito_smartcity")), VsBlueprint.class);
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/generate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(vsb)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+    Nsd actualNsd = JSON_OM.readValue(result.getResponse().getContentAsString(), Nsd.class);
+    Nsd expectedNsd = YAML_OM
+        .readValue(new URL(urlProp.getProperty("vsb_polito_smartcity_nsds")), Nsd.class);
+    assertEquals(YAML_OM.writeValueAsString(expectedNsd), YAML_OM.writeValueAsString(actualNsd));
+  }
+
+  @Test
+  @SneakyThrows
+  public void generate400Wrong() {
+    // Given
+    VsBlueprint vsb = YAML_OM
+        .readValue(new URL(urlProp.getProperty("vsb_polito_smartcity")), VsBlueprint.class);
+
+    // When
+    // We pass only the VsbRequest as body to make the REST fail
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/generate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(vsb.getCompatibleSites())))
+        .andReturn();
+
+    // Then
+    assertEquals(400, result.getResponse().getStatus());
+    if (result.getResolvedException() != null) {
+      log.info("Error message: {}", result.getResolvedException().getMessage());
+    }
+  }
+
+  @Test
+  @SneakyThrows
+  public void generate400Empty() {
+    // Given
+
+    // When
+    // We pass only the VsbRequest as body to make the REST fail
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/generate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(""))
+        .andReturn();
+
+    // Then
+    assertEquals(400, result.getResponse().getStatus());
+    if (result.getResolvedException() != null) {
+      log.info("Error message: {}", result.getResolvedException().getMessage());
+    }
   }
 
   @SneakyThrows
@@ -132,13 +197,13 @@ public class ExperimentsControllerTest {
 
   @Test
   @SneakyThrows
-  public void composeExperimentAres2T200() {
+  public void composeAres2T200() {
     // Given
     ComposeRequest request = getAres2TRequest();
 
     // When
     MvcResult result = mvc.perform(
-        MockMvcRequestBuilders.post("/experiments")
+        MockMvcRequestBuilders.post("/nsd/compose")
             .contentType(MediaType.APPLICATION_JSON)
             .content(JSON_OM.writeValueAsString(request)))
         .andReturn();
@@ -160,13 +225,13 @@ public class ExperimentsControllerTest {
 
   @Test
   @SneakyThrows
-  public void composeExperimentPolito200() {
+  public void composePolito200() {
     // Given
     ComposeRequest request = getPolitoRequest();
 
     // When
     MvcResult result = mvc.perform(
-        MockMvcRequestBuilders.post("/experiments")
+        MockMvcRequestBuilders.post("/nsd/compose")
             .contentType(MediaType.APPLICATION_JSON)
             .content(JSON_OM.writeValueAsString(request)))
         .andReturn();
@@ -187,14 +252,14 @@ public class ExperimentsControllerTest {
 
   @Test
   @SneakyThrows
-  public void composeExperiment400Wrong() {
+  public void compose400Wrong() {
     // Given
     ComposeRequest request = getAres2TRequest();
 
     // When
     // We pass only the VsbRequest as body to make the REST fail
     MvcResult result = mvc.perform(
-        MockMvcRequestBuilders.post("/experiments")
+        MockMvcRequestBuilders.post("/nsd/compose")
             .contentType(MediaType.APPLICATION_JSON)
             .content(JSON_OM.writeValueAsString(request.getVsbRequest())))
         .andReturn();
@@ -208,13 +273,13 @@ public class ExperimentsControllerTest {
 
   @Test
   @SneakyThrows
-  public void composeExperiment400Empty() {
+  public void compose400Empty() {
     // Given
 
     // When
     // We pass only the VsbRequest as body to make the REST fail
     MvcResult result = mvc.perform(
-        MockMvcRequestBuilders.post("/experiments")
+        MockMvcRequestBuilders.post("/nsd/compose")
             .contentType(MediaType.APPLICATION_JSON)
             .content(""))
         .andReturn();
@@ -228,7 +293,7 @@ public class ExperimentsControllerTest {
 
   @Test
   @SneakyThrows
-  public void composeExperiment422() {
+  public void compose422() {
     // Given
     ComposeRequest request = getAres2TRequest();
 
@@ -237,7 +302,7 @@ public class ExperimentsControllerTest {
     request.getVsbRequest().getNsds().get(0).getVirtualLinkDesc().get(0)
         .setVirtualLinkDescId("wrong-vld-id");
     MvcResult result = mvc.perform(
-        MockMvcRequestBuilders.post("/experiments")
+        MockMvcRequestBuilders.post("/nsd/compose")
             .contentType(MediaType.APPLICATION_JSON)
             .content(JSON_OM.writeValueAsString(request)))
         .andReturn();
@@ -247,5 +312,76 @@ public class ExperimentsControllerTest {
     if (result.getResolvedException() != null) {
       log.info("Error message: {}", result.getResolvedException().getMessage());
     }
+  }
+
+  @Test
+  @SneakyThrows
+  public void validate200() {
+    // Given
+    Nsd nsd = getPolitoRequest().getVsbRequest().getNsds().get(0);
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/validate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(nsd)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+  }
+
+  @Test
+  @SneakyThrows
+  public void validate400() {
+    // Given
+    Nsd nsd = getPolitoRequest().getVsbRequest().getNsds().get(0);
+    nsd.setNsdIdentifier(null);
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/validate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(nsd)))
+        .andReturn();
+
+    // Then
+    assertEquals(400, result.getResponse().getStatus());
+    if (result.getResolvedException() != null) {
+      log.info("Error message: {}", result.getResolvedException().getMessage());
+    }
+  }
+
+  @Test
+  @SneakyThrows
+  public void schema200() {
+    // Given
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.get("/nsd/schema"))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+    JSON_OM.readValue(result.getResponse().getContentAsString(), ObjectSchema.class);
+  }
+
+  @Test
+  @SneakyThrows
+  public void graph200() {
+    // Given
+    Nsd nsd = getPolitoRequest().getVsbRequest().getNsds().get(0);
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/graph")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(nsd)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+    JSON_OM.readValue(result.getResponse().getContentAsString(), GraphResponse[].class);
   }
 }
