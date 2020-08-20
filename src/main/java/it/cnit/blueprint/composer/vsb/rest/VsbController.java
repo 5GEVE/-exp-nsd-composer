@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
+import it.cnit.blueprint.composer.vsb.VsbService;
 import it.cnit.blueprint.composer.vsb.graph.VsbGraphService;
 import it.cnit.blueprint.composer.vsb.graph.VsbVertex;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +30,17 @@ import org.springframework.web.server.ResponseStatusException;
 public class VsbController {
 
   private final VsbGraphService vsbGraphService;
+  private final VsbService vsbService;
+
+  @PostMapping("/vsb/addMgmt")
+  public VsBlueprint addMgmtConnService(@RequestBody VsBlueprint vsb) {
+    validate(vsb);
+    if (vsb.getConnectivityServices().stream().noneMatch(VsbLink::isManagement)) {
+      vsbService.addMgmtConnServ(vsb);
+    }
+    validate(vsb);
+    return vsb;
+  }
 
   /**
    * Validate method. Serialization errors are handled by Spring

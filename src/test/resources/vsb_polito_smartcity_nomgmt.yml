@@ -90,17 +90,20 @@ applicationMetrics:
     unit: devices
     interval: 5s
     topic: /app/tracked_devices
+    metricGraphType: LINE
   - metricId: processed_records
     name: Number of total processed records
     metricCollectionType: CUMULATIVE
     unit: records
     interval: 5s
     topic: /app/processed_records
+    metricGraphType: LINE
   - metricId: record_visualization_time
     name: Time needed to process and visualize a record
     metricCollectionType: GAUGE
     unit: ms
     interval: 1s
     topic: /app/tracking_response_time
+    metricGraphType: LINE
 compatibleSites:
   - ITALY_TURIN

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
@@ -53,6 +54,29 @@ public class VsbControllerTest {
     mvc = MockMvcBuilders
         .webAppContextSetup(webApplicationContext)
         .build();
+  }
+
+  @Test
+  @SneakyThrows
+  public void addMgmtConnService() {
+    // Given
+    VsBlueprint vsb;
+    try (InputStream inVsb = getClass().getResourceAsStream("/vsb_polito_smartcity_nomgmt.yml")) {
+      vsb = YAML_OM.readValue(inVsb, VsBlueprint.class);
+    }
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/vsb/addMgmt")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(vsb)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+    VsBlueprint newVsb = JSON_OM
+        .readValue(result.getResponse().getContentAsString(), VsBlueprint.class);
+    assertTrue(newVsb.getConnectivityServices().stream().anyMatch(VsbLink::isManagement));
   }
 
   @Test
