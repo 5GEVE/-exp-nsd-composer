@@ -9,7 +9,6 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import it.cnit.blueprint.composer.vsb.graph.VsbGraphService;
 import it.cnit.blueprint.composer.vsb.graph.VsbVertex;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
-import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +58,7 @@ public class CtxController {
 
   @PostMapping("/ctx/graph")
   public Map<String, String> graph(@RequestBody CtxBlueprint ctx) {
+    validate(ctx);
     Graph<VsbVertex, String> graph = vsbGraphService.buildGraph(ctx);
     return new HashMap<String, String>() {
       {

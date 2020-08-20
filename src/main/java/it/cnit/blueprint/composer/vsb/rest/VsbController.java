@@ -71,6 +71,7 @@ public class VsbController {
 
   @PostMapping("/vsb/graph")
   public Map<String, String> graph(@RequestBody VsBlueprint vsb) {
+    validate(vsb);
     Graph<VsbVertex, String> graph = vsbGraphService.buildGraph(vsb);
     return new HashMap<String, String>() {
       {
