@@ -59,4 +59,33 @@ public class VsbGraphServiceTest {
     }
     assertEquals(expected, actual);
   }
+
+  @Test
+  @SneakyThrows
+  public void buildGraphServersNumber() {
+    // Given
+    Blueprint b;
+    try (InputStream inVsb = getClass()
+        .getResourceAsStream("/vsb_polito_smartcity_servers_number.yaml")) {
+      b = oM.readValue(inVsb, VsBlueprint.class);
+    }
+
+    // When
+    Graph<VsbVertex, String> graph = vsbGraphService.buildGraph(b);
+    String actual = vsbGraphService.export(graph);
+    log.debug("actual graph:\n{}", actual);
+
+    log.debug("Graph is connected: {}", vsbGraphService.isConnected(graph));
+
+    // Then
+    String expected;
+    //noinspection ConstantConditions
+    try (Scanner scanner = new Scanner(
+        ClassLoader.getSystemResourceAsStream("vsb_polito_smartcity_servers_number" + ".dot"),
+        StandardCharsets.UTF_8.name())) {
+      expected = scanner.useDelimiter("\\A").next();
+    }
+    assertEquals(expected, actual);
+  }
+
 }

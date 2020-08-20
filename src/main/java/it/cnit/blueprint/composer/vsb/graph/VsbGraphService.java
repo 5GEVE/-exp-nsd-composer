@@ -35,10 +35,11 @@ public class VsbGraphService {
 
     // Vertices
     for (VsComponent c : b.getAtomicComponents()) {
-      AtomicComponentVertex v = new AtomicComponentVertex(c);
-      // TODO handle 'serversNumber'
-      compVList.add(v);
-      g.addVertex(v);
+      for (int i = 0; i < c.getServersNumber(); i++) {
+        AtomicComponentVertex v = new AtomicComponentVertex(c, i);
+        compVList.add(v);
+        g.addVertex(v);
+      }
     }
     for (VsbLink l : b.getConnectivityServices()) {
       VsbLinkVertex v = new VsbLinkVertex(l);
@@ -60,7 +61,7 @@ public class VsbGraphService {
         for (VsbLinkVertex v2 : linkVList) {
           for (String vlEp : v2.getVsbLink().getEndPointIds()) {
             if (!acEp.contains("sap") && !vlEp.contains("sap") && acEp.equals(vlEp)) {
-              g.addEdge(v1, v2, vlEp);
+              g.addEdge(v1, v2, vlEp + "_" + v1.getNumber());
             }
           }
         }
