@@ -65,8 +65,10 @@ public class NsdControllerTest {
   @SneakyThrows
   public void generate() {
     // Given
-    VsBlueprint vsb = YAML_OM
-        .readValue(new URL(urlProp.getProperty("vsb_polito_smartcity")), VsBlueprint.class);
+    VsBlueprint vsb;
+    try (InputStream inVsb = getClass().getResourceAsStream("/vsb_polito_smartcity_nomgmt.yml")) {
+      vsb = YAML_OM.readValue(inVsb, VsBlueprint.class);
+    }
 
     // When
     MvcResult result = mvc.perform(
@@ -78,8 +80,10 @@ public class NsdControllerTest {
     // Then
     assertEquals(200, result.getResponse().getStatus());
     Nsd actualNsd = JSON_OM.readValue(result.getResponse().getContentAsString(), Nsd.class);
-    Nsd expectedNsd = YAML_OM
-        .readValue(new URL(urlProp.getProperty("vsb_polito_smartcity_nsds")), Nsd.class);
+    Nsd expectedNsd;
+    try (InputStream inNsd = getClass().getResourceAsStream("/vsb_polito_smartcity_nsd.yaml")) {
+      expectedNsd = YAML_OM.readValue(inNsd, Nsd.class);
+    }
     assertEquals(YAML_OM.writeValueAsString(expectedNsd), YAML_OM.writeValueAsString(actualNsd));
   }
 

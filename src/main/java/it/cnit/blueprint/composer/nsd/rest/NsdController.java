@@ -19,6 +19,8 @@ import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.composer.rules.TranslationRulesComposer;
 import it.cnit.blueprint.composer.vsb.VsbService;
+import it.cnit.blueprint.composer.vsb.rest.CtxController;
+import it.cnit.blueprint.composer.vsb.rest.VsbController;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CompositionStrategy;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
@@ -63,10 +65,13 @@ public class NsdController {
   private final NsdComposer connectComposer;
 
   private final VsbService vsbService;
+  private final VsbController vsbController;
+  private final CtxController ctxController;
   private final TranslationRulesComposer translationRulesComposer;
 
   @PostMapping("/nsd/generate")
   public Nsd generate(@RequestBody VsBlueprint vsb) {
+    vsbController.validate(vsb);
     try {
       return nsdGenerator.generate(vsb);
     } catch (NsdGenerationException e) {
@@ -77,23 +82,25 @@ public class NsdController {
   @PostMapping("/nsd/compose")
   public ComposeResponse compose(@RequestBody ComposeRequest composeRequest) {
     VsBlueprint vsb = composeRequest.getVsbRequest().getVsBlueprint();
+    vsbController.validate(vsb);
     Nsd expNsd = composeRequest.getVsbRequest().getNsds().get(0);
+    validate(expNsd);
     List<VsdNsdTranslationRule> vsbTransRules = composeRequest.getVsbRequest()
         .getTranslationRules();
     expNsd.setNsdIdentifier(UUID.randomUUID().toString());
     expNsd.setNsdInvariantId(UUID.randomUUID().toString());
     expNsd.setDesigner(expNsd.getDesigner() + " + NSD Composer");
 
-    Context[] contexts = composeRequest.getContexts();
-
     try {
       // Assumptions:
       // - The Vsb has only 1 Nsd.
       NsVirtualLinkDesc ranVld = findRanVld(vsb, expNsd);
-      for (Context ctx : contexts) {
+      for (Context ctx : composeRequest.getContexts()) {
         // - The Ctx has only 1 Nsd.
         CtxBlueprint ctxB = ctx.getCtxbRequest().getCtxBlueprint();
+        ctxController.validate(ctxB);
         Nsd ctxNsd = ctx.getCtxbRequest().getNsds().get(0);
+        validate(ctxNsd);
 
         log.info("Current CtxB: {}", ctxB.getBlueprintId());
 
@@ -169,6 +176,7 @@ public class NsdController {
 
   @PostMapping("/nsd/graph")
   public List<GraphResponse> graph(@RequestBody Nsd nsd) {
+    validate(nsd);
     ArrayList<GraphResponse> graphs = new ArrayList<>();
     for (NsDf nsDf : nsd.getNsDf()) {
       for (NsLevel nsLvl : nsDf.getNsInstantiationLevel()) {
