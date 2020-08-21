@@ -7,13 +7,13 @@ description: Blueprint for 5G EVE Smart City (Smart Turin) for quantification of
 parameters:
 atomicComponents:
   - componentId: mobility_tracker
-    serversNumber: 5
+    serversNumber: 3
     endPointsIds:
       - cp_tracker_ext_mobile
       - cp_tracker_data
       - cp_tracker_mgmt
   - componentId: visualization_tool
-    serversNumber: 6
+    serversNumber: 1
     endPointsIds:
       - cp_vis_data
       - cp_vis_mgmt

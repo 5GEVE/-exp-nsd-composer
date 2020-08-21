@@ -91,7 +91,7 @@ nsDf:
         flavourId: "mobility_tracker_vnf_df"
         instantiationLevel: "mobility_tracker_vnf_il"
         minNumberOfInstances: 1
-        maxNumberOfInstances: 5
+        maxNumberOfInstances: 3
         nsVirtualLinkConnectivity:
           - virtualLinkProfileId: "vl_smartcity_ext_vlp"
             cpdId:
