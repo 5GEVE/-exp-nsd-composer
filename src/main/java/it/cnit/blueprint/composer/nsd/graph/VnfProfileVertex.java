@@ -10,8 +10,11 @@ public class VnfProfileVertex extends ProfileVertex {
   @Getter
   private final VnfProfile vnfProfile;
 
+  @Getter
+  private int number;
+
   @Override
   public String getElementId() {
-    return this.vnfProfile.getVnfProfileId();
+    return this.vnfProfile.getVnfProfileId() + "_" + number;
   }
 }

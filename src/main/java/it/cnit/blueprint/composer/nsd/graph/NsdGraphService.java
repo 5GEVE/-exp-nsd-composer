@@ -8,6 +8,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.PnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,10 +40,9 @@ public class NsdGraphService {
 
     // Vertices
     for (VnfToLevelMapping vnfToLevelMapping : nsLevel.getVnfToLevelMapping()) {
-      VnfProfileVertex v;
+      VnfProfile vnfProfile;
       try {
-        v = new VnfProfileVertex(
-            nsDf.getVnfProfile(vnfToLevelMapping.getVnfProfileId()));
+        vnfProfile = nsDf.getVnfProfile(vnfToLevelMapping.getVnfProfileId());
       } catch (NotExistingEntityException e) {
         String message = MessageFormatter.arrayFormat(
             "vnfProfileId='{}' not found for nsDfId='{}' and nsLevelId='{}'.",
@@ -51,9 +51,11 @@ public class NsdGraphService {
         log.error(message);
         throw new NsdInvalidException(nsDf.getNsDfId(), message);
       }
-      // TODO handle the number of instances to build the graph
-      vnfPVertices.add(v);
-      g.addVertex(v);
+      for (int i = 0; i < vnfToLevelMapping.getNumberOfInstances(); i++) {
+        VnfProfileVertex v = new VnfProfileVertex(vnfProfile, i);
+        vnfPVertices.add(v);
+        g.addVertex(v);
+      }
     }
     for (PnfProfile pp : nsDf.getPnfProfile()) {
       PnfProfileVertex v = new PnfProfileVertex(pp);
@@ -89,7 +91,7 @@ public class NsdGraphService {
         for (VirtualLinkProfileVertex v2 : vlPVertices) {
           if (vlc.getVirtualLinkProfileId()
               .equals(v2.getVlProfile().getVirtualLinkProfileId())) {
-            g.addEdge(v1, v2, v1.getVnfProfile().getVnfProfileId() + "_" + vlc.getCpdId().get(0));
+            g.addEdge(v1, v2, v1.getElementId() + "_" + vlc.getCpdId().get(0));
           }
         }
       }
