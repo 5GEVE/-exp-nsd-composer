@@ -3,6 +3,8 @@ strict graph G {
   overlap=false;
   mindist=0.5;
   -1387715755 [ label="mobility_tracker_0" shape="box" style="filled" fillcolor="#d5e8d4" color="#82b366" ];
+  -1387715754 [ label="mobility_tracker_1" shape="box" style="filled" fillcolor="#d5e8d4" color="#82b366" ];
+  -1387715753 [ label="mobility_tracker_2" shape="box" style="filled" fillcolor="#d5e8d4" color="#82b366" ];
   -401307964 [ label="visualization_tool_0" shape="box" style="filled" fillcolor="#d5e8d4" color="#82b366" ];
   742607949 [ label="vl_smartcity_ext" shape="oval" style="filled" fillcolor="#dae8fc" color="#6c8ebf" ];
   1545958142 [ label="vl_smartcity_data" shape="oval" style="filled" fillcolor="#dae8fc" color="#6c8ebf" ];
@@ -14,6 +16,12 @@ strict graph G {
   -1387715755 -- 742607949 [ label="cp_tracker_ext_mobile_0" ];
   -1387715755 -- 1545958142 [ label="cp_tracker_data_0" ];
   -1387715755 -- 1546231829 [ label="cp_tracker_mgmt_0" ];
+  -1387715754 -- 742607949 [ label="cp_tracker_ext_mobile_1" ];
+  -1387715754 -- 1545958142 [ label="cp_tracker_data_1" ];
+  -1387715754 -- 1546231829 [ label="cp_tracker_mgmt_1" ];
+  -1387715753 -- 742607949 [ label="cp_tracker_ext_mobile_2" ];
+  -1387715753 -- 1545958142 [ label="cp_tracker_data_2" ];
+  -1387715753 -- 1546231829 [ label="cp_tracker_mgmt_2" ];
   -401307964 -- 1545958142 [ label="cp_vis_data_0" ];
   -401307964 -- 1546231829 [ label="cp_vis_mgmt_0" ];
   -401307964 -- 1546481439 [ label="cp_vis_user_0" ];

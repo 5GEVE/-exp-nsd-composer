@@ -146,7 +146,7 @@ public class NsdGenerator {
       vnfp.setFlavourId(vsc.getComponentId() + "_vnf_df");
       vnfp.setInstantiationLevel(vsc.getComponentId() + "_vnf_il");
       vnfp.setMinNumberOfInstances(1);
-      vnfp.setMaxNumberOfInstances(1);
+      vnfp.setMaxNumberOfInstances(vsc.getServersNumber());
       List<NsVirtualLinkConnectivity> nsVirtualLinkConnectivities = new ArrayList<>();
       for (String ep : vsc.getEndPointsIds()) {
         for (VsbLink cs : b.getConnectivityServices()) {
@@ -167,7 +167,8 @@ public class NsdGenerator {
       }
       vnfp.setNsVirtualLinkConnectivity(nsVirtualLinkConnectivities);
       nsDf.getVnfProfile().add(vnfp);
-      nsLevel.getVnfToLevelMapping().add(new VnfToLevelMapping(vnfp.getVnfProfileId(), 1));
+      nsLevel.getVnfToLevelMapping()
+          .add(new VnfToLevelMapping(vnfp.getVnfProfileId(), vsc.getServersNumber()));
     }
 
     nsDf.setNsInstantiationLevel(Collections.singletonList(nsLevel));

@@ -10,8 +10,11 @@ public class AtomicComponentVertex extends VsbVertex {
   @Getter
   private final VsComponent vsComponent;
 
+  @Getter
+  private int number;
+
   @Override
   public String getElementId() {
-    return this.vsComponent.getComponentId();
+    return this.vsComponent.getComponentId() + "_" + number;
   }
 }

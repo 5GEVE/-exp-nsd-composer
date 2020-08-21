@@ -128,6 +128,32 @@ public class NsdGraphServiceTest {
 
   @Test
   @SneakyThrows
+  public void buildGraphPolitoNumberOfInstances() {
+    // Given
+    Nsd nsd;
+    try (InputStream inVsb = getClass()
+        .getResourceAsStream("/vsb_polito_smartcity_nsd_number_instances.yaml")) {
+      nsd = oM.readValue(inVsb, Nsd.class);
+    }
+    String nsLevel = "vsb_polito_smartcity_il_3";
+
+    // When
+    String actual = nsdGraphService.export(nsdGraphService
+        .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0), nsd.getNsDf().get(0).getNsLevel(nsLevel)));
+    log.debug("actual graph:\n{}", actual);
+
+    // Then
+    String expected = "";
+    //noinspection ConstantConditions
+    try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream("vsb_polito_smartcity_il_3.dot"),
+        StandardCharsets.UTF_8.name())) {
+      expected = scanner.useDelimiter("\\A").next();
+    }
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  @SneakyThrows
   public void isConnectedAres2TTrackerSmallTest() {
 
     // Given

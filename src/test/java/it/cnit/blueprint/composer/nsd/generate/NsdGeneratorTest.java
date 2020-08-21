@@ -79,6 +79,33 @@ public class NsdGeneratorTest {
 
   @Test
   @SneakyThrows
+  public void generateVsbPolitoSmartCityNumberOfInstances() {
+
+    // Given
+    VsBlueprint vsb;
+    try (InputStream inVsb = getClass().getResourceAsStream("/vsb_polito_smartcity_nomgmt_servers_number.yml")) {
+      vsb = oM.readValue(inVsb, VsBlueprint.class);
+    }
+    Graph<VsbVertex, String> vsbGraph = vsbGraphService.buildGraph(vsb);
+    log.debug("vsb graph:\n{}", vsbGraphService.export(vsbGraph));
+
+    //When
+    Nsd actualNsd = nsdGenerator.generate(vsb);
+    Graph<ProfileVertex, String> nsdGraph = nsdGraphService.buildGraph(actualNsd.getSapd(),
+        actualNsd.getNsDf().get(0), actualNsd.getNsDf().get(0).getDefaultInstantiationLevel());
+    log.debug("Graph AFTER generation:\n{}", nsdGraphService.export(nsdGraph));
+
+    //Then
+    // A NSD from a VSB should always be a connected graph.
+    assertTrue(nsdGraphService.isConnected(nsdGraph));
+    Nsd expectedNsd;
+    try (InputStream inNsd = getClass().getResourceAsStream("/vsb_polito_smartcity_nsd_number_instances.yaml")) {
+      expectedNsd = oM.readValue(inNsd, Nsd.class);
+    }
+    assertEquals(oM.writeValueAsString(expectedNsd), oM.writeValueAsString(actualNsd));
+  }
+  @Test
+  @SneakyThrows
   public void generateBgTrafficCtxB() {
 
     // Given
