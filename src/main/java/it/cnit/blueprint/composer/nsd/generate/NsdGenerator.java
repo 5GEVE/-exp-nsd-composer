@@ -4,9 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.cnit.blueprint.composer.exceptions.NsdGenerationException;
-import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
-import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
-import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
+import it.cnit.blueprint.composer.vsb.VsbService;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
@@ -39,7 +37,6 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.jgrapht.Graph;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
@@ -53,20 +50,24 @@ public class NsdGenerator {
 
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
-  private final NsdGraphService nsdGraphService;
+  private final VsbService vsbService;
 
   @SneakyThrows(JsonProcessingException.class)
-  public Nsd generate(Blueprint blueprint) throws NsdInvalidException, NsdGenerationException {
+  public Nsd generate(Blueprint b) throws NsdGenerationException {
 
-    log.debug("blueprint {}:\n{}", blueprint.getBlueprintId(),
-        OBJECT_MAPPER.writeValueAsString(blueprint));
+    log.debug("blueprint {}:\n{}", b.getBlueprintId(),
+        OBJECT_MAPPER.writeValueAsString(b));
+
+    if (b.getConnectivityServices().stream().noneMatch(VsbLink::isManagement)) {
+      vsbService.addMgmtConnServ(b);
+    }
 
     Nsd nsd = new Nsd();
-    nsd.setNsdIdentifier(blueprint.getBlueprintId() + "_nsd");
+    nsd.setNsdIdentifier(b.getBlueprintId() + "_nsd");
     nsd.setDesigner("NSD generator");
-    nsd.setNsdInvariantId(blueprint.getBlueprintId() + "_nsd");
-    nsd.setVersion(blueprint.getVersion());
-    nsd.setNsdName(blueprint.getName() + " NSD");
+    nsd.setNsdInvariantId(b.getBlueprintId() + "_nsd");
+    nsd.setVersion(b.getVersion());
+    nsd.setNsdName(b.getName() + " NSD");
     nsd.setSecurity(new SecurityParameters(
         "FC_NSD_SIGNATURE",
         "FC_NSD_ALGORITHM",
@@ -74,14 +75,14 @@ public class NsdGenerator {
     ));
 
     NsDf nsDf = new NsDf();
-    nsDf.setNsDfId(blueprint.getBlueprintId() + "_df");
-    nsDf.setFlavourKey(blueprint.getBlueprintId() + "_df_fk");
+    nsDf.setNsDfId(b.getBlueprintId() + "_df");
+    nsDf.setFlavourKey(b.getBlueprintId() + "_df_fk");
 
     NsLevel nsLevel = new NsLevel();
-    nsLevel.setNsLevelId(blueprint.getBlueprintId() + "_il_default");
+    nsLevel.setNsLevelId(b.getBlueprintId() + "_il_default");
     nsLevel.setDescription("Default Instantiation Level");
 
-    for (VsbLink connService : blueprint.getConnectivityServices()) {
+    for (VsbLink connService : b.getConnectivityServices()) {
       NsVirtualLinkDesc vld = new NsVirtualLinkDesc();
       vld.setVirtualLinkDescId(connService.getName());
       vld.setVirtualLinkDescProvider(nsd.getDesigner());
@@ -108,14 +109,15 @@ public class NsdGenerator {
     }
 
     List<Sapd> sapdList = new ArrayList<>();
-    for (VsbEndpoint e : blueprint.getEndPoints()) {
-      if (e.isExternal() && e.getEndPointId().contains("sap")) {
+    for (VsbEndpoint e : b.getEndPoints()) {
+      // An insecure way to determine sap endpoints.
+      if (e.isExternal() && e.getEndPointId().toLowerCase().contains("sap")) {
         Sapd sapd = new Sapd();
         sapd.setCpdId(e.getEndPointId());
         sapd.setLayerProtocol(LayerProtocol.IPV4);
         sapd.setCpRole(CpRole.ROOT);
         sapd.setSapAddressAssignment(false);
-        for (VsbLink cs : blueprint.getConnectivityServices()) {
+        for (VsbLink cs : b.getConnectivityServices()) {
           for (String ep : cs.getEndPointIds()) {
             if (ep.equals(sapd.getCpdId())) {
               sapd.setNsVirtualLinkDescId(cs.getName());
@@ -136,7 +138,7 @@ public class NsdGenerator {
     }
     nsd.setSapd(sapdList);
 
-    for (VsComponent vsc : blueprint.getAtomicComponents()) {
+    for (VsComponent vsc : b.getAtomicComponents()) {
       nsd.getVnfdId().add(vsc.getComponentId());
       VnfProfile vnfp = new VnfProfile();
       vnfp.setVnfProfileId(vsc.getComponentId() + "_vnfp");
@@ -144,10 +146,10 @@ public class NsdGenerator {
       vnfp.setFlavourId(vsc.getComponentId() + "_vnf_df");
       vnfp.setInstantiationLevel(vsc.getComponentId() + "_vnf_il");
       vnfp.setMinNumberOfInstances(1);
-      vnfp.setMaxNumberOfInstances(1);
+      vnfp.setMaxNumberOfInstances(vsc.getServersNumber());
       List<NsVirtualLinkConnectivity> nsVirtualLinkConnectivities = new ArrayList<>();
       for (String ep : vsc.getEndPointsIds()) {
-        for (VsbLink cs : blueprint.getConnectivityServices()) {
+        for (VsbLink cs : b.getConnectivityServices()) {
           for (String csEp : cs.getEndPointIds()) {
             if (csEp.equals(ep)) {
               NsVirtualLinkConnectivity nsVLC = new NsVirtualLinkConnectivity();
@@ -165,15 +167,15 @@ public class NsdGenerator {
       }
       vnfp.setNsVirtualLinkConnectivity(nsVirtualLinkConnectivities);
       nsDf.getVnfProfile().add(vnfp);
-      nsLevel.getVnfToLevelMapping().add(new VnfToLevelMapping(vnfp.getVnfProfileId(), 1));
+      nsLevel.getVnfToLevelMapping()
+          .add(new VnfToLevelMapping(vnfp.getVnfProfileId(), vsc.getServersNumber()));
     }
 
     nsDf.setNsInstantiationLevel(Collections.singletonList(nsLevel));
     nsDf.setDefaultNsInstantiationLevelId(nsLevel.getNsLevelId());
     nsd.setNsDf(Collections.singletonList(nsDf));
 
-    log.debug("Nsd AFTER generation with {}:\n{}",
-        nsd.getNsdIdentifier(), OBJECT_MAPPER.writeValueAsString(nsd));
+    log.debug("Generated NSD:\n{}", OBJECT_MAPPER.writeValueAsString(nsd));
 
     // Nsd validation and logging
     try {
@@ -181,14 +183,6 @@ public class NsdGenerator {
     } catch (MalformattedElementException e) {
       throw new NsdGenerationException(nsd.getNsdIdentifier(),
           "Nsd not valid after generation", e);
-    }
-    Graph<ProfileVertex, String> g = nsdGraphService.buildGraph(nsd.getSapd(), nsDf, nsLevel);
-    log.debug("Graph AFTER generation with {}:\n{}",
-        nsd.getNsdIdentifier(), nsdGraphService.export(g));
-    if (!nsdGraphService.isConnected(g)) {
-      throw new NsdGenerationException(nsd.getNsdIdentifier(),
-          "Network topology not connected for NsDf " + nsDf.getNsDfId() + " and NsLevel "
-              + nsLevel.getNsLevelId());
     }
 
     return nsd;

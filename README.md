@@ -1,5 +1,5 @@
 # 5G EVE Experiment NSD composer
-A REST API module to compose the NSD of a VSB and multiple CBs.
+A REST API module to compose experiment NSDs. It can also validate blueprints and generate NSDs from them. 
 
 ## Install
 

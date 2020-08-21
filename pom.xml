@@ -12,8 +12,10 @@
   </parent>
   <groupId>it.cnit.blueprint</groupId>
   <artifactId>composer</artifactId>
-  <version>0.0.3</version>
-  <description>A REST API module to compose NSDs.</description>
+  <version>0.0.4</version>
+  <description>A REST API module to compose experiment NSDs. It can also validate blueprints and
+    generate NSDs from them.
+  </description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -88,6 +90,13 @@
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>2.9.8</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-module-jsonSchema -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-jsonSchema</artifactId>
       <version>2.9.8</version>
     </dependency>
 

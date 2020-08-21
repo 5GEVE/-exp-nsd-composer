@@ -42,7 +42,7 @@ public class NsdGraphServiceTest {
   @SneakyThrows
   public void buildGraphAres2TTrackerBig() {
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
     String nsLevel = "ns_ares2t_tracker_il_big";
 
     // When
@@ -51,7 +51,6 @@ public class NsdGraphServiceTest {
     log.debug("actual graph:\n{}", actual);
 
     // Then
-    InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
     String expected;
     //noinspection ConstantConditions
     try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
@@ -65,7 +64,7 @@ public class NsdGraphServiceTest {
   @SneakyThrows
   public void buildGraphAres2TTrackerSmall() {
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
     String nsLevel = "ns_ares2t_tracker_il_small";
 
     // When
@@ -74,7 +73,6 @@ public class NsdGraphServiceTest {
     log.debug("actual graph:\n{}", actual);
 
     // Then
-    InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
     String expected;
     //noinspection ConstantConditions
     try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
@@ -88,7 +86,7 @@ public class NsdGraphServiceTest {
   @SneakyThrows
   public void buildGraphAres2TDelayExperimentBig() {
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("expb_ares2t_tracker_delay_nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("expb_ares2t_tracker_delay_nsds")), Nsd.class);
     String nsLevel = "ns_ares2t_tracker_exp_il_big";
 
     // When
@@ -97,7 +95,6 @@ public class NsdGraphServiceTest {
     log.debug("actual graph:\n{}", actual);
 
     // Then
-    InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
     String expected;
     //noinspection ConstantConditions
     try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
@@ -111,7 +108,7 @@ public class NsdGraphServiceTest {
   @SneakyThrows
   public void buildGraphAres2TDelayExperimentSmall() {
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("expb_ares2t_tracker_delay_nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("expb_ares2t_tracker_delay_nsds")), Nsd.class);
     String nsLevel = "ns_ares2t_tracker_exp_il_small";
 
     // When
@@ -120,7 +117,6 @@ public class NsdGraphServiceTest {
     log.debug("actual graph:\n{}", actual);
 
     // Then
-    InputStream in = ClassLoader.getSystemResourceAsStream(nsLevel + ".dot");
     String expected;
     //noinspection ConstantConditions
     try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
@@ -132,10 +128,36 @@ public class NsdGraphServiceTest {
 
   @Test
   @SneakyThrows
+  public void buildGraphPolitoNumberOfInstances() {
+    // Given
+    Nsd nsd;
+    try (InputStream inVsb = getClass()
+        .getResourceAsStream("/vsb_polito_smartcity_nsd_number_instances.yaml")) {
+      nsd = oM.readValue(inVsb, Nsd.class);
+    }
+    String nsLevel = "vsb_polito_smartcity_il_default";
+
+    // When
+    String actual = nsdGraphService.export(nsdGraphService
+        .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0), nsd.getNsDf().get(0).getNsLevel(nsLevel)));
+    log.debug("actual graph:\n{}", actual);
+
+    // Then
+    String expected = "";
+    //noinspection ConstantConditions
+    try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream("vsb_polito_smartcity_il_3.dot"),
+        StandardCharsets.UTF_8.name())) {
+      expected = scanner.useDelimiter("\\A").next();
+    }
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  @SneakyThrows
   public void isConnectedAres2TTrackerSmallTest() {
 
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
     String nsLevel = "ns_ares2t_tracker_il_small";
 
     // When
@@ -151,7 +173,7 @@ public class NsdGraphServiceTest {
   public void isNotConnectedAres2TTrackerSmallTest() {
 
     // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd[].class)[0];
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
     String nsLevel = "ns_ares2t_tracker_il_small";
 
     // When

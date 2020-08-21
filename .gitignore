@@ -13,9 +13,12 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 .m2
+/mvn-release.sh
+/mvn-fix.sh
 
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar
 
 # hibernate-validator
 /.attach_pid*
+
