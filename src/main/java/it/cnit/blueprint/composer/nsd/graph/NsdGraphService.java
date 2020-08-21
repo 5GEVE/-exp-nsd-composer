@@ -102,7 +102,7 @@ public class NsdGraphService {
         for (VirtualLinkProfileVertex v2 : vlPVertices) {
           if (vlc.getVirtualLinkProfileId()
               .equals(v2.getVlProfile().getVirtualLinkProfileId())) {
-            g.addEdge(v1, v2, v1.getPnfProfile().getPnfProfileId() + "_" + vlc.getCpdId().get(0));
+            g.addEdge(v1, v2, v1.getElementId() + "_" + vlc.getCpdId().get(0));
           }
         }
       }
