@@ -13,7 +13,9 @@
   <groupId>it.cnit.blueprint</groupId>
   <artifactId>composer</artifactId>
   <version>0.0.4-SNAPSHOT</version>
-  <description>A REST API module to compose NSDs.</description>
+  <description>A REST API module to compose experiment NSDs. It can also validate blueprints and
+    generate NSDs from them.
+  </description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
