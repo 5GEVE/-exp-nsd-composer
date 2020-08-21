@@ -135,7 +135,7 @@ public class NsdGraphServiceTest {
         .getResourceAsStream("/vsb_polito_smartcity_nsd_number_instances.yaml")) {
       nsd = oM.readValue(inVsb, Nsd.class);
     }
-    String nsLevel = "vsb_polito_smartcity_il_3";
+    String nsLevel = "vsb_polito_smartcity_il_default";
 
     // When
     String actual = nsdGraphService.export(nsdGraphService
