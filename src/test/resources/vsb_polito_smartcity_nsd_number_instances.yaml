@@ -156,7 +156,7 @@ nsDf:
           root: "1"
           leaf: "1"
     nsInstantiationLevel:
-      - nsLevelId: "vsb_polito_smartcity_il_3"
+      - nsLevelId: "vsb_polito_smartcity_il_default"
         description: "Default Instantiation Level"
         vnfToLevelMapping:
           - vnfProfileId: "mobility_tracker_vnfp"
@@ -180,7 +180,7 @@ nsDf:
             bitRateRequirements:
               root: "1"
               leaf: "1"
-    defaultNsInstantiationLevelId: "vsb_polito_smartcity_il_3"
+    defaultNsInstantiationLevelId: "vsb_polito_smartcity_il_default"
 security:
   signature: "FC_NSD_SIGNATURE"
   algorithm: "FC_NSD_ALGORITHM"
