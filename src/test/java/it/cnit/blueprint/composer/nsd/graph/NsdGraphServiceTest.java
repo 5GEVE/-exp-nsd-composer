@@ -145,7 +145,7 @@ public class NsdGraphServiceTest {
     // Then
     String expected = "";
     //noinspection ConstantConditions
-    try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
+    try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream("vsb_polito_smartcity_il_3.dot"),
         StandardCharsets.UTF_8.name())) {
       expected = scanner.useDelimiter("\\A").next();
     }
