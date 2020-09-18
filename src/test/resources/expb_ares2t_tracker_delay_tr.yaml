@@ -1,0 +1,21 @@
+---
+- input:
+    - parameterId: "number_of_tracked_devices"
+      minValue: 1
+      maxValue: 100
+  nstId: null
+  nsdId: "58886b95-cd29-4b7b-aca0-e884caaa5c68"
+  nsdVersion: "1.0"
+  nsFlavourId: "ns_Ares2T_Tracking_df"
+  nsInstantiationLevelId: "ns_ares2t_tracker_il_small"
+#  default: false
+- input:
+    - parameterId: "number_of_tracked_devices"
+      minValue: 101
+      maxValue: 1000
+  nstId: null
+  nsdId: "58886b95-cd29-4b7b-aca0-e884caaa5c68"
+  nsdVersion: "1.0"
+  nsFlavourId: "ns_Ares2T_Tracking_df"
+  nsInstantiationLevelId: "ns_ares2t_tracker_il_big"
+#  default: false

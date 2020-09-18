@@ -10,14 +10,11 @@ import it.cnit.blueprint.composer.exceptions.ContextInvalidException;
 import it.cnit.blueprint.composer.exceptions.NsdCompositionException;
 import it.cnit.blueprint.composer.exceptions.NsdGenerationException;
 import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
-import it.cnit.blueprint.composer.exceptions.TransRuleCompositionException;
-import it.cnit.blueprint.composer.exceptions.TransRuleInvalidException;
 import it.cnit.blueprint.composer.exceptions.VsbInvalidException;
 import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
 import it.cnit.blueprint.composer.nsd.generate.NsdGenerator;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
-import it.cnit.blueprint.composer.rules.TranslationRulesComposer;
 import it.cnit.blueprint.composer.vsb.VsbService;
 import it.cnit.blueprint.composer.vsb.rest.CtxController;
 import it.cnit.blueprint.composer.vsb.rest.VsbController;
@@ -27,7 +24,6 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
-import it.nextworks.nfvmano.catalogue.blueprint.elements.VsdNsdTranslationRule;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
@@ -67,7 +63,6 @@ public class NsdController {
   private final VsbService vsbService;
   private final VsbController vsbController;
   private final CtxController ctxController;
-  private final TranslationRulesComposer translationRulesComposer;
 
   @PostMapping("/nsd/generate")
   public Nsd generate(@RequestBody VsBlueprint vsb) {
@@ -80,13 +75,11 @@ public class NsdController {
   }
 
   @PostMapping("/nsd/compose")
-  public ComposeResponse compose(@RequestBody ComposeRequest composeRequest) {
+  public Nsd compose(@RequestBody ComposeRequest composeRequest) {
     VsBlueprint vsb = composeRequest.getVsbRequest().getVsBlueprint();
     vsbController.validate(vsb);
     Nsd expNsd = composeRequest.getVsbRequest().getNsds().get(0);
     validate(expNsd);
-    List<VsdNsdTranslationRule> vsbTransRules = composeRequest.getVsbRequest()
-        .getTranslationRules();
     expNsd.setNsdIdentifier(UUID.randomUUID().toString());
     expNsd.setNsdInvariantId(UUID.randomUUID().toString());
     expNsd.setDesigner(expNsd.getDesigner() + " + NSD Composer");
@@ -137,14 +130,7 @@ public class NsdController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
-    List<VsdNsdTranslationRule> expTransRules;
-    try {
-      expTransRules = translationRulesComposer.compose(expNsd, vsbTransRules);
-    } catch (TransRuleInvalidException | TransRuleCompositionException e) {
-      log.warn("{}. Return empty translation rules.", e.getMessage());
-      expTransRules = new ArrayList<>();
-    }
-    return new ComposeResponse(expNsd, expTransRules);
+    return expNsd;
   }
 
   /**
