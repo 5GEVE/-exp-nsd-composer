@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.ExpBlueprint;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
@@ -57,8 +58,9 @@ public class ExpControllerTest {
   @SneakyThrows
   public void validate() {
     // Given
-    ExpBlueprint exp = YAML_OM
-        .readValue(new URL(urlProp.getProperty("expb_polito_smartcity")), ExpBlueprint.class);
+    InputStream in = getClass()
+        .getResourceAsStream("/expb_polito_smartcity.yaml");
+    ExpBlueprint exp = YAML_OM.readValue(in, ExpBlueprint.class);
 
     // When
     MvcResult result = mvc.perform(
