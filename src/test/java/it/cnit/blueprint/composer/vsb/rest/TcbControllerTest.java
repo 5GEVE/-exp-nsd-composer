@@ -9,7 +9,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.TestCaseBlueprint;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Properties;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -57,8 +56,8 @@ public class TcbControllerTest {
   @SneakyThrows
   public void validate() {
     // Given
-    TestCaseBlueprint tcb = YAML_OM
-        .readValue(new URL(urlProp.getProperty("tcb_polito_smartcity_1")), TestCaseBlueprint.class);
+    InputStream in = getClass().getResourceAsStream("/TCB_Ares2T_Service_v5-RC-v2.yaml");
+    TestCaseBlueprint tcb = YAML_OM.readValue(in, TestCaseBlueprint.class);
 
     // When
     MvcResult result = mvc.perform(
