@@ -3,6 +3,5 @@ services:
   exp-nsd-composer:
     build:
       context: .
-    container_name: exp-nsd-composer
     ports:
       - 8086:8086

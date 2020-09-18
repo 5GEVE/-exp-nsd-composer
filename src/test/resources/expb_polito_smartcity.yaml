@@ -1,0 +1,51 @@
+# expb_polito_smartcity.yaml
+---
+expBlueprintId: 'expb_polito_smartcity'
+version: '1.0'
+name: Smart Turin WiFi scanner experiment with mobility patterns
+description: Blueprint for 5G EVE Smart City experiment with Libellium WiFi scanners.
+sites:
+  - ITALY_TURIN
+kpis:
+  - kpiId: 'kpi_resources_usage_MOB'
+    name: 'Resources usage of the MOB must be lower than or equal to the objective.'
+    formula: 'resources_consumption'
+    unit: 'GB and %'
+    interval: '1s'
+    metricIds: ['cpu_consumption', 'memory_consumption', 'storage_consumption']
+    kpiGraphType: LINE
+  - kpiId: 'kpi_cpu_usage_VIS'
+    name: 'CPU usage of the VIS must be lower than or equal to the objective.'
+    formula: 'CPU_consumption'
+    unit: '%'
+    interval: '1s'
+    metricIds: ['cpu_consumption']
+    kpiGraphType: LINE
+  - kpiId: 'kpi_bandwidth_MOB_OneM2M'
+    name: 'The time taken to get a remote record must be lower than or equal to the objective.'
+    formula: 'bandwidth_MOB_OneM2M'
+    unit: 'Mbps'
+    interval: '10s'
+    metricIds: ['bandwidth']
+    kpiGraphType: LINE
+  - kpiId: 'number_of_active_sensors'
+    name: 'Number of active sensors'
+    formula: 'number_of_active_sensors'
+    unit: 'devices'
+    interval: '10m'
+    metricIds: ['active_sensor']
+    kpiGraphType: COUNTER
+metrics:
+  - metricId: 'bandwidth'
+    name: 'Measurement of bandwidth.'
+    metricCollectionType: 'GAUGE'
+    unit: 'Mbps'
+    interval: '10s'
+    iMetricType: 'USER_DATA_RATE_UPLINK'
+    metricGraphType: LINE
+vsBlueprintId: 'vsb_polito_smartcity'
+ctxBlueprintIds:
+  - 'ctx_smart_turin_WiFi_scanner_traffic'
+tcBlueprintIds:
+  - 'smart_turin_WiFi_scanner_testcase_5'
+deploymentType: 'ON_DEMAND'
