@@ -1,5 +1,7 @@
 strict graph G {
-  splines=false;
+  nodesep=1;
+  ranksep=3;
+  splines=true;
   overlap=false;
   mindist=0.5;
   11668654 [ label="mobility_tracker_vnfp_0" shape="box" style="filled" fillcolor="#d5e8d4" color="#82b366" ];
