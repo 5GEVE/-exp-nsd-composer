@@ -60,7 +60,7 @@ public class NsdControllerTest {
 
   @Test
   @SneakyThrows
-  public void generate() {
+  public void generateFromVsb() {
     // Given
     VsBlueprint vsb;
     try (InputStream inVsb = getClass().getResourceAsStream("/vsb_polito_smartcity_nomgmt.yml")) {
@@ -80,6 +80,31 @@ public class NsdControllerTest {
     Nsd actualNsd = JSON_OM.readValue(result.getResponse().getContentAsString(), Nsd.class);
     Nsd expectedNsd;
     try (InputStream inNsd = getClass().getResourceAsStream("/vsb_polito_smartcity_nsd.yaml")) {
+      expectedNsd = YAML_OM.readValue(inNsd, Nsd.class);
+    }
+    assertEquals(YAML_OM.writeValueAsString(expectedNsd), YAML_OM.writeValueAsString(actualNsd));
+  }
+
+  @Test
+  @SneakyThrows
+  public void generateFromCtx() {
+    // Given
+    CtxBlueprint ctx = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_smartcity_traffic")), CtxBlueprint.class);
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/generate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(ctx)))
+        .andReturn();
+
+    // Then
+    log.info(result.getResponse().getContentAsString());
+    assertEquals(200, result.getResponse().getStatus());
+    Nsd actualNsd = JSON_OM.readValue(result.getResponse().getContentAsString(), Nsd.class);
+    Nsd expectedNsd;
+    try (InputStream inNsd = getClass().getResourceAsStream("/ctx_smartcity_traffic_nsd.yaml")) {
       expectedNsd = YAML_OM.readValue(inNsd, Nsd.class);
     }
     assertEquals(YAML_OM.writeValueAsString(expectedNsd), YAML_OM.writeValueAsString(actualNsd));

@@ -1,8 +1,10 @@
 package it.cnit.blueprint.composer.nsd.rest;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
@@ -30,6 +32,7 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +59,7 @@ public class NsdController {
 
   private final NsdGenerator nsdGenerator;
   private final NsdGraphService nsdGraphService;
+  private final ObjectMapper objectMapper;
 
   @Qualifier("PASS_THROUGH")
   private final NsdComposer passThroughComposer;
@@ -65,8 +70,19 @@ public class NsdController {
   private final VsbController vsbController;
   private final CtxController ctxController;
 
+  /**
+   * @param httpEntity Here we manually deserialize the body to support any kind of Blueprint
+   * @return The generated NSD
+   */
   @PostMapping("/nsd/generate")
-  public Nsd generate(@RequestBody @Valid Blueprint b) {
+  public Nsd generate(HttpEntity<String> httpEntity) {
+    Blueprint b;
+    try {
+      b = createSafeBlueprintReader().readValue(httpEntity.getBody());
+    } catch (IOException e) {
+      log.debug("Can not read JSON: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
     try {
       b.isValid();
     } catch (MalformattedElementException e) {
@@ -78,6 +94,14 @@ public class NsdController {
     } catch (NsdGenerationException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
+  }
+
+  /**
+   * @return An ObjectMapper with FAIL_ON_UNKNOWN_PROPERTIES=false
+   */
+  private ObjectReader createSafeBlueprintReader() {
+    return objectMapper.readerFor(Blueprint.class)
+        .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
   }
 
   @PostMapping("/nsd/compose")
