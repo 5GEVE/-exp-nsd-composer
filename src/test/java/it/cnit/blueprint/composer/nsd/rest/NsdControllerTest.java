@@ -75,6 +75,7 @@ public class NsdControllerTest {
         .andReturn();
 
     // Then
+    log.info(result.getResponse().getContentAsString());
     assertEquals(200, result.getResponse().getStatus());
     Nsd actualNsd = JSON_OM.readValue(result.getResponse().getContentAsString(), Nsd.class);
     Nsd expectedNsd;
@@ -242,10 +243,11 @@ public class NsdControllerTest {
     MvcResult result = mvc.perform(
         MockMvcRequestBuilders.post("/nsd/compose")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(JSON_OM.writeValueAsString(request.getVsbRequest())))
+            .content(JSON_OM.writeValueAsString(request.getVsbRequest().getVsBlueprint())))
         .andReturn();
 
     // Then
+    log.info(result.getResponse().getContentAsString());
     assertEquals(400, result.getResponse().getStatus());
     if (result.getResolvedException() != null) {
       log.info("Error message: {}", result.getResolvedException().getMessage());

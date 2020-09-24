@@ -14,6 +14,7 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
@@ -33,7 +34,7 @@ public class VsbController {
   private final VsbService vsbService;
 
   @PostMapping("/vsb/addMgmt")
-  public VsBlueprint addMgmtConnService(@RequestBody VsBlueprint vsb) {
+  public VsBlueprint addMgmtConnService(@RequestBody @Valid VsBlueprint vsb) {
     validate(vsb);
     if (vsb.getConnectivityServices().stream().noneMatch(VsbLink::isManagement)) {
       vsbService.addMgmtConnServ(vsb);
@@ -49,7 +50,7 @@ public class VsbController {
    * @return 200 if valid, 400 with validation errors if invalid
    */
   @PostMapping("/vsb/validate")
-  public void validate(@RequestBody VsBlueprint vsb) {
+  public void validate(@RequestBody @Valid VsBlueprint vsb) {
     try {
       vsb.isValid();
     } catch (MalformattedElementException e) {
@@ -70,7 +71,7 @@ public class VsbController {
   }
 
   @PostMapping("/vsb/graph")
-  public Map<String, String> graph(@RequestBody VsBlueprint vsb) {
+  public Map<String, String> graph(@RequestBody @Valid VsBlueprint vsb) {
     validate(vsb);
     Graph<VsbVertex, String> graph = vsbGraphService.buildGraph(vsb);
     return new HashMap<String, String>() {

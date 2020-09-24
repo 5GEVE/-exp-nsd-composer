@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.TestCaseBlueprint;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class TcbController {
    * @return 200 if valid, 400 with validation errors if invalid
    */
   @PostMapping("/tcb/validate")
-  public void validate(@RequestBody TestCaseBlueprint tcb) {
+  public void validate(@RequestBody @Valid TestCaseBlueprint tcb) {
     try {
       tcb.isValid();
     } catch (MalformattedElementException e) {

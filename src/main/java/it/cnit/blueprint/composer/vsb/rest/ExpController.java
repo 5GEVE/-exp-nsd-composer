@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.ExpBlueprint;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class ExpController {
    * @return 200 if valid, 400 with validation errors if invalid
    */
   @PostMapping("/exp/validate")
-  public void validate(@RequestBody ExpBlueprint exp) {
+  public void validate(@RequestBody @Valid ExpBlueprint exp) {
     try {
       exp.isValid();
     } catch (MalformattedElementException e) {

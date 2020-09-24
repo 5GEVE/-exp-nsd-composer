@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
@@ -65,7 +66,7 @@ public class NsdController {
   private final CtxController ctxController;
 
   @PostMapping("/nsd/generate")
-  public Nsd generate(@RequestBody Blueprint b) {
+  public Nsd generate(@RequestBody @Valid Blueprint b) {
     try {
       b.isValid();
     } catch (MalformattedElementException e) {
@@ -80,7 +81,7 @@ public class NsdController {
   }
 
   @PostMapping("/nsd/compose")
-  public Nsd compose(@RequestBody ComposeRequest composeRequest) {
+  public Nsd compose(@RequestBody @Valid ComposeRequest composeRequest) {
     VsBlueprint vsb = composeRequest.getVsbRequest().getVsBlueprint();
     vsbController.validate(vsb);
     Nsd expNsd = composeRequest.getVsbRequest().getNsds().get(0);
@@ -145,7 +146,7 @@ public class NsdController {
    * @return 200 if valid, 400 with validation errors if invalid
    */
   @PostMapping("/nsd/validate")
-  public void validate(@RequestBody Nsd nsd) {
+  public void validate(@RequestBody @Valid Nsd nsd) {
     try {
       nsd.isValid();
     } catch (MalformattedElementException e) {
@@ -166,7 +167,7 @@ public class NsdController {
   }
 
   @PostMapping("/nsd/graph")
-  public List<GraphResponse> graph(@RequestBody Nsd nsd) {
+  public List<GraphResponse> graph(@RequestBody @Valid Nsd nsd) {
     validate(nsd);
     ArrayList<GraphResponse> graphs = new ArrayList<>();
     for (NsDf nsDf : nsd.getNsDf()) {

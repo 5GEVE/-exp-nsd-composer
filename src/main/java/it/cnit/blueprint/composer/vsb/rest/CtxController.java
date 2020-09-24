@@ -12,6 +12,7 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
@@ -36,7 +37,7 @@ public class CtxController {
    * @return 200 if valid, 400 with validation errors if invalid
    */
   @PostMapping("/ctx/validate")
-  public void validate(@RequestBody CtxBlueprint ctx) {
+  public void validate(@RequestBody @Valid CtxBlueprint ctx) {
     try {
       ctx.isValid();
     } catch (MalformattedElementException e) {
@@ -57,7 +58,7 @@ public class CtxController {
   }
 
   @PostMapping("/ctx/graph")
-  public Map<String, String> graph(@RequestBody CtxBlueprint ctx) {
+  public Map<String, String> graph(@RequestBody @Valid CtxBlueprint ctx) {
     validate(ctx);
     Graph<VsbVertex, String> graph = vsbGraphService.buildGraph(ctx);
     return new HashMap<String, String>() {
