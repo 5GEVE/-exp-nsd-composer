@@ -10,7 +10,6 @@ import org.jgrapht.io.ComponentAttributeProvider;
 import org.jgrapht.io.ComponentNameProvider;
 import org.jgrapht.io.DOTExporter;
 import org.jgrapht.io.DefaultAttribute;
-import org.jgrapht.io.StringComponentNameProvider;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -46,14 +45,11 @@ public class GraphVizExporter implements GraphExporter {
       }
       return map;
     };
-    ComponentNameProvider<String> edgeProvider = new ComponentNameProvider<String>() {
-      @Override
-      public String getName(String component) {
-        if (component.toLowerCase().contains("sap")) {
-          return "";
-        } else {
-          return component;
-        }
+    ComponentNameProvider<String> edgeProvider = component -> {
+      if (component.toLowerCase().contains("sap")) {
+        return "";
+      } else {
+        return component;
       }
     };
     ComponentAttributeProvider<String> edgeAttributeProvider = v -> {
@@ -67,7 +63,7 @@ public class GraphVizExporter implements GraphExporter {
         vertexLabelProvider,
         edgeProvider,
         vertexAttributeProvider,
-        null);
+        edgeAttributeProvider);
     // This controls width
     exporter.putGraphAttribute("nodesep", "1");
     // This controls height
