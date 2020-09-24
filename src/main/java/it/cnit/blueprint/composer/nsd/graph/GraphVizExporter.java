@@ -10,7 +10,6 @@ import org.jgrapht.io.ComponentAttributeProvider;
 import org.jgrapht.io.ComponentNameProvider;
 import org.jgrapht.io.DOTExporter;
 import org.jgrapht.io.DefaultAttribute;
-import org.jgrapht.io.StringComponentNameProvider;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -46,23 +45,31 @@ public class GraphVizExporter implements GraphExporter {
       }
       return map;
     };
-    ComponentNameProvider<String> edgeProvider = new ComponentNameProvider<String>() {
-      @Override
-      public String getName(String component) {
-        if (component.toLowerCase().contains("sap")) {
-          return "";
-        } else {
-          return component;
-        }
+    ComponentNameProvider<String> edgeProvider = component -> {
+      if (component.toLowerCase().contains("sap")) {
+        return "";
+      } else {
+        return component;
       }
+    };
+    ComponentAttributeProvider<String> edgeAttributeProvider = v -> {
+      Map<String, Attribute> map = new LinkedHashMap<>();
+      map.put("color", DefaultAttribute.createAttribute("#8f8f8f"));
+      map.put("style", DefaultAttribute.createAttribute("bold"));
+      return map;
     };
     DOTExporter<ProfileVertex, String> exporter = new DOTExporter<>(
         vertexIdProvider,
         vertexLabelProvider,
         edgeProvider,
         vertexAttributeProvider,
-        null);
-    exporter.putGraphAttribute("splines", "false");
+        edgeAttributeProvider);
+    // This controls width
+    exporter.putGraphAttribute("nodesep", "1");
+    // This controls height
+    exporter.putGraphAttribute("ranksep", "3");
+    // Curved edges (better space for labels)
+    exporter.putGraphAttribute("splines", "true");
     exporter.putGraphAttribute("overlap", "false");
     exporter.putGraphAttribute("mindist", "0.5");
     Writer writer = new StringWriter();
