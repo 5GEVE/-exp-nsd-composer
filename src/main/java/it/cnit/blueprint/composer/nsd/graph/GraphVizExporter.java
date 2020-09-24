@@ -56,13 +56,24 @@ public class GraphVizExporter implements GraphExporter {
         }
       }
     };
+    ComponentAttributeProvider<String> edgeAttributeProvider = v -> {
+      Map<String, Attribute> map = new LinkedHashMap<>();
+      map.put("color", DefaultAttribute.createAttribute("#8f8f8f"));
+      map.put("style", DefaultAttribute.createAttribute("bold"));
+      return map;
+    };
     DOTExporter<ProfileVertex, String> exporter = new DOTExporter<>(
         vertexIdProvider,
         vertexLabelProvider,
         edgeProvider,
         vertexAttributeProvider,
         null);
-    exporter.putGraphAttribute("splines", "false");
+    // This controls width
+    exporter.putGraphAttribute("nodesep", "1");
+    // This controls height
+    exporter.putGraphAttribute("ranksep", "3");
+    // Curved edges (better space for labels)
+    exporter.putGraphAttribute("splines", "true");
     exporter.putGraphAttribute("overlap", "false");
     exporter.putGraphAttribute("mindist", "0.5");
     Writer writer = new StringWriter();
