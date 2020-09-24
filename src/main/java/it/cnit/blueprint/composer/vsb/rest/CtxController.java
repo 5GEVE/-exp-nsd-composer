@@ -20,12 +20,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @Slf4j
 @AllArgsConstructor
+@RequestMapping("/ctx")
 public class CtxController {
 
   private final VsbGraphService vsbGraphService;
@@ -36,7 +38,7 @@ public class CtxController {
    * @param ctx object to validate
    * @return 200 if valid, 400 with validation errors if invalid
    */
-  @PostMapping("/ctx/validate")
+  @PostMapping("/validate")
   public void validate(@RequestBody @Valid CtxBlueprint ctx) {
     try {
       ctx.isValid();
@@ -46,7 +48,7 @@ public class CtxController {
     }
   }
 
-  @GetMapping("/ctx/schema")
+  @GetMapping("/schema")
   public JsonSchema schema() {
     ObjectMapper J_OBJECT_MAPPER = new ObjectMapper(new JsonFactory())
         .enable(SerializationFeature.INDENT_OUTPUT);
@@ -57,7 +59,7 @@ public class CtxController {
     }
   }
 
-  @PostMapping("/ctx/graph")
+  @PostMapping("/graph")
   public Map<String, String> graph(@RequestBody @Valid CtxBlueprint ctx) {
     validate(ctx);
     Graph<VsbVertex, String> graph = vsbGraphService.buildGraph(ctx);

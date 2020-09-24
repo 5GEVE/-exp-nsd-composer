@@ -15,12 +15,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @Slf4j
 @AllArgsConstructor
+@RequestMapping("/exp")
 public class ExpController {
 
   /**
@@ -29,7 +31,7 @@ public class ExpController {
    * @param exp object to validate
    * @return 200 if valid, 400 with validation errors if invalid
    */
-  @PostMapping("/exp/validate")
+  @PostMapping("/validate")
   public void validate(@RequestBody @Valid ExpBlueprint exp) {
     try {
       exp.isValid();
@@ -39,7 +41,7 @@ public class ExpController {
     }
   }
 
-  @GetMapping("/exp/schema")
+  @GetMapping("/schema")
   public JsonSchema schema() {
     ObjectMapper J_OBJECT_MAPPER = new ObjectMapper(new JsonFactory())
         .enable(SerializationFeature.INDENT_OUTPUT);

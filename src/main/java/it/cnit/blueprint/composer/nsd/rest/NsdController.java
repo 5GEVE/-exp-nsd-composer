@@ -49,12 +49,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @Slf4j
 @AllArgsConstructor
+@RequestMapping("/nsd")
 public class NsdController {
 
   private final NsdGenerator nsdGenerator;
@@ -74,8 +76,12 @@ public class NsdController {
    * @param httpEntity Here we manually deserialize the body to support any kind of Blueprint
    * @return The generated NSD
    */
-  @PostMapping("/nsd/generate")
+  @PostMapping("/generate")
   public Nsd generate(HttpEntity<String> httpEntity) {
+    if (httpEntity.getBody() == null){
+      log.debug("Empty body");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Empty body");
+    }
     Blueprint b;
     try {
       b = createSafeBlueprintReader().readValue(httpEntity.getBody());
@@ -104,7 +110,7 @@ public class NsdController {
         .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
   }
 
-  @PostMapping("/nsd/compose")
+  @PostMapping("/compose")
   public Nsd compose(@RequestBody @Valid ComposeRequest composeRequest) {
     VsBlueprint vsb = composeRequest.getVsbRequest().getVsBlueprint();
     vsbController.validate(vsb);
@@ -169,7 +175,7 @@ public class NsdController {
    * @param nsd nsd to validate
    * @return 200 if valid, 400 with validation errors if invalid
    */
-  @PostMapping("/nsd/validate")
+  @PostMapping("/validate")
   public void validate(@RequestBody @Valid Nsd nsd) {
     try {
       nsd.isValid();
@@ -179,7 +185,7 @@ public class NsdController {
     }
   }
 
-  @GetMapping("/nsd/schema")
+  @GetMapping("/schema")
   public JsonSchema schema() {
     ObjectMapper J_OBJECT_MAPPER = new ObjectMapper(new JsonFactory())
         .enable(SerializationFeature.INDENT_OUTPUT);
@@ -190,7 +196,7 @@ public class NsdController {
     }
   }
 
-  @PostMapping("/nsd/graph")
+  @PostMapping("/graph")
   public List<GraphResponse> graph(@RequestBody @Valid Nsd nsd) {
     validate(nsd);
     ArrayList<GraphResponse> graphs = new ArrayList<>();
