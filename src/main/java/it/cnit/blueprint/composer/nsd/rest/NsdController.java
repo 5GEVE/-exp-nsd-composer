@@ -65,10 +65,15 @@ public class NsdController {
   private final CtxController ctxController;
 
   @PostMapping("/nsd/generate")
-  public Nsd generate(@RequestBody VsBlueprint vsb) {
-    vsbController.validate(vsb);
+  public Nsd generate(@RequestBody Blueprint b) {
     try {
-      return nsdGenerator.generate(vsb);
+      b.isValid();
+    } catch (MalformattedElementException e) {
+      log.debug("Invalid Blueprint: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+    try {
+      return nsdGenerator.generate(b);
     } catch (NsdGenerationException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
