@@ -13,13 +13,13 @@ strict graph G {
   -734211891 [ label="sap_tracking_mobile" shape="circle" style="filled" fillcolor="#ffe6cc" color="#d79b00" fixedsize="true" ];
   1031629740 [ label="sap_tracking_mgmt" shape="circle" style="filled" fillcolor="#ffe6cc" color="#d79b00" fixedsize="true" ];
   585344071 [ label="sap_vis_user" shape="circle" style="filled" fillcolor="#ffe6cc" color="#d79b00" fixedsize="true" ];
-  203635968 -- 1228317574 [ label="vnfp_small_Ares2T_Tracker_0_cp_tracker_ext_in" ];
-  203635968 -- -1844810866 [ label="vnfp_small_Ares2T_Tracker_0_cp_tracker_data" ];
-  203635968 -- -1844537179 [ label="vnfp_small_Ares2T_Tracker_0_cp_tracker_mgmt" ];
-  -968382224 -- -1844810866 [ label="vnfp_Ares2T_Vis_0_cp_vis_data" ];
-  -968382224 -- -1844537179 [ label="vnfp_Ares2T_Vis_0_cp_vis_mgmt" ];
-  -968382224 -- -1844287569 [ label="vnfp_Ares2T_Vis_0_cp_vis_user" ];
-  -734211891 -- 1228317574 [ label="" ];
-  1031629740 -- -1844537179 [ label="" ];
-  585344071 -- -1844287569 [ label="" ];
+  203635968 -- 1228317574 [ label="vnfp_small_Ares2T_Tracker_0_cp_tracker_ext_in" color="#8f8f8f" style="bold" ];
+  203635968 -- -1844810866 [ label="vnfp_small_Ares2T_Tracker_0_cp_tracker_data" color="#8f8f8f" style="bold" ];
+  203635968 -- -1844537179 [ label="vnfp_small_Ares2T_Tracker_0_cp_tracker_mgmt" color="#8f8f8f" style="bold" ];
+  -968382224 -- -1844810866 [ label="vnfp_Ares2T_Vis_0_cp_vis_data" color="#8f8f8f" style="bold" ];
+  -968382224 -- -1844537179 [ label="vnfp_Ares2T_Vis_0_cp_vis_mgmt" color="#8f8f8f" style="bold" ];
+  -968382224 -- -1844287569 [ label="vnfp_Ares2T_Vis_0_cp_vis_user" color="#8f8f8f" style="bold" ];
+  -734211891 -- 1228317574 [ label="" color="#8f8f8f" style="bold" ];
+  1031629740 -- -1844537179 [ label="" color="#8f8f8f" style="bold" ];
+  585344071 -- -1844287569 [ label="" color="#8f8f8f" style="bold" ];
 }

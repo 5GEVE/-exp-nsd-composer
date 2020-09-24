@@ -15,16 +15,16 @@ strict graph G {
   142347183 [ label="sap_tracking_exp_mobile" shape="circle" style="filled" fillcolor="#ffe6cc" color="#d79b00" fixedsize="true" ];
   1823602446 [ label="sap_tracking_exp_mgmt" shape="circle" style="filled" fillcolor="#ffe6cc" color="#d79b00" fixedsize="true" ];
   1913076497 [ label="sap_visualizer_exp_user" shape="circle" style="filled" fillcolor="#ffe6cc" color="#d79b00" fixedsize="true" ];
-  890595397 -- 1008003435 [ label="vnfp_big_Ares2T_Tracker_exp_0_cp_tracker_ext_in" ];
-  890595397 -- -1971465616 [ label="vnfp_big_Ares2T_Tracker_exp_0_cp_tracker_data" ];
-  890595397 -- -1971191929 [ label="vnfp_big_Ares2T_Tracker_exp_0_cp_tracker_mgmt" ];
-  -1702048946 -- -1971465616 [ label="vnfp_Ares2T_Vis_exp_0_cp_vis_data" ];
-  -1702048946 -- -1971191929 [ label="vnfp_Ares2T_Vis_exp_0_cp_vis_mgmt" ];
-  -1702048946 -- 1542916426 [ label="vnfp_Ares2T_Vis_exp_0_cp_vis_user" ];
-  2082736535 -- 1008003435 [ label="vnfp_netem_exp_0_cp_dg_traffic_out" ];
-  2082736535 -- -1971191929 [ label="vnfp_netem_exp_0_cp_dg_mgmt" ];
-  2082736535 -- -227812888 [ label="vnfp_netem_exp_0_cp_dg_traffic_in" ];
-  142347183 -- -227812888 [ label="" ];
-  1823602446 -- -1971191929 [ label="" ];
-  1913076497 -- 1542916426 [ label="" ];
+  890595397 -- 1008003435 [ label="vnfp_big_Ares2T_Tracker_exp_0_cp_tracker_ext_in" color="#8f8f8f" style="bold" ];
+  890595397 -- -1971465616 [ label="vnfp_big_Ares2T_Tracker_exp_0_cp_tracker_data" color="#8f8f8f" style="bold" ];
+  890595397 -- -1971191929 [ label="vnfp_big_Ares2T_Tracker_exp_0_cp_tracker_mgmt" color="#8f8f8f" style="bold" ];
+  -1702048946 -- -1971465616 [ label="vnfp_Ares2T_Vis_exp_0_cp_vis_data" color="#8f8f8f" style="bold" ];
+  -1702048946 -- -1971191929 [ label="vnfp_Ares2T_Vis_exp_0_cp_vis_mgmt" color="#8f8f8f" style="bold" ];
+  -1702048946 -- 1542916426 [ label="vnfp_Ares2T_Vis_exp_0_cp_vis_user" color="#8f8f8f" style="bold" ];
+  2082736535 -- 1008003435 [ label="vnfp_netem_exp_0_cp_dg_traffic_out" color="#8f8f8f" style="bold" ];
+  2082736535 -- -1971191929 [ label="vnfp_netem_exp_0_cp_dg_mgmt" color="#8f8f8f" style="bold" ];
+  2082736535 -- -227812888 [ label="vnfp_netem_exp_0_cp_dg_traffic_in" color="#8f8f8f" style="bold" ];
+  142347183 -- -227812888 [ label="" color="#8f8f8f" style="bold" ];
+  1823602446 -- -1971191929 [ label="" color="#8f8f8f" style="bold" ];
+  1913076497 -- 1542916426 [ label="" color="#8f8f8f" style="bold" ];
 }
