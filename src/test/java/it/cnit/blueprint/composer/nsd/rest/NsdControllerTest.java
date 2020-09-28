@@ -1,6 +1,7 @@
 package it.cnit.blueprint.composer.nsd.rest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -390,6 +391,6 @@ public class NsdControllerTest {
 
     // Then
     assertEquals(200, result.getResponse().getStatus());
-    JSON_OM.readValue(result.getResponse().getContentAsString(), GraphResponse[].class);
+    assertEquals("application/octet-stream", result.getResponse().getContentType());
   }
 }
