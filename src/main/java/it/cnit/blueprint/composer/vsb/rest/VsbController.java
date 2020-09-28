@@ -6,19 +6,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
+import it.cnit.blueprint.composer.commons.ZipService;
 import it.cnit.blueprint.composer.vsb.VsbService;
 import it.cnit.blueprint.composer.vsb.graph.VsbGraphService;
 import it.cnit.blueprint.composer.vsb.graph.VsbVertex;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Collections;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,6 +39,8 @@ public class VsbController {
 
   private final VsbGraphService vsbGraphService;
   private final VsbService vsbService;
+
+  private final ZipService zipService;
 
   @PostMapping("/addMgmt")
   public VsBlueprint addMgmtConnService(@RequestBody @Valid VsBlueprint vsb) {
@@ -73,13 +80,26 @@ public class VsbController {
   }
 
   @PostMapping("/graph")
-  public Map<String, String> graph(@RequestBody @Valid VsBlueprint vsb) {
+  public ResponseEntity<InputStreamResource> graph(@RequestBody @Valid VsBlueprint vsb) {
     validate(vsb);
-    Graph<VsbVertex, String> graph = vsbGraphService.buildGraph(vsb);
-    return new HashMap<String, String>() {
-      {
-        put("graph", vsbGraphService.export(graph));
-      }
-    };
+    File tempFile;
+    try {
+      tempFile = Files.createTempFile(vsb.getBlueprintId() + "-", ".png").toFile();
+      Graph<VsbVertex, String> graph = vsbGraphService.buildGraph(vsb);
+      vsbGraphService.renderPNG(vsbGraphService.export(graph)).toFile(tempFile);
+    } catch (IOException e) {
+      log.error("Can not write file: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+    try {
+      ResponseEntity<InputStreamResource> response = zipService.getZipResponse(
+          Collections.singletonList(tempFile));
+      //noinspection ResultOfMethodCallIgnored
+      tempFile.delete();
+      return response;
+    } catch (IOException e) {
+      log.debug("Zip response error: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 }
