@@ -173,7 +173,7 @@ public class NsdController {
   }
 
   @PostMapping("/compose/details")
-  public ResponseEntity<InputStreamResource> composeWithImage(
+  public ResponseEntity<InputStreamResource> composeDetails(
       @RequestBody @Valid ComposeRequest composeRequest) {
     Nsd expNsd = compose(composeRequest);
 
