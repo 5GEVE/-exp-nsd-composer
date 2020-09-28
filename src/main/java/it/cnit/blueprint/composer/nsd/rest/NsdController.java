@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
+import it.cnit.blueprint.composer.commons.ZipService;
 import it.cnit.blueprint.composer.exceptions.ContextInvalidException;
 import it.cnit.blueprint.composer.exceptions.NsdCompositionException;
 import it.cnit.blueprint.composer.exceptions.NsdGenerationException;
@@ -32,7 +33,9 @@ import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,8 +47,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -72,13 +77,15 @@ public class NsdController {
   private final VsbController vsbController;
   private final CtxController ctxController;
 
+  private final ZipService zipService;
+
   /**
    * @param httpEntity Here we manually deserialize the body to support any kind of Blueprint
    * @return The generated NSD
    */
   @PostMapping("/generate")
   public Nsd generate(HttpEntity<String> httpEntity) {
-    if (httpEntity.getBody() == null){
+    if (httpEntity.getBody() == null) {
       log.debug("Empty body");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Empty body");
     }
@@ -197,23 +204,38 @@ public class NsdController {
   }
 
   @PostMapping("/graph")
-  public List<GraphResponse> graph(@RequestBody @Valid Nsd nsd) {
+  public ResponseEntity<InputStreamResource> graph(@RequestBody @Valid Nsd nsd) {
     validate(nsd);
-    ArrayList<GraphResponse> graphs = new ArrayList<>();
+    ArrayList<File> graphs = new ArrayList<>();
     for (NsDf nsDf : nsd.getNsDf()) {
       for (NsLevel nsLvl : nsDf.getNsInstantiationLevel()) {
         try {
+          File tempFile = Files
+              .createTempFile(nsDf.getNsDfId() + "-" + nsLvl.getNsLevelId() + "-", ".png").toFile();
           Graph<ProfileVertex, String> graph = nsdGraphService
               .buildGraph(nsd.getSapd(), nsDf, nsLvl);
-          graphs.add(
-              new GraphResponse(nsDf.getNsDfId(), nsLvl.getNsLevelId(),
-                  nsdGraphService.export(graph).replace("\n", "").replace("\r", "")));
+          nsdGraphService.renderPNG(nsdGraphService.export(graph)).toFile(tempFile);
+          graphs.add(tempFile);
         } catch (NsdInvalidException e) {
+          log.error("Invalid NSD: " + e.getMessage());
           throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+        } catch (IOException e) {
+          log.error("Can not write file: " + e.getMessage());
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
         }
       }
     }
-    return graphs;
+    try {
+      ResponseEntity<InputStreamResource> response = zipService.getZipResponse(graphs);
+      for (File g : graphs) {
+        //noinspection ResultOfMethodCallIgnored
+        g.delete();
+      }
+      return response;
+    } catch (IOException e) {
+      log.debug("Zip response error: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
   private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd)
