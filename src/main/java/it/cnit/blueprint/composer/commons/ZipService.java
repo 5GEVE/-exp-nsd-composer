@@ -21,7 +21,9 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class ZipService {
 
-  public ResponseEntity<InputStreamResource> getZipResponse(List<File> files) throws IOException {
+  @SuppressWarnings("ResultOfMethodCallIgnored")
+  public ResponseEntity<InputStreamResource> getZipResponse(List<File> files, boolean cleanUp)
+      throws IOException {
     File zipFile = Files.createTempFile("enc-output-", ".zip").toFile();
     ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
     for (File f : files) {
@@ -40,8 +42,12 @@ public class ZipService {
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .contentLength(zipFile.length())
         .body(new InputStreamResource(new FileInputStream(zipFile)));
-    //noinspection ResultOfMethodCallIgnored
-    zipFile.delete();
+    if (cleanUp){
+      for (File f : files) {
+        f.delete();
+      }
+      zipFile.delete();
+    }
     return response;
   }
 
