@@ -7,15 +7,22 @@ import static org.junit.Assert.assertTrue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import guru.nidi.graphviz.engine.GraphvizException;
+import guru.nidi.graphviz.engine.Renderer;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.stream.Collectors;
+import javax.imageio.ImageIO;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
@@ -70,18 +77,22 @@ public class NsdGraphServiceTest {
     String nsLevel = "ns_ares2t_tracker_il_big";
 
     // When
-    nsdGraphService.renderSVG(nsdGraphService.export(nsdGraphService
+    Renderer svg = nsdGraphService.renderSVG(nsdGraphService.export(nsdGraphService
         .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0),
-            nsd.getNsDf().get(0).getNsLevel(nsLevel)))).toFile(new File("/tmp/graph.svg"));
+            nsd.getNsDf().get(0).getNsLevel(nsLevel))));
 
-//    // Then
-//    String expected;
-//    //noinspection ConstantConditions
-//    try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
-//        StandardCharsets.UTF_8.name())) {
-//      expected = scanner.useDelimiter("\\A").next();
-//    }
-//    assertEquals(expected, actual);
+    // Then
+    // Verify we can write temp files
+    svg.toFile(Files.createTempFile(null, ".svg").toFile());
+
+    // Verify image is equal to expected
+    String actual = svg.toString();
+    String expected = new BufferedReader(
+        new InputStreamReader(getClass().getResourceAsStream("/ares2tTrackerBig.svg"),
+            StandardCharsets.UTF_8))
+        .lines()
+        .collect(Collectors.joining("\n"));
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -92,18 +103,18 @@ public class NsdGraphServiceTest {
     String nsLevel = "ns_ares2t_tracker_il_big";
 
     // When
-    nsdGraphService.renderPNG(nsdGraphService.export(nsdGraphService
+    Renderer png = nsdGraphService.renderPNG(nsdGraphService.export(nsdGraphService
         .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0),
-            nsd.getNsDf().get(0).getNsLevel(nsLevel)))).toFile(new File("/tmp/graph.png"));
+            nsd.getNsDf().get(0).getNsLevel(nsLevel))));
 
-//    // Then
-//    String expected;
-//    //noinspection ConstantConditions
-//    try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
-//        StandardCharsets.UTF_8.name())) {
-//      expected = scanner.useDelimiter("\\A").next();
-//    }
-//    assertEquals(expected, actual);
+    // Then
+    // Verify we can write temp files
+    png.toFile(Files.createTempFile(null, ".png").toFile());
+
+    // Verify image is equal to expected
+    BufferedImage actual = png.toImage();
+    BufferedImage expected = ImageIO.read(getClass().getResourceAsStream("/ares2tTrackerBig.png"));
+    assertTrue(compareImages(expected, actual));
   }
 
   @Test(expected = GraphvizException.class)
@@ -241,11 +252,40 @@ public class NsdGraphServiceTest {
     // Get the first vertex and remove its edges
     ProfileVertex v = g.vertexSet().iterator().next();
     Set<String> edges = new HashSet<>(g.edgesOf(v));
-    for (String e: edges){
+    for (String e : edges) {
       g.removeEdge(e);
     }
 
     // Then
     assertFalse(nsdGraphService.isConnected(g));
+  }
+
+  /**
+   * Compares two images pixel by pixel.
+   *
+   * @param imgA the first image.
+   * @param imgB the second image.
+   * @return whether the images are both the same or not.
+   */
+  public static boolean compareImages(BufferedImage imgA, BufferedImage imgB) {
+    // The images must be the same size.
+    if (imgA.getWidth() != imgB.getWidth() || imgA.getHeight() != imgB.getHeight()) {
+      return false;
+    }
+
+    int width = imgA.getWidth();
+    int height = imgA.getHeight();
+
+    // Loop over every pixel.
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        // Compare the pixels for equality.
+        if (imgA.getRGB(x, y) != imgB.getRGB(x, y)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 }
