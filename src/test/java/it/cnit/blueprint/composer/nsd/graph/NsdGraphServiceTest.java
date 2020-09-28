@@ -6,7 +6,9 @@ import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import guru.nidi.graphviz.engine.GraphvizException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -58,6 +60,63 @@ public class NsdGraphServiceTest {
       expected = scanner.useDelimiter("\\A").next();
     }
     assertEquals(expected, actual);
+  }
+
+  @Test
+  @SneakyThrows
+  public void renderSVGGraphAres2TTrackerBig() {
+    // Given
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
+    String nsLevel = "ns_ares2t_tracker_il_big";
+
+    // When
+    nsdGraphService.renderSVG(nsdGraphService.export(nsdGraphService
+        .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0),
+            nsd.getNsDf().get(0).getNsLevel(nsLevel)))).toFile(new File("/tmp/graph.svg"));
+
+//    // Then
+//    String expected;
+//    //noinspection ConstantConditions
+//    try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
+//        StandardCharsets.UTF_8.name())) {
+//      expected = scanner.useDelimiter("\\A").next();
+//    }
+//    assertEquals(expected, actual);
+  }
+
+  @Test
+  @SneakyThrows
+  public void renderPNGGraphAres2TTrackerBig() {
+    // Given
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
+    String nsLevel = "ns_ares2t_tracker_il_big";
+
+    // When
+    nsdGraphService.renderPNG(nsdGraphService.export(nsdGraphService
+        .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0),
+            nsd.getNsDf().get(0).getNsLevel(nsLevel)))).toFile(new File("/tmp/graph.png"));
+
+//    // Then
+//    String expected;
+//    //noinspection ConstantConditions
+//    try (Scanner scanner = new Scanner(ClassLoader.getSystemResourceAsStream(nsLevel + ".dot"),
+//        StandardCharsets.UTF_8.name())) {
+//      expected = scanner.useDelimiter("\\A").next();
+//    }
+//    assertEquals(expected, actual);
+  }
+
+  @Test(expected = GraphvizException.class)
+  @SneakyThrows
+  public void renderPNGGraphEmpty() {
+    // Given
+    String empty = "";
+
+    // When
+    nsdGraphService.renderPNG(empty).toFile(new File("/tmp/graph.png"));
+
+    // Then
+    // throws GraphvizException
   }
 
   @Test
