@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import it.cnit.blueprint.composer.nsd.graph.GraphVizExporter;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.composer.vsb.VsbService;
@@ -42,7 +41,7 @@ public class NsdGeneratorTest {
     InputStream input = ClassLoader.getSystemResourceAsStream("url.properties");
     urlProp.load(input);
     oM = new ObjectMapper(new YAMLFactory());
-    nsdGraphService = new NsdGraphService(new GraphVizExporter());
+    nsdGraphService = new NsdGraphService();
     vsbService = new VsbService();
     nsdGenerator = new NsdGenerator(vsbService);
     vsbGraphService = new VsbGraphService();

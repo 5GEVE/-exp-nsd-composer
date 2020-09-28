@@ -44,7 +44,7 @@ public class NsdGraphServiceTest {
     InputStream input = ClassLoader.getSystemResourceAsStream("url.properties");
     prop.load(input);
     oM = new ObjectMapper(new YAMLFactory());
-    nsdGraphService = new NsdGraphService(new GraphVizExporter());
+    nsdGraphService = new NsdGraphService();
   }
 
   @Test
