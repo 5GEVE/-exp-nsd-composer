@@ -105,12 +105,9 @@ public class NsdController {
     }
   }
 
-  /**
-   * @return An ObjectMapper with FAIL_ON_UNKNOWN_PROPERTIES=false
-   */
-  private ObjectReader createSafeBlueprintReader() {
-    return objectMapper.readerFor(Blueprint.class)
-        .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+  @PostMapping("/generate/details")
+  public ResponseEntity<InputStreamResource> generateDetails(HttpEntity<String> httpEntity) {
+    return getDetailsResponse(generate(httpEntity));
   }
 
   @PostMapping("/compose")
@@ -175,34 +172,7 @@ public class NsdController {
   @PostMapping("/compose/details")
   public ResponseEntity<InputStreamResource> composeDetails(
       @RequestBody @Valid ComposeRequest composeRequest) {
-    Nsd expNsd = compose(composeRequest);
-
-    List<File> files;
-    try {
-      files = nsdGraphService.writeImageFiles(expNsd);
-      File nsdFile = Files.createTempFile("nsd-", ".json").toFile();
-      createIndentNsdWriter().writeValue(nsdFile, expNsd);
-      files.add(nsdFile);
-    } catch (NsdInvalidException e) {
-      log.error("Invalid NSD: " + e.getMessage());
-      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
-    } catch (IOException e) {
-      log.error("Can not write file: " + e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
-    try {
-      return zipService.getZipResponse(files, true);
-    } catch (IOException e) {
-      log.debug("Zip response error: " + e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
-  }
-
-  /**
-   * @return An ObjectMapper with INDENT_OUTPUT=true
-   */
-  private ObjectWriter createIndentNsdWriter() {
-    return objectMapper.writerFor(Nsd.class).with(SerializationFeature.INDENT_OUTPUT);
+    return getDetailsResponse(compose(composeRequest));
   }
 
   /**
@@ -303,4 +273,42 @@ public class NsdController {
                 .collect(Collectors.toList())
                 .toString());
   }
+
+  /**
+   * @return An ObjectMapper with FAIL_ON_UNKNOWN_PROPERTIES=false
+   */
+  private ObjectReader createSafeBlueprintReader() {
+    return objectMapper.readerFor(Blueprint.class)
+        .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+  }
+
+  /**
+   * @return An ObjectMapper with INDENT_OUTPUT=true
+   */
+  private ObjectWriter createIndentNsdWriter() {
+    return objectMapper.writerFor(Nsd.class).with(SerializationFeature.INDENT_OUTPUT);
+  }
+
+  private ResponseEntity<InputStreamResource> getDetailsResponse(Nsd nsd) {
+    List<File> files;
+    try {
+      files = nsdGraphService.writeImageFiles(nsd);
+      File nsdFile = Files.createTempFile("nsd-", ".json").toFile();
+      createIndentNsdWriter().writeValue(nsdFile, nsd);
+      files.add(nsdFile);
+    } catch (NsdInvalidException e) {
+      log.error("Invalid NSD: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+    } catch (IOException e) {
+      log.error("Can not write file: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+    try {
+      return zipService.getZipResponse(files, true);
+    } catch (IOException e) {
+      log.debug("Zip response error: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
 }

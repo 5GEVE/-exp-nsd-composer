@@ -1,7 +1,6 @@
 package it.cnit.blueprint.composer.nsd.rest;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -84,6 +83,27 @@ public class NsdControllerTest {
       expectedNsd = YAML_OM.readValue(inNsd, Nsd.class);
     }
     assertEquals(YAML_OM.writeValueAsString(expectedNsd), YAML_OM.writeValueAsString(actualNsd));
+  }
+
+  @Test
+  @SneakyThrows
+  public void generateDetailsFromVsb() {
+    // Given
+    VsBlueprint vsb;
+    try (InputStream inVsb = getClass().getResourceAsStream("/vsb_polito_smartcity_nomgmt.yml")) {
+      vsb = YAML_OM.readValue(inVsb, VsBlueprint.class);
+    }
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/generate/details")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(vsb)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+    assertEquals("application/octet-stream", result.getResponse().getContentType());
   }
 
   @Test
