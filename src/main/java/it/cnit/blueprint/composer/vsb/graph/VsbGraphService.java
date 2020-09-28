@@ -1,5 +1,8 @@
 package it.cnit.blueprint.composer.vsb.graph;
 
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.engine.Renderer;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
@@ -141,6 +144,14 @@ public class VsbGraphService {
   public boolean isConnected(Graph<VsbVertex, String> g) {
     ConnectivityInspector<VsbVertex, String> inspector = new ConnectivityInspector<>(g);
     return inspector.isConnected();
+  }
+
+  public Renderer renderSVG(String dot) {
+    return Graphviz.fromString(dot).render(Format.SVG);
+  }
+
+  public Renderer renderPNG(String dot) {
+    return Graphviz.fromString(dot).width(1920).render(Format.PNG);
   }
 }
 
