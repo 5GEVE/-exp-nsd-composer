@@ -1,5 +1,8 @@
 package it.cnit.blueprint.composer.nsd.graph;
 
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.engine.Renderer;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.LinkedHashMap;
@@ -15,9 +18,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Primary
-public class GraphVizExporter implements GraphExporter {
+public class GraphVizExporter {
 
-  @Override
   public String export(Graph<ProfileVertex, String> g) {
     ComponentNameProvider<ProfileVertex> vertexIdProvider = ProfileVertex::getVertexId;
     ComponentNameProvider<ProfileVertex> vertexLabelProvider = ProfileVertex::toString;
@@ -76,4 +78,13 @@ public class GraphVizExporter implements GraphExporter {
     exporter.exportGraph(g, writer);
     return writer.toString();
   }
+
+  public Renderer renderSVG(String dot) {
+    return Graphviz.fromString(dot).render(Format.SVG);
+  }
+
+  public Renderer renderPNG(String dot) {
+    return Graphviz.fromString(dot).width(1920).render(Format.PNG);
+  }
+
 }

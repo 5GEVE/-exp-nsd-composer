@@ -1,5 +1,6 @@
 package it.cnit.blueprint.composer.nsd.graph;
 
+import guru.nidi.graphviz.engine.Renderer;
 import it.cnit.blueprint.composer.exceptions.NsdInvalidException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
@@ -28,7 +29,7 @@ import org.springframework.stereotype.Service;
 public class NsdGraphService {
 
   @Setter
-  private GraphExporter graphExporter;
+  private GraphVizExporter graphVizExporter;
 
   public Graph<ProfileVertex, String> buildGraph(List<Sapd> sapdList, NsDf nsDf, NsLevel nsLevel)
       throws NsdInvalidException {
@@ -119,7 +120,15 @@ public class NsdGraphService {
   }
 
   public String export(Graph<ProfileVertex, String> graph) {
-    return graphExporter.export(graph);
+    return graphVizExporter.export(graph);
+  }
+
+  public Renderer renderSVG(String dot) {
+    return graphVizExporter.renderSVG(dot);
+  }
+
+  public Renderer renderPNG(String dot) {
+    return graphVizExporter.renderPNG(dot);
   }
 
   public ProfileVertex getVertexById(Graph<ProfileVertex, String> g, String vertexId)
