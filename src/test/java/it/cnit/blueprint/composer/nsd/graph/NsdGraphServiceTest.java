@@ -71,63 +71,17 @@ public class NsdGraphServiceTest {
 
   @Test
   @SneakyThrows
-  public void renderSVGGraphAres2TTrackerBig() {
+  public void writeImageFiles() {
     // Given
     Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
     String nsLevel = "ns_ares2t_tracker_il_big";
 
     // When
-    Renderer svg = nsdGraphService.renderSVG(nsdGraphService.export(nsdGraphService
-        .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0),
-            nsd.getNsDf().get(0).getNsLevel(nsLevel))));
+    BufferedImage actual = ImageIO.read(nsdGraphService.writeImageFiles(nsd).get(0));
 
     // Then
-    // Verify we can write temp files
-    svg.toFile(Files.createTempFile(null, ".svg").toFile());
-
-    // Verify image is equal to expected
-    String actual = svg.toString();
-    String expected = new BufferedReader(
-        new InputStreamReader(getClass().getResourceAsStream("/ares2tTrackerBig.svg"),
-            StandardCharsets.UTF_8))
-        .lines()
-        .collect(Collectors.joining("\n"));
-    assertEquals(expected, actual);
-  }
-
-  @Test
-  @SneakyThrows
-  public void renderPNGGraphAres2TTrackerBig() {
-    // Given
-    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
-    String nsLevel = "ns_ares2t_tracker_il_big";
-
-    // When
-    Renderer png = nsdGraphService.renderPNG(nsdGraphService.export(nsdGraphService
-        .buildGraph(nsd.getSapd(), nsd.getNsDf().get(0),
-            nsd.getNsDf().get(0).getNsLevel(nsLevel))));
-
-    // Then
-    // Verify we can write temp files
-    png.toFile(Files.createTempFile(null, ".png").toFile());
-
-    // Verify image is equal to expected
-    BufferedImage actual = png.toImage();
     BufferedImage expected = ImageIO.read(getClass().getResourceAsStream("/ares2tTrackerBig.png"));
     assertTrue(compareImages(expected, actual));
-  }
-
-  @Test(expected = GraphvizException.class)
-  @SneakyThrows
-  public void renderPNGGraphEmpty() {
-    // Given
-    String empty = "";
-
-    // When
-    nsdGraphService.renderPNG(empty).toFile(new File("/tmp/graph.png"));
-
-    // Then
-    // throws GraphvizException
   }
 
   @Test

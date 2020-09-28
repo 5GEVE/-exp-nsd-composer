@@ -17,7 +17,6 @@ import it.cnit.blueprint.composer.exceptions.VsbInvalidException;
 import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
 import it.cnit.blueprint.composer.nsd.generate.NsdGenerator;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
-import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.composer.vsb.VsbService;
 import it.cnit.blueprint.composer.vsb.rest.CtxController;
 import it.cnit.blueprint.composer.vsb.rest.VsbController;
@@ -28,15 +27,12 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +40,6 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jgrapht.Graph;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
@@ -176,6 +171,33 @@ public class NsdController {
     return expNsd;
   }
 
+  // TODO write test
+  @PostMapping("/compose/details")
+  public ResponseEntity<InputStreamResource> composeWithImage(
+      @RequestBody @Valid ComposeRequest composeRequest) {
+    Nsd expNsd = compose(composeRequest);
+
+    List<File> files;
+    try {
+      files = nsdGraphService.writeImageFiles(expNsd);
+      File nsdFile = Files.createTempFile("nsd-", ".yaml").toFile();
+      objectMapper.writeValue(nsdFile, expNsd);
+      files.add(nsdFile);
+    } catch (NsdInvalidException e) {
+      log.error("Invalid NSD: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+    } catch (IOException e) {
+      log.error("Can not write file: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+    try {
+      return zipService.getZipResponse(files, true);
+    } catch (IOException e) {
+      log.debug("Zip response error: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
   /**
    * Validate an NSD. Serialization errors are handled by Spring
    *
@@ -206,32 +228,18 @@ public class NsdController {
   @PostMapping("/graph")
   public ResponseEntity<InputStreamResource> graph(@RequestBody @Valid Nsd nsd) {
     validate(nsd);
-    ArrayList<File> graphs = new ArrayList<>();
-    for (NsDf nsDf : nsd.getNsDf()) {
-      for (NsLevel nsLvl : nsDf.getNsInstantiationLevel()) {
-        try {
-          File tempFile = Files
-              .createTempFile(nsDf.getNsDfId() + "-" + nsLvl.getNsLevelId() + "-", ".png").toFile();
-          Graph<ProfileVertex, String> graph = nsdGraphService
-              .buildGraph(nsd.getSapd(), nsDf, nsLvl);
-          nsdGraphService.renderPNG(nsdGraphService.export(graph)).toFile(tempFile);
-          graphs.add(tempFile);
-        } catch (NsdInvalidException e) {
-          log.error("Invalid NSD: " + e.getMessage());
-          throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
-        } catch (IOException e) {
-          log.error("Can not write file: " + e.getMessage());
-          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-        }
-      }
+    List<File> graphs;
+    try {
+      graphs = nsdGraphService.writeImageFiles(nsd);
+    } catch (NsdInvalidException e) {
+      log.error("Invalid NSD: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+    } catch (IOException e) {
+      log.error("Can not write file: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
     try {
-      ResponseEntity<InputStreamResource> response = zipService.getZipResponse(graphs);
-      for (File g : graphs) {
-        //noinspection ResultOfMethodCallIgnored
-        g.delete();
-      }
-      return response;
+      return zipService.getZipResponse(graphs, true);
     } catch (IOException e) {
       log.debug("Zip response error: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

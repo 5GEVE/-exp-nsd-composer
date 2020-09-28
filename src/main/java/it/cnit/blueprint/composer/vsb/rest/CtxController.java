@@ -71,19 +71,13 @@ public class CtxController {
     validate(ctx);
     File tempFile;
     try {
-      tempFile = Files.createTempFile(ctx.getBlueprintId() + "-", ".png").toFile();
-      Graph<VsbVertex, String> graph = vsbGraphService.buildGraph(ctx);
-      vsbGraphService.renderPNG(vsbGraphService.export(graph)).toFile(tempFile);
+      tempFile = vsbGraphService.writeImageFile(ctx);
     } catch (IOException e) {
       log.error("Can not write file: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
     try {
-      ResponseEntity<InputStreamResource> response = zipService.getZipResponse(
-          Collections.singletonList(tempFile));
-      //noinspection ResultOfMethodCallIgnored
-      tempFile.delete();
-      return response;
+      return zipService.getZipResponse(Collections.singletonList(tempFile), true);
     } catch (IOException e) {
       log.debug("Zip response error: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

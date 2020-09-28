@@ -8,13 +8,17 @@ import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityExceptio
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.PnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VirtualLinkToLevelMapping;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfProfile;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.VnfToLevelMapping;
+import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,7 +35,9 @@ import org.jgrapht.io.ComponentNameProvider;
 import org.jgrapht.io.DOTExporter;
 import org.jgrapht.io.DefaultAttribute;
 import org.slf4j.helpers.MessageFormatter;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Slf4j
@@ -185,14 +191,6 @@ public class NsdGraphService {
     return writer.toString();
   }
 
-  public Renderer renderSVG(String dot) {
-    return Graphviz.fromString(dot).render(Format.SVG);
-  }
-
-  public Renderer renderPNG(String dot) {
-    return Graphviz.fromString(dot).width(1920).render(Format.PNG);
-  }
-
   public ProfileVertex getVertexById(Graph<ProfileVertex, String> g, String vertexId)
       throws ProfileVertexNotFoundException {
     Optional<ProfileVertex> optVertex = g.vertexSet().stream()
@@ -209,6 +207,21 @@ public class NsdGraphService {
   public boolean isConnected(Graph<ProfileVertex, String> g) {
     ConnectivityInspector<ProfileVertex, String> inspector = new ConnectivityInspector<>(g);
     return inspector.isConnected();
+  }
+
+  public List<File> writeImageFiles(Nsd nsd) throws IOException, NsdInvalidException {
+    ArrayList<File> graphs = new ArrayList<>();
+    for (NsDf nsDf : nsd.getNsDf()) {
+      for (NsLevel nsLvl : nsDf.getNsInstantiationLevel()) {
+          File tempFile = Files
+              .createTempFile(nsDf.getNsDfId() + "-" + nsLvl.getNsLevelId() + "-", ".png")
+              .toFile();
+          String dotGraph = export(buildGraph(nsd.getSapd(), nsDf, nsLvl));
+          Graphviz.fromString(dotGraph).width(1920).render(Format.PNG).toFile(tempFile);
+          graphs.add(tempFile);
+      }
+    }
+    return graphs;
   }
 
 }
