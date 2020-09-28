@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
@@ -171,7 +172,6 @@ public class NsdController {
     return expNsd;
   }
 
-  // TODO write test
   @PostMapping("/compose/details")
   public ResponseEntity<InputStreamResource> composeWithImage(
       @RequestBody @Valid ComposeRequest composeRequest) {
@@ -180,8 +180,8 @@ public class NsdController {
     List<File> files;
     try {
       files = nsdGraphService.writeImageFiles(expNsd);
-      File nsdFile = Files.createTempFile("nsd-", ".yaml").toFile();
-      objectMapper.writeValue(nsdFile, expNsd);
+      File nsdFile = Files.createTempFile("nsd-", ".json").toFile();
+      createIndentNsdWriter().writeValue(nsdFile, expNsd);
       files.add(nsdFile);
     } catch (NsdInvalidException e) {
       log.error("Invalid NSD: " + e.getMessage());
@@ -196,6 +196,13 @@ public class NsdController {
       log.debug("Zip response error: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
+  }
+
+  /**
+   * @return An ObjectMapper with INDENT_OUTPUT=true
+   */
+  private ObjectWriter createIndentNsdWriter() {
+    return objectMapper.writerFor(Nsd.class).with(SerializationFeature.INDENT_OUTPUT);
   }
 
   /**

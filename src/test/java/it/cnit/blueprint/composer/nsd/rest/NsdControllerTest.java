@@ -260,6 +260,24 @@ public class NsdControllerTest {
 
   @Test
   @SneakyThrows
+  public void composeDetailsPolito200() {
+    // Given
+    ComposeRequest request = getPolitoRequest();
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/compose/details")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(request)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+    assertEquals("application/octet-stream", result.getResponse().getContentType());
+  }
+
+  @Test
+  @SneakyThrows
   public void compose400Wrong() {
     // Given
     ComposeRequest request = getAres2TRequest();
