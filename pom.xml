@@ -135,6 +135,13 @@
         </exclusion>
       </exclusions>
     </dependency>
+
+    <!--    https://github.com/nidi3/graphviz-java-->
+    <dependency>
+      <groupId>guru.nidi</groupId>
+      <artifactId>graphviz-java</artifactId>
+      <version>0.17.0</version>
+    </dependency>
   </dependencies>
 
   <build>
