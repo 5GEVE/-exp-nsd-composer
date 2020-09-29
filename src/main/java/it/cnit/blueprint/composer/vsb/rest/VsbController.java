@@ -1,30 +1,26 @@
 package it.cnit.blueprint.composer.vsb.rest;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import it.cnit.blueprint.composer.commons.ObjectMapperService;
 import it.cnit.blueprint.composer.commons.ZipService;
 import it.cnit.blueprint.composer.vsb.VsbService;
 import it.cnit.blueprint.composer.vsb.graph.VsbGraphService;
-import it.cnit.blueprint.composer.vsb.graph.VsbVertex;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Collections;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jgrapht.Graph;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,6 +43,7 @@ public class VsbController {
   private final VsbService vsbService;
 
   private final ZipService zipService;
+  private final ObjectMapperService omService;
 
   @PostMapping("/addMgmt")
   @Operation(description = "Adds a management connectivity service to a VSB if not present")
@@ -79,10 +76,8 @@ public class VsbController {
   @GetMapping("/schema")
   @Operation(description = "Generates the JSON Schema for a VSB")
   public JsonSchema schema() {
-    ObjectMapper J_OBJECT_MAPPER = new ObjectMapper(new JsonFactory())
-        .enable(SerializationFeature.INDENT_OUTPUT);
     try {
-      return new JsonSchemaGenerator(J_OBJECT_MAPPER).generateSchema(VsBlueprint.class);
+      return new JsonSchemaGenerator(omService.createIndentNsdWriter()).generateSchema(Nsd.class);
     } catch (JsonMappingException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }

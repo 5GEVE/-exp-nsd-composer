@@ -1,12 +1,6 @@
 package it.cnit.blueprint.composer.nsd.rest;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +8,7 @@ import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import it.cnit.blueprint.composer.commons.ObjectMapperService;
 import it.cnit.blueprint.composer.commons.ZipService;
 import it.cnit.blueprint.composer.exceptions.ContextInvalidException;
 import it.cnit.blueprint.composer.exceptions.NsdCompositionException;
@@ -69,7 +64,6 @@ public class NsdController {
 
   private final NsdGenerator nsdGenerator;
   private final NsdGraphService nsdGraphService;
-  private final ObjectMapper objectMapper;
 
   @Qualifier("PASS_THROUGH")
   private final NsdComposer passThroughComposer;
@@ -81,6 +75,7 @@ public class NsdController {
   private final CtxController ctxController;
 
   private final ZipService zipService;
+  private final ObjectMapperService omService;
 
   /**
    * @param httpEntity Here we manually deserialize the body to support any kind of Blueprint
@@ -98,7 +93,7 @@ public class NsdController {
     }
     Blueprint b;
     try {
-      b = createSafeBlueprintReader().readValue(httpEntity.getBody());
+      b = omService.createSafeBlueprintReader().readValue(httpEntity.getBody());
     } catch (IOException e) {
       log.debug("Can not read JSON: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
@@ -228,10 +223,8 @@ public class NsdController {
   @GetMapping("/schema")
   @Operation(description = "Generates the JSON Schema for a NSD")
   public JsonSchema schema() {
-    ObjectMapper J_OBJECT_MAPPER = new ObjectMapper(new JsonFactory())
-        .enable(SerializationFeature.INDENT_OUTPUT);
     try {
-      return new JsonSchemaGenerator(J_OBJECT_MAPPER).generateSchema(Nsd.class);
+      return new JsonSchemaGenerator(omService.createIndentNsdWriter()).generateSchema(Nsd.class);
     } catch (JsonMappingException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
@@ -315,27 +308,12 @@ public class NsdController {
                 .toString());
   }
 
-  /**
-   * @return An ObjectMapper with FAIL_ON_UNKNOWN_PROPERTIES=false
-   */
-  private ObjectReader createSafeBlueprintReader() {
-    return objectMapper.readerFor(Blueprint.class)
-        .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-  }
-
-  /**
-   * @return An ObjectMapper with INDENT_OUTPUT=true
-   */
-  private ObjectWriter createIndentNsdWriter() {
-    return objectMapper.writerFor(Nsd.class).with(SerializationFeature.INDENT_OUTPUT);
-  }
-
   private ResponseEntity<InputStreamResource> getDetailsResponse(Nsd nsd) {
     List<File> files;
     try {
       files = nsdGraphService.writeImageFiles(nsd);
       File nsdFile = Files.createTempFile("nsd-", ".json").toFile();
-      createIndentNsdWriter().writeValue(nsdFile, nsd);
+      omService.createIndentNsdWriter().writeValue(nsdFile, nsd);
       files.add(nsdFile);
     } catch (NsdInvalidException e) {
       log.error("Invalid NSD: " + e.getMessage());
