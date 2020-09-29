@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import it.cnit.blueprint.composer.nsd.graph.GraphVizExporter;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkConnectivity;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
@@ -37,7 +36,7 @@ public class NsdComposerTest {
     InputStream input = ClassLoader.getSystemResourceAsStream("url.properties");
     urlProp.load(input);
     oM = new ObjectMapper(new YAMLFactory());
-    nsdGraphService = new NsdGraphService(new GraphVizExporter());
+    nsdGraphService = new NsdGraphService();
     passThroughComposer = new PassThroughComposer(nsdGraphService);
     connectComposer = new ConnectComposer(nsdGraphService);
   }

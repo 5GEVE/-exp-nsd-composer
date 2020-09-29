@@ -19,6 +19,13 @@ docker-compose build
 docker-compose up
 ```
 
+## OpenApi
+
+Once running, you can get the OpenAPI specification by visiting (change host if needed):
+
+- http://localhost:8086/swagger-ui.html
+- http://localhost:8086/api-docs
+
 ## Graph export for visualization
 
 Debug log often provides network topology export into graphviz format.

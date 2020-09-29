@@ -87,6 +87,27 @@ public class NsdControllerTest {
 
   @Test
   @SneakyThrows
+  public void generateDetailsFromVsb() {
+    // Given
+    VsBlueprint vsb;
+    try (InputStream inVsb = getClass().getResourceAsStream("/vsb_polito_smartcity_nomgmt.yml")) {
+      vsb = YAML_OM.readValue(inVsb, VsBlueprint.class);
+    }
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/generate/details")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(vsb)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+    assertEquals("application/octet-stream", result.getResponse().getContentType());
+  }
+
+  @Test
+  @SneakyThrows
   public void generateFromCtx() {
     // Given
     CtxBlueprint ctx = YAML_OM
@@ -259,6 +280,24 @@ public class NsdControllerTest {
 
   @Test
   @SneakyThrows
+  public void composeDetailsPolito200() {
+    // Given
+    ComposeRequest request = getPolitoRequest();
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/compose/details")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(request)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+    assertEquals("application/octet-stream", result.getResponse().getContentType());
+  }
+
+  @Test
+  @SneakyThrows
   public void compose400Wrong() {
     // Given
     ComposeRequest request = getAres2TRequest();
@@ -390,6 +429,6 @@ public class NsdControllerTest {
 
     // Then
     assertEquals(200, result.getResponse().getStatus());
-    JSON_OM.readValue(result.getResponse().getContentAsString(), GraphResponse[].class);
+    assertEquals("application/octet-stream", result.getResponse().getContentType());
   }
 }

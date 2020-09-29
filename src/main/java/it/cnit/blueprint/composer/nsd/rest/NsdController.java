@@ -1,13 +1,15 @@
 package it.cnit.blueprint.composer.nsd.rest;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import it.cnit.blueprint.composer.commons.ObjectMapperService;
+import it.cnit.blueprint.composer.commons.ZipService;
 import it.cnit.blueprint.composer.exceptions.ContextInvalidException;
 import it.cnit.blueprint.composer.exceptions.NsdCompositionException;
 import it.cnit.blueprint.composer.exceptions.NsdGenerationException;
@@ -16,7 +18,6 @@ import it.cnit.blueprint.composer.exceptions.VsbInvalidException;
 import it.cnit.blueprint.composer.nsd.compose.NsdComposer;
 import it.cnit.blueprint.composer.nsd.generate.NsdGenerator;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
-import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.composer.vsb.VsbService;
 import it.cnit.blueprint.composer.vsb.rest.CtxController;
 import it.cnit.blueprint.composer.vsb.rest.VsbController;
@@ -27,13 +28,12 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsDf;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsLevel;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.NsVirtualLinkDesc;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Sapd;
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -41,11 +41,14 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jgrapht.Graph;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,7 +64,6 @@ public class NsdController {
 
   private final NsdGenerator nsdGenerator;
   private final NsdGraphService nsdGraphService;
-  private final ObjectMapper objectMapper;
 
   @Qualifier("PASS_THROUGH")
   private final NsdComposer passThroughComposer;
@@ -72,45 +74,64 @@ public class NsdController {
   private final VsbController vsbController;
   private final CtxController ctxController;
 
+  private final ZipService zipService;
+  private final ObjectMapperService omService;
+
   /**
    * @param httpEntity Here we manually deserialize the body to support any kind of Blueprint
    * @return The generated NSD
    */
   @PostMapping("/generate")
+  @Operation(description = "Generates a NSD from a VSB",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "A VSB or CtxB in JSON format",
+          content = @Content(schema = @Schema(implementation = Blueprint.class)),
+          required = true))
   public Nsd generate(HttpEntity<String> httpEntity) {
-    if (httpEntity.getBody() == null){
-      log.debug("Empty body");
+    if (httpEntity.getBody() == null) {
+      log.warn("Empty body for generate request");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Empty body");
     }
     Blueprint b;
     try {
-      b = createSafeBlueprintReader().readValue(httpEntity.getBody());
+      b = omService.createSafeBlueprintReader().readValue(httpEntity.getBody());
     } catch (IOException e) {
-      log.debug("Can not read JSON: " + e.getMessage());
+      log.error("Can not read JSON", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
     try {
       b.isValid();
     } catch (MalformattedElementException e) {
-      log.debug("Invalid Blueprint: " + e.getMessage());
+      log.warn("Invalid Blueprint: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
     try {
       return nsdGenerator.generate(b);
     } catch (NsdGenerationException e) {
+      log.error("Error generating NSD", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
-  /**
-   * @return An ObjectMapper with FAIL_ON_UNKNOWN_PROPERTIES=false
-   */
-  private ObjectReader createSafeBlueprintReader() {
-    return objectMapper.readerFor(Blueprint.class)
-        .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+  @PostMapping("/generate/details")
+  @Operation(description = "Generates a NSD with details from a VSB",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "A VSB or CtxB in JSON format",
+          content = @Content(schema = @Schema(implementation = Blueprint.class)),
+          required = true),
+      responses = @ApiResponse(
+          responseCode = "200",
+          description = "A zip file containing the generated NSD (JSON) and the images representing it (PNG)",
+          content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE),
+          headers = @Header(name = HttpHeaders.CONTENT_DISPOSITION)))
+  public ResponseEntity<InputStreamResource> generateDetails(HttpEntity<String> httpEntity) {
+    return getDetailsResponse(generate(httpEntity));
   }
 
   @PostMapping("/compose")
+  @Operation(description = "Composes a NSD with several contexts and returns a new NSD",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "Translation rules are ignored, leave them null",
+          required = true))
   public Nsd compose(@RequestBody @Valid ComposeRequest composeRequest) {
     VsBlueprint vsb = composeRequest.getVsbRequest().getVsBlueprint();
     vsbController.validate(vsb);
@@ -145,7 +166,7 @@ public class NsdController {
         } else if (ctxB.getCompositionStrategy().equals(CompositionStrategy.PASS_THROUGH)) {
           log.info("Strategy is PASS_THROUGH");
           if (ctxNsd.getVnfdId().size() == 1) {
-            log.debug("ctxNsd has only one vnfdId.");
+            log.info("ctxNsd has only one vnfdId.");
           } else {
             throw new ContextInvalidException("More than one VNFD ID found for PASS_THROUGH");
           }
@@ -155,18 +176,33 @@ public class NsdController {
           String m = MessageFormatter.format("Composition strategy {} not supported.",
               ctxB.getCompositionStrategy().name())
               .getMessage();
-          log.error(m);
           throw new ContextInvalidException(m);
         }
 
       }
     } catch (VsbInvalidException | NsdInvalidException | ContextInvalidException e) {
+      log.warn("Invalid element: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     } catch (NsdCompositionException e) {
+      log.error("Error composing NSD", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
     return expNsd;
+  }
+
+  @PostMapping("/compose/details")
+  @Operation(description = "Composes a NSD with several contexts and returns a new NSD with details",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "Translation rules are ignored, leave them null"),
+      responses = @ApiResponse(
+          responseCode = "200",
+          description = "A zip file containing the generated NSD (JSON) and the images representing it (PNG)",
+          content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE),
+          headers = @Header(name = HttpHeaders.CONTENT_DISPOSITION)))
+  public ResponseEntity<InputStreamResource> composeDetails(
+      @RequestBody @Valid ComposeRequest composeRequest) {
+    return getDetailsResponse(compose(composeRequest));
   }
 
   /**
@@ -176,44 +212,52 @@ public class NsdController {
    * @return 200 if valid, 400 with validation errors if invalid
    */
   @PostMapping("/validate")
+  @Operation(description = "Validates a NSD")
   public void validate(@RequestBody @Valid Nsd nsd) {
     try {
       nsd.isValid();
     } catch (MalformattedElementException e) {
-      log.debug("Invalid NSD: " + e.getMessage());
+      log.warn("Invalid NSD: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
   @GetMapping("/schema")
+  @Operation(description = "Generates the JSON Schema for a NSD")
   public JsonSchema schema() {
-    ObjectMapper J_OBJECT_MAPPER = new ObjectMapper(new JsonFactory())
-        .enable(SerializationFeature.INDENT_OUTPUT);
     try {
-      return new JsonSchemaGenerator(J_OBJECT_MAPPER).generateSchema(Nsd.class);
+      return new JsonSchemaGenerator(omService.createIndentNsdWriter()).generateSchema(Nsd.class);
     } catch (JsonMappingException e) {
+      log.error("Error generating JSON Schema", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
   @PostMapping("/graph")
-  public List<GraphResponse> graph(@RequestBody @Valid Nsd nsd) {
+  @Operation(description = "Generates PNG images to visualize the topology of a NSD",
+      responses = @ApiResponse(
+          responseCode = "200",
+          description = "A zip file containing the images (PNG) representing the NSD in input",
+          content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE),
+          headers = @Header(name = HttpHeaders.CONTENT_DISPOSITION)))
+  public ResponseEntity<InputStreamResource> graph(@RequestBody @Valid Nsd nsd) {
     validate(nsd);
-    ArrayList<GraphResponse> graphs = new ArrayList<>();
-    for (NsDf nsDf : nsd.getNsDf()) {
-      for (NsLevel nsLvl : nsDf.getNsInstantiationLevel()) {
-        try {
-          Graph<ProfileVertex, String> graph = nsdGraphService
-              .buildGraph(nsd.getSapd(), nsDf, nsLvl);
-          graphs.add(
-              new GraphResponse(nsDf.getNsDfId(), nsLvl.getNsLevelId(),
-                  nsdGraphService.export(graph).replace("\n", "").replace("\r", "")));
-        } catch (NsdInvalidException e) {
-          throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
-        }
-      }
+    List<File> graphs;
+    try {
+      graphs = nsdGraphService.writeImageFiles(nsd);
+    } catch (NsdInvalidException e) {
+      log.warn("Invalid NSD: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+    } catch (IOException e) {
+      log.error("Can not write file", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-    return graphs;
+    try {
+      return zipService.getZipResponse(graphs, true);
+    } catch (IOException e) {
+      log.error("Zip response error", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
   private NsVirtualLinkDesc findRanVld(Blueprint b, Nsd nsd)
@@ -266,4 +310,27 @@ public class NsdController {
                 .collect(Collectors.toList())
                 .toString());
   }
+
+  private ResponseEntity<InputStreamResource> getDetailsResponse(Nsd nsd) {
+    List<File> files;
+    try {
+      files = nsdGraphService.writeImageFiles(nsd);
+      File nsdFile = Files.createTempFile("nsd-", ".json").toFile();
+      omService.createIndentNsdWriter().writeValue(nsdFile, nsd);
+      files.add(nsdFile);
+    } catch (NsdInvalidException e) {
+      log.warn("Invalid NSD: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+    } catch (IOException e) {
+      log.error("Can not write file", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+    try {
+      return zipService.getZipResponse(files, true);
+    } catch (IOException e) {
+      log.error("Zip response error", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
 }

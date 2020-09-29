@@ -57,7 +57,7 @@
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-ui</artifactId>
-      <version>1.2.30</version>
+      <version>1.4.8</version>
     </dependency>
 
     <!-- Lombok -->
@@ -135,6 +135,13 @@
         </exclusion>
       </exclusions>
     </dependency>
+
+    <!--    https://github.com/nidi3/graphviz-java-->
+    <dependency>
+      <groupId>guru.nidi</groupId>
+      <artifactId>graphviz-java</artifactId>
+      <version>0.17.0</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -142,6 +149,14 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>build-info</id>
+            <goals>
+              <goal>build-info</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
     <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
