@@ -87,9 +87,10 @@ public class NsdController {
    * @return The generated NSD
    */
   @PostMapping("/generate")
-  @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "A VSB or CtxB in JSON format",
-      content = @Content(schema = @Schema(implementation = Blueprint.class)),
-      required = true))
+  @Operation(description = "Generates a NSD from a VSB",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "A VSB or CtxB in JSON format",
+          content = @Content(schema = @Schema(implementation = Blueprint.class)),
+          required = true))
   public Nsd generate(HttpEntity<String> httpEntity) {
     if (httpEntity.getBody() == null) {
       log.debug("Empty body");
@@ -116,10 +117,11 @@ public class NsdController {
   }
 
   @PostMapping("/generate/details")
-  @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-      description = "A VSB or CtxB in JSON format",
-      content = @Content(schema = @Schema(implementation = Blueprint.class)),
-      required = true),
+  @Operation(description = "Generates a NSD with details from a VSB",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "A VSB or CtxB in JSON format",
+          content = @Content(schema = @Schema(implementation = Blueprint.class)),
+          required = true),
       responses = @ApiResponse(
           responseCode = "200",
           description = "A zip file containing the generated NSD (JSON) and the images representing it (PNG)",
@@ -130,9 +132,10 @@ public class NsdController {
   }
 
   @PostMapping("/compose")
-  @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-      description = "Translation rules are ignored, leave them null",
-      required = true))
+  @Operation(description = "Composes a NSD with several contexts and returns a new NSD",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "Translation rules are ignored, leave them null",
+          required = true))
   public Nsd compose(@RequestBody @Valid ComposeRequest composeRequest) {
     VsBlueprint vsb = composeRequest.getVsbRequest().getVsBlueprint();
     vsbController.validate(vsb);
@@ -192,8 +195,9 @@ public class NsdController {
   }
 
   @PostMapping("/compose/details")
-  @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-      description = "Translation rules are ignored, leave them null"),
+  @Operation(description = "Composes a NSD with several contexts and returns a new NSD with details",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "Translation rules are ignored, leave them null"),
       responses = @ApiResponse(
           responseCode = "200",
           description = "A zip file containing the generated NSD (JSON) and the images representing it (PNG)",
@@ -211,6 +215,7 @@ public class NsdController {
    * @return 200 if valid, 400 with validation errors if invalid
    */
   @PostMapping("/validate")
+  @Operation(description = "Validates a NSD")
   public void validate(@RequestBody @Valid Nsd nsd) {
     try {
       nsd.isValid();
@@ -221,6 +226,7 @@ public class NsdController {
   }
 
   @GetMapping("/schema")
+  @Operation(description = "Generates the JSON Schema for a NSD")
   public JsonSchema schema() {
     ObjectMapper J_OBJECT_MAPPER = new ObjectMapper(new JsonFactory())
         .enable(SerializationFeature.INDENT_OUTPUT);
@@ -232,11 +238,12 @@ public class NsdController {
   }
 
   @PostMapping("/graph")
-  @Operation(responses = @ApiResponse(
-      responseCode = "200",
-      description = "A zip file containing the images (PNG) representing the NSD in input",
-      content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE),
-      headers = @Header(name = HttpHeaders.CONTENT_DISPOSITION)))
+  @Operation(description = "Generates PNG images to visualize the topology of a NSD",
+      responses = @ApiResponse(
+          responseCode = "200",
+          description = "A zip file containing the images (PNG) representing the NSD in input",
+          content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE),
+          headers = @Header(name = HttpHeaders.CONTENT_DISPOSITION)))
   public ResponseEntity<InputStreamResource> graph(@RequestBody @Valid Nsd nsd) {
     validate(nsd);
     List<File> graphs;
