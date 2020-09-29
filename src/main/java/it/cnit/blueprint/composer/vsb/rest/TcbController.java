@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
+import io.swagger.v3.oas.annotations.Operation;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.TestCaseBlueprint;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import javax.validation.Valid;
@@ -32,6 +33,7 @@ public class TcbController {
    * @return 200 if valid, 400 with validation errors if invalid
    */
   @PostMapping("/validate")
+  @Operation(description = "Validates a TcB")
   public void validate(@RequestBody @Valid TestCaseBlueprint tcb) {
     try {
       tcb.isValid();
@@ -42,6 +44,7 @@ public class TcbController {
   }
 
   @GetMapping("/schema")
+  @Operation(description = "Generates the JSON Schema for a TcB")
   public JsonSchema schema() {
     ObjectMapper J_OBJECT_MAPPER = new ObjectMapper(new JsonFactory())
         .enable(SerializationFeature.INDENT_OUTPUT);

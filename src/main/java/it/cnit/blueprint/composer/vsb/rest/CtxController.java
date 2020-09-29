@@ -6,6 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import it.cnit.blueprint.composer.commons.ZipService;
 import it.cnit.blueprint.composer.vsb.graph.VsbGraphService;
 import it.cnit.blueprint.composer.vsb.graph.VsbVertex;
@@ -20,7 +24,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,6 +52,7 @@ public class CtxController {
    * @return 200 if valid, 400 with validation errors if invalid
    */
   @PostMapping("/validate")
+  @Operation(description = "Validates a CtxB")
   public void validate(@RequestBody @Valid CtxBlueprint ctx) {
     try {
       ctx.isValid();
@@ -56,6 +63,7 @@ public class CtxController {
   }
 
   @GetMapping("/schema")
+  @Operation(description = "Generates the JSON Schema for a CtxB")
   public JsonSchema schema() {
     ObjectMapper J_OBJECT_MAPPER = new ObjectMapper(new JsonFactory())
         .enable(SerializationFeature.INDENT_OUTPUT);
@@ -67,6 +75,12 @@ public class CtxController {
   }
 
   @PostMapping("/graph")
+  @Operation(description = "Generates PNG images to visualize the topology of a CtxB",
+      responses = @ApiResponse(
+          responseCode = "200",
+          description = "A zip file containing the images (PNG) representing the CtxB in input",
+          content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE),
+          headers = @Header(name = HttpHeaders.CONTENT_DISPOSITION)))
   public ResponseEntity<InputStreamResource> graph(@RequestBody @Valid CtxBlueprint ctx) {
     validate(ctx);
     File tempFile;
