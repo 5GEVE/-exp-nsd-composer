@@ -39,7 +39,7 @@ public class ExpController {
     try {
       exp.isValid();
     } catch (MalformattedElementException e) {
-      log.debug("Invalid ExpBlueprint: " + e.getMessage());
+      log.warn("Invalid ExpBlueprint: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
@@ -50,6 +50,7 @@ public class ExpController {
     try {
       return new JsonSchemaGenerator(omService.createIndentNsdWriter()).generateSchema(Nsd.class);
     } catch (JsonMappingException e) {
+      log.error("Error generating JSON Schema: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }

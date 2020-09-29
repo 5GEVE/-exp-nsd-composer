@@ -39,7 +39,7 @@ public class TcbController {
     try {
       tcb.isValid();
     } catch (MalformattedElementException e) {
-      log.debug("Invalid TestCaseBlueprint: " + e.getMessage());
+      log.warn("Invalid TestCaseBlueprint: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
@@ -50,6 +50,7 @@ public class TcbController {
     try {
       return new JsonSchemaGenerator(omService.createIndentNsdWriter()).generateSchema(Nsd.class);
     } catch (JsonMappingException e) {
+      log.error("Error generating JSON Schema: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }

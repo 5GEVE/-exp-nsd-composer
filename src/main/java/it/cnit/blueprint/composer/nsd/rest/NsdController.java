@@ -88,25 +88,26 @@ public class NsdController {
           required = true))
   public Nsd generate(HttpEntity<String> httpEntity) {
     if (httpEntity.getBody() == null) {
-      log.debug("Empty body");
+      log.warn("Empty body");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Empty body");
     }
     Blueprint b;
     try {
       b = omService.createSafeBlueprintReader().readValue(httpEntity.getBody());
     } catch (IOException e) {
-      log.debug("Can not read JSON: " + e.getMessage());
+      log.error("Can not read JSON: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
     try {
       b.isValid();
     } catch (MalformattedElementException e) {
-      log.debug("Invalid Blueprint: " + e.getMessage());
+      log.warn("Invalid Blueprint: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
     try {
       return nsdGenerator.generate(b);
     } catch (NsdGenerationException e) {
+      log.error("Error generating NSD" + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -165,7 +166,7 @@ public class NsdController {
         } else if (ctxB.getCompositionStrategy().equals(CompositionStrategy.PASS_THROUGH)) {
           log.info("Strategy is PASS_THROUGH");
           if (ctxNsd.getVnfdId().size() == 1) {
-            log.debug("ctxNsd has only one vnfdId.");
+            log.info("ctxNsd has only one vnfdId.");
           } else {
             throw new ContextInvalidException("More than one VNFD ID found for PASS_THROUGH");
           }
@@ -175,14 +176,15 @@ public class NsdController {
           String m = MessageFormatter.format("Composition strategy {} not supported.",
               ctxB.getCompositionStrategy().name())
               .getMessage();
-          log.error(m);
           throw new ContextInvalidException(m);
         }
 
       }
     } catch (VsbInvalidException | NsdInvalidException | ContextInvalidException e) {
+      log.warn("Invalid element: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     } catch (NsdCompositionException e) {
+      log.error("Error composing NSD" + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
@@ -215,7 +217,7 @@ public class NsdController {
     try {
       nsd.isValid();
     } catch (MalformattedElementException e) {
-      log.debug("Invalid NSD: " + e.getMessage());
+      log.warn("Invalid NSD: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
@@ -226,6 +228,7 @@ public class NsdController {
     try {
       return new JsonSchemaGenerator(omService.createIndentNsdWriter()).generateSchema(Nsd.class);
     } catch (JsonMappingException e) {
+      log.error("Error generating JSON Schema: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -243,7 +246,7 @@ public class NsdController {
     try {
       graphs = nsdGraphService.writeImageFiles(nsd);
     } catch (NsdInvalidException e) {
-      log.error("Invalid NSD: " + e.getMessage());
+      log.warn("Invalid NSD: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     } catch (IOException e) {
       log.error("Can not write file: " + e.getMessage());
@@ -252,7 +255,7 @@ public class NsdController {
     try {
       return zipService.getZipResponse(graphs, true);
     } catch (IOException e) {
-      log.debug("Zip response error: " + e.getMessage());
+      log.error("Zip response error: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -316,7 +319,7 @@ public class NsdController {
       omService.createIndentNsdWriter().writeValue(nsdFile, nsd);
       files.add(nsdFile);
     } catch (NsdInvalidException e) {
-      log.error("Invalid NSD: " + e.getMessage());
+      log.warn("Invalid NSD: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     } catch (IOException e) {
       log.error("Can not write file: " + e.getMessage());
@@ -325,7 +328,7 @@ public class NsdController {
     try {
       return zipService.getZipResponse(files, true);
     } catch (IOException e) {
-      log.debug("Zip response error: " + e.getMessage());
+      log.error("Zip response error: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }

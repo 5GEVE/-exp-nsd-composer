@@ -68,7 +68,7 @@ public class VsbController {
     try {
       vsb.isValid();
     } catch (MalformattedElementException e) {
-      log.debug("Invalid VsBlueprint: " + e.getMessage());
+      log.warn("Invalid VsBlueprint: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
@@ -79,6 +79,7 @@ public class VsbController {
     try {
       return new JsonSchemaGenerator(omService.createIndentNsdWriter()).generateSchema(Nsd.class);
     } catch (JsonMappingException e) {
+      log.error("Error generating JSON Schema: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -102,7 +103,7 @@ public class VsbController {
     try {
       return zipService.getZipResponse(Collections.singletonList(tempFile), true);
     } catch (IOException e) {
-      log.debug("Zip response error: " + e.getMessage());
+      log.error("Zip response error: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
