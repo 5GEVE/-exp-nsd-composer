@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -49,7 +50,9 @@ import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -85,8 +88,8 @@ public class NsdController {
    */
   @PostMapping("/generate")
   @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "A VSB or CtxB in JSON format",
-      content = @Content(schema = @Schema(implementation = Blueprint.class))),
-      responses = @ApiResponse(description = "The generated NSD"))
+      content = @Content(schema = @Schema(implementation = Blueprint.class)),
+      required = true))
   public Nsd generate(HttpEntity<String> httpEntity) {
     if (httpEntity.getBody() == null) {
       log.debug("Empty body");
@@ -113,11 +116,23 @@ public class NsdController {
   }
 
   @PostMapping("/generate/details")
+  @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      description = "A VSB or CtxB in JSON format",
+      content = @Content(schema = @Schema(implementation = Blueprint.class)),
+      required = true),
+      responses = @ApiResponse(
+          responseCode = "200",
+          description = "A zip file containing the generated NSD (JSON) and the images representing it (PNG)",
+          content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE),
+          headers = @Header(name = HttpHeaders.CONTENT_DISPOSITION)))
   public ResponseEntity<InputStreamResource> generateDetails(HttpEntity<String> httpEntity) {
     return getDetailsResponse(generate(httpEntity));
   }
 
   @PostMapping("/compose")
+  @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      description = "Translation rules are ignored, leave them null",
+      required = true))
   public Nsd compose(@RequestBody @Valid ComposeRequest composeRequest) {
     VsBlueprint vsb = composeRequest.getVsbRequest().getVsBlueprint();
     vsbController.validate(vsb);
@@ -177,6 +192,13 @@ public class NsdController {
   }
 
   @PostMapping("/compose/details")
+  @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      description = "Translation rules are ignored, leave them null"),
+      responses = @ApiResponse(
+          responseCode = "200",
+          description = "A zip file containing the generated NSD (JSON) and the images representing it (PNG)",
+          content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE),
+          headers = @Header(name = HttpHeaders.CONTENT_DISPOSITION)))
   public ResponseEntity<InputStreamResource> composeDetails(
       @RequestBody @Valid ComposeRequest composeRequest) {
     return getDetailsResponse(compose(composeRequest));
@@ -210,6 +232,11 @@ public class NsdController {
   }
 
   @PostMapping("/graph")
+  @Operation(responses = @ApiResponse(
+      responseCode = "200",
+      description = "A zip file containing the images (PNG) representing the NSD in input",
+      content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE),
+      headers = @Header(name = HttpHeaders.CONTENT_DISPOSITION)))
   public ResponseEntity<InputStreamResource> graph(@RequestBody @Valid Nsd nsd) {
     validate(nsd);
     List<File> graphs;
