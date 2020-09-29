@@ -65,7 +65,7 @@ public class CtxController {
     try {
       return new JsonSchemaGenerator(omService.createIndentNsdWriter()).generateSchema(Nsd.class);
     } catch (JsonMappingException e) {
-      log.error("Error generating JSON Schema: " + e.getMessage());
+      log.error("Error generating JSON Schema", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -83,13 +83,13 @@ public class CtxController {
     try {
       tempFile = vsbGraphService.writeImageFile(ctx);
     } catch (IOException e) {
-      log.error("Can not write file: " + e.getMessage());
+      log.error("Can not write file", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
     try {
       return zipService.getZipResponse(Collections.singletonList(tempFile), true);
     } catch (IOException e) {
-      log.error("Zip response error: " + e.getMessage());
+      log.error("Zip response error", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }

@@ -50,7 +50,7 @@ public class TcbController {
     try {
       return new JsonSchemaGenerator(omService.createIndentNsdWriter()).generateSchema(Nsd.class);
     } catch (JsonMappingException e) {
-      log.error("Error generating JSON Schema: " + e.getMessage());
+      log.error("Error generating JSON Schema", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
