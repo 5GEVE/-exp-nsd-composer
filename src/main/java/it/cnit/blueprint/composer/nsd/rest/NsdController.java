@@ -9,6 +9,10 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import it.cnit.blueprint.composer.commons.ZipService;
 import it.cnit.blueprint.composer.exceptions.ContextInvalidException;
 import it.cnit.blueprint.composer.exceptions.NsdCompositionException;
@@ -80,6 +84,9 @@ public class NsdController {
    * @return The generated NSD
    */
   @PostMapping("/generate")
+  @Operation(requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "A VSB or CtxB in JSON format",
+      content = @Content(schema = @Schema(implementation = Blueprint.class))),
+      responses = @ApiResponse(description = "The generated NSD"))
   public Nsd generate(HttpEntity<String> httpEntity) {
     if (httpEntity.getBody() == null) {
       log.debug("Empty body");
