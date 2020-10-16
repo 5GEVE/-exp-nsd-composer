@@ -129,7 +129,7 @@ public class NsdGenerator {
         addressData.setAddressType(AddressType.IP_ADDRESS);
         addressData.setiPAddressType(IpVersion.IPv4);
         addressData.setiPAddressAssignment(false);
-        addressData.setFloatingIpActivated(true);
+        addressData.setFloatingIpActivated(false);
         addressData.setNumberOfIpAddress(1);
         if (e.isManagement()) {
           addressData.setManagement(true);
