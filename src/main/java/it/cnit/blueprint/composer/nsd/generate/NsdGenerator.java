@@ -131,6 +131,9 @@ public class NsdGenerator {
         addressData.setiPAddressAssignment(false);
         addressData.setFloatingIpActivated(true);
         addressData.setNumberOfIpAddress(1);
+        if (e.isManagement()) {
+          addressData.setManagement(true);
+        }
         sapd.setAddressData(Collections.singletonList(addressData));
 
         sapdList.add(sapd);
