@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import it.cnit.blueprint.composer.commons.ObjectMapperService;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.TestCaseBlueprint;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +47,8 @@ public class TcbController {
   @Operation(description = "Generates the JSON Schema for a TcB")
   public JsonSchema schema() {
     try {
-      return new JsonSchemaGenerator(omService.createIndentNsdWriter()).generateSchema(Nsd.class);
+      return new JsonSchemaGenerator(omService.createIndentNsdWriter())
+          .generateSchema(TestCaseBlueprint.class);
     } catch (JsonMappingException e) {
       log.error("Error generating JSON Schema", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

@@ -14,7 +14,6 @@ import it.cnit.blueprint.composer.vsb.graph.VsbGraphService;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
-import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -77,7 +76,8 @@ public class VsbController {
   @Operation(description = "Generates the JSON Schema for a VSB")
   public JsonSchema schema() {
     try {
-      return new JsonSchemaGenerator(omService.createIndentNsdWriter()).generateSchema(Nsd.class);
+      return new JsonSchemaGenerator(omService.createIndentNsdWriter())
+          .generateSchema(VsBlueprint.class);
     } catch (JsonMappingException e) {
       log.error("Error generating JSON Schema", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
