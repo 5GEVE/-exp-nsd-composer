@@ -217,10 +217,14 @@ public class NsdControllerTest {
         Collections.singletonList(delayNsd), null);
     Context delay = new Context(delayRequest, null);
 
-    CtxBlueprint trafficCtxB = YAML_OM
-        .readValue(new URL(urlProp.getProperty("ctx_smartcity_traffic")), CtxBlueprint.class);
-    Nsd trafficNsd = YAML_OM
-        .readValue(new URL(urlProp.getProperty("ctx_smartcity_traffic_nsd")), Nsd.class);
+    CtxBlueprint trafficCtxB ;
+    try (InputStream inNsd = getClass().getResourceAsStream("/ctx_smartcity_traffic.yaml")) {
+      trafficCtxB = YAML_OM.readValue(inNsd, CtxBlueprint.class);
+    }
+    Nsd trafficNsd;
+    try (InputStream inNsd = getClass().getResourceAsStream("/ctx_smartcity_traffic_nsd.yaml")) {
+      trafficNsd = YAML_OM.readValue(inNsd, Nsd.class);
+    }
     OnboardCtxBlueprintRequest trafficRequest = new OnboardCtxBlueprintRequest(trafficCtxB,
         Collections.singletonList(trafficNsd), null);
     Context traffic = new Context(trafficRequest, null);

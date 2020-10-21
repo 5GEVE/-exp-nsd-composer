@@ -26,6 +26,7 @@ import org.junit.Test;
 @Slf4j
 public class NsdGeneratorTest {
 
+  static ObjectMapper YAML_OM ;
   static Properties urlProp;
   static ObjectMapper oM;
   static VsbGraphService vsbGraphService;
@@ -45,6 +46,7 @@ public class NsdGeneratorTest {
     vsbService = new VsbService();
     nsdGenerator = new NsdGenerator(vsbService);
     vsbGraphService = new VsbGraphService();
+    YAML_OM = new ObjectMapper(new YAMLFactory());
   }
 
 
@@ -118,7 +120,10 @@ public class NsdGeneratorTest {
     log.debug("Graph AFTER generation:\n{}", nsdGraphService.export(nsdGraph));
 
     //Then
-    Nsd expectedNsd = oM.readValue(new URL(urlProp.getProperty("ctx_bg_traffic_nsds")), Nsd.class);
+    Nsd expectedNsd ;
+    try (InputStream inNsd = getClass().getResourceAsStream("/ctx_bg_traffic_nsds.yaml")) {
+      expectedNsd = YAML_OM.readValue(inNsd, Nsd.class);
+    }
     assertEquals(oM.writeValueAsString(expectedNsd), oM.writeValueAsString(actualNsd));
   }
 }

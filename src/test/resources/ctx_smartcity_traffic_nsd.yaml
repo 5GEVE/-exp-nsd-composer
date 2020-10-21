@@ -14,8 +14,8 @@ sapd:
     addressData:
       - addressType: "IP_ADDRESS"
         iPAddressAssignment: false
-        floatingIpActivated: true
-        management: false
+        floatingIpActivated: false
+        management: true
         iPAddressType: "IPv4"
         numberOfIpAddress: 1
     sapAddressAssignment: false
