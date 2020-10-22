@@ -78,9 +78,9 @@ public class TcbControllerTest {
 
   @Test
   @SneakyThrows
-  public void validate400() {
+  public void validate400Conf() {
     // Given
-    InputStream in = getClass().getResourceAsStream("/tcb_cnit_smart_city_1_param_error.yaml");
+    InputStream in = getClass().getResourceAsStream("/tcb_cnit_smart_city_1_param_error_conf.yaml");
     OnboardTestCaseBlueprintRequest tcb = YAML_OM
         .readValue(in, OnboardTestCaseBlueprintRequest.class);
 
@@ -95,6 +95,28 @@ public class TcbControllerTest {
     log.info(result.getResponse().getErrorMessage());
     assertThat(result.getResponse().getErrorMessage(),
         containsString("Parameter '$$pippo' in configurationScript is not declared"));
+    assertEquals(400, result.getResponse().getStatus());
+  }
+
+  @Test
+  @SneakyThrows
+  public void validate400Exec() {
+    // Given
+    InputStream in = getClass().getResourceAsStream("/tcb_cnit_smart_city_1_param_error_exec.yaml");
+    OnboardTestCaseBlueprintRequest tcb = YAML_OM
+        .readValue(in, OnboardTestCaseBlueprintRequest.class);
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/tcb/validate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(tcb)))
+        .andReturn();
+
+    // Then
+    log.info(result.getResponse().getErrorMessage());
+    assertThat(result.getResponse().getErrorMessage(),
+        containsString("Parameter '$$sleep$$wrong' in executionScript is not declared"));
     assertEquals(400, result.getResponse().getStatus());
   }
 

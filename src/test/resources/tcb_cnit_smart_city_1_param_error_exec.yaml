@@ -1,0 +1,27 @@
+# tcb_cnit_smartcity_1.yaml
+---
+testCaseBlueprint:
+  version: '1.0'
+  name: TCB CNIT SmartCity test case
+  description: Test case to run the CNIT SmartCity use case
+  # In configurationScript we setup the filebeat and run the metric collection
+  configurationScript:
+    EXECUTE_COMMAND 10.50.80.14 $$user:$$password sudo /opt/datashipper/add_input_config_cpu $$metric.topic.cpu_consumption_vis;
+    EXECUTE_COMMAND 10.50.80.40 $$user:$$password sudo /opt/datashipper/add_input_config_cpu $$metric.topic.cpu_consumption_mob;
+    EXECUTE_COMMAND 10.50.80.40 $$user:$$password sudo /opt/datashipper/add_input_config_ram $$metric.topic.memory_consumption_mob;
+    EXECUTE_COMMAND 10.50.80.40 $$user:$$password sudo /opt/datashipper/add_input_config_storage $$metric.topic.storage_consumption_mob;
+    EXECUTE_COMMAND 10.50.80.40 $$user:$$password sudo /opt/datashipper/add_input_config_scanner $$metric.topic.active_sensor_mob
+  executionScript:
+    SLEEP $$sleep$$wrong;
+    EXECUTE_COMMAND 10.50.80.40 $$user:$$password sudo rm /opt/datashipper/configs/*.yml;
+    EXECUTE_COMMAND 10.50.80.14 $$user:$$password sudo rm /opt/datashipper/configs/*.yml;
+  userParameters:
+    duration: $$sleep$$time
+    username: $$user
+    password: $$password
+  infrastructureParameters:
+    $$metric.topic.cpu_consumption_vis: ''
+    $$metric.topic.cpu_consumption_mob: ''
+    $$metric.topic.memory_consumption_mob: ''
+    $$metric.topic.storage_consumption_mob: ''
+    $$metric.topic.active_sensor_mob: ''
