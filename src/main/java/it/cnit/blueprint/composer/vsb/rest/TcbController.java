@@ -42,11 +42,22 @@ public class TcbController {
     try {
       tcbR.isValid();
       // Check params
-      Matcher m = paramPattern.matcher(tcbR.getTestCaseBlueprint().getConfigurationScript());
-      while (m.find()) {
-        if (!tcbR.getTestCaseBlueprint().getUserParameters().containsValue(m.group()) &&
-            !tcbR.getTestCaseBlueprint().getInfrastructureParameters().containsKey(m.group())) {
-          throw new MalformattedElementException("Parameter " + m.group() + " not declared");
+      Matcher mConf = paramPattern.matcher(tcbR.getTestCaseBlueprint().getConfigurationScript());
+      while (mConf.find()) {
+        String gr = mConf.group();
+        if (!tcbR.getTestCaseBlueprint().getUserParameters().containsValue(mConf.group()) &&
+            !tcbR.getTestCaseBlueprint().getInfrastructureParameters().containsKey(mConf.group())) {
+          throw new MalformattedElementException(
+              "Parameter '" + mConf.group() + "' in configurationScript is not declared");
+        }
+      }
+      Matcher mExec = paramPattern.matcher(tcbR.getTestCaseBlueprint().getExecutionScript());
+      while (mExec.find()) {
+        String gr = mExec.group();
+        if (!tcbR.getTestCaseBlueprint().getUserParameters().containsValue(mExec.group()) &&
+            !tcbR.getTestCaseBlueprint().getInfrastructureParameters().containsKey(mExec.group())) {
+          throw new MalformattedElementException(
+              "Parameter '" + mExec.group() + "' in executionScript is not declared");
         }
       }
     } catch (MalformattedElementException e) {
