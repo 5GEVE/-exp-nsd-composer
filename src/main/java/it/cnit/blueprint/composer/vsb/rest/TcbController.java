@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import io.swagger.v3.oas.annotations.Operation;
 import it.cnit.blueprint.composer.commons.ObjectMapperService;
-import it.nextworks.nfvmano.catalogue.blueprint.elements.TestCaseBlueprint;
+import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardTestCaseBlueprintRequest;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -29,14 +29,14 @@ public class TcbController {
   /**
    * Validate method. Serialization errors are handled by Spring
    *
-   * @param tcb object to validate
+   * @param tcbR object to validate
    * @return 200 if valid, 400 with validation errors if invalid
    */
   @PostMapping("/validate")
   @Operation(description = "Validates a TcB")
-  public void validate(@RequestBody @Valid TestCaseBlueprint tcb) {
+  public void validate(@RequestBody @Valid OnboardTestCaseBlueprintRequest tcbR) {
     try {
-      tcb.isValid();
+      tcbR.isValid();
     } catch (MalformattedElementException e) {
       log.warn("Invalid TestCaseBlueprint: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
@@ -48,7 +48,7 @@ public class TcbController {
   public JsonSchema schema() {
     try {
       return new JsonSchemaGenerator(omService.createIndentNsdWriter())
-          .generateSchema(TestCaseBlueprint.class);
+          .generateSchema(OnboardTestCaseBlueprintRequest.class);
     } catch (JsonMappingException e) {
       log.error("Error generating JSON Schema", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
