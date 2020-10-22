@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import it.cnit.blueprint.composer.commons.ObjectMapperService;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardTestCaseBlueprintRequest;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,8 @@ public class TcbController {
 
   private final ObjectMapperService omService;
 
+  private final Pattern paramPattern = Pattern.compile("\\$\\$([^$|^\\s|^:|^;]*)");
+
   /**
    * Validate method. Serialization errors are handled by Spring
    *
@@ -37,6 +41,14 @@ public class TcbController {
   public void validate(@RequestBody @Valid OnboardTestCaseBlueprintRequest tcbR) {
     try {
       tcbR.isValid();
+      // Check params
+      Matcher m = paramPattern.matcher(tcbR.getTestCaseBlueprint().getConfigurationScript());
+      while (m.find()) {
+        if (!tcbR.getTestCaseBlueprint().getUserParameters().containsValue(m.group()) &&
+            !tcbR.getTestCaseBlueprint().getInfrastructureParameters().containsKey(m.group())) {
+          throw new MalformattedElementException("Parameter " + m.group() + " not declared");
+        }
+      }
     } catch (MalformattedElementException e) {
       log.warn("Invalid TestCaseBlueprint: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
