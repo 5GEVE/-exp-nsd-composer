@@ -28,7 +28,7 @@ public class TcbController {
 
   private final ObjectMapperService omService;
 
-  private final Pattern paramPattern = Pattern.compile("\\$\\$([^$|^\\s|^:|^;]*)");
+  private final Pattern paramPattern = Pattern.compile("\\$\\$([^\\s|^:|^;]*)");
 
   /**
    * Validate method. Serialization errors are handled by Spring
