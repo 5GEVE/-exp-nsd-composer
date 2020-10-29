@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import it.cnit.blueprint.composer.commons.ObjectMapperService;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardTestCaseBlueprintRequest;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,8 @@ public class TcbController {
 
   private final ObjectMapperService omService;
 
+  private final Pattern paramPattern = Pattern.compile("\\$\\$([^\\s|^:|^;]*)");
+
   /**
    * Validate method. Serialization errors are handled by Spring
    *
@@ -37,6 +41,25 @@ public class TcbController {
   public void validate(@RequestBody @Valid OnboardTestCaseBlueprintRequest tcbR) {
     try {
       tcbR.isValid();
+      // Check params
+      Matcher mConf = paramPattern.matcher(tcbR.getTestCaseBlueprint().getConfigurationScript());
+      while (mConf.find()) {
+        String gr = mConf.group();
+        if (!tcbR.getTestCaseBlueprint().getUserParameters().containsValue(mConf.group()) &&
+            !tcbR.getTestCaseBlueprint().getInfrastructureParameters().containsKey(mConf.group())) {
+          throw new MalformattedElementException(
+              "Parameter '" + mConf.group() + "' in configurationScript is not declared");
+        }
+      }
+      Matcher mExec = paramPattern.matcher(tcbR.getTestCaseBlueprint().getExecutionScript());
+      while (mExec.find()) {
+        String gr = mExec.group();
+        if (!tcbR.getTestCaseBlueprint().getUserParameters().containsValue(mExec.group()) &&
+            !tcbR.getTestCaseBlueprint().getInfrastructureParameters().containsKey(mExec.group())) {
+          throw new MalformattedElementException(
+              "Parameter '" + mExec.group() + "' in executionScript is not declared");
+        }
+      }
     } catch (MalformattedElementException e) {
       log.warn("Invalid TestCaseBlueprint: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
