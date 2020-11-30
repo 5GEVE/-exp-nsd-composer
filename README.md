@@ -7,7 +7,7 @@ Docker images are available on [Docker Hub](https://hub.docker.com/r/mpergolesi/
 Run the application with:
 
 ```shell script
-docker run -p 8086:8086 -d mpergolesi/exp-nsd-composer
+docker run -p 8086:8086 -d mpergolesi/exp-nsd-composer:1.0.0
 ```
 
 Wait for the application to start, then test it with:
