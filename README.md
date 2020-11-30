@@ -3,20 +3,17 @@ A REST API module to compose experiment NSDs. It can also validate blueprints an
 
 ## Install
 
-Some dependencies are not available in Maven repository. Check `pom.xml`.
+Docker images are available on [Docker Hub](https://hub.docker.com/r/mpergolesi/exp-nsd-composer).
+Run the application with:
 
-Compile the project with:
-
+```shell script
+docker run -p 8086:8086 -d mpergolesi/exp-nsd-composer
 ```
-mvn clean package
-```
 
-We use Docker Compose for deployment. Run:
+Wait for the application to start, then test it with:
 
-```
-docker pull azul/zulu-openjdk-alpine:8-jre
-docker-compose build
-docker-compose up
+```shell script
+curl http://localhost:8086/vsb/schema
 ```
 
 ## OpenApi
@@ -25,6 +22,24 @@ Once running, you can get the OpenAPI specification by visiting (change host if 
 
 - http://localhost:8086/swagger-ui.html
 - http://localhost:8086/api-docs
+
+## Development
+
+Some dependencies are not available in Maven repository. Check `pom.xml`.
+
+Compile the project with:
+
+```
+mvn clean package
+```
+
+Build the Docker image with:
+
+```
+docker build --no-cache=true --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+    --build-arg BUILD_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) \
+    -t exp-nsd-composer:$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) .
+```
 
 ## Graph export for visualization
 
