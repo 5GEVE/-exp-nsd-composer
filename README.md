@@ -38,7 +38,7 @@ Build the Docker image with:
 ```
 docker build --no-cache=true --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
     --build-arg BUILD_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) \
-    -t exp-nsd-composer:$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) .
+    -t <your-repo>:exp-nsd-composer:$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) .
 ```
 
 ## Graph export for visualization
