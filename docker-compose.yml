@@ -1,7 +1,0 @@
-version: '3.7'
-services:
-  exp-nsd-composer:
-    build:
-      context: .
-    ports:
-      - 8086:8086

@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import it.cnit.blueprint.composer.nsd.graph.GraphVizExporter;
 import it.cnit.blueprint.composer.nsd.graph.NsdGraphService;
 import it.cnit.blueprint.composer.nsd.graph.ProfileVertex;
 import it.cnit.blueprint.composer.vsb.VsbService;
@@ -27,6 +26,7 @@ import org.junit.Test;
 @Slf4j
 public class NsdGeneratorTest {
 
+  static ObjectMapper YAML_OM ;
   static Properties urlProp;
   static ObjectMapper oM;
   static VsbGraphService vsbGraphService;
@@ -42,10 +42,11 @@ public class NsdGeneratorTest {
     InputStream input = ClassLoader.getSystemResourceAsStream("url.properties");
     urlProp.load(input);
     oM = new ObjectMapper(new YAMLFactory());
-    nsdGraphService = new NsdGraphService(new GraphVizExporter());
+    nsdGraphService = new NsdGraphService();
     vsbService = new VsbService();
     nsdGenerator = new NsdGenerator(vsbService);
     vsbGraphService = new VsbGraphService();
+    YAML_OM = new ObjectMapper(new YAMLFactory());
   }
 
 
@@ -119,7 +120,10 @@ public class NsdGeneratorTest {
     log.debug("Graph AFTER generation:\n{}", nsdGraphService.export(nsdGraph));
 
     //Then
-    Nsd expectedNsd = oM.readValue(new URL(urlProp.getProperty("ctx_bg_traffic_nsds")), Nsd.class);
+    Nsd expectedNsd ;
+    try (InputStream inNsd = getClass().getResourceAsStream("/ctx_bg_traffic_nsds.yaml")) {
+      expectedNsd = YAML_OM.readValue(inNsd, Nsd.class);
+    }
     assertEquals(oM.writeValueAsString(expectedNsd), oM.writeValueAsString(actualNsd));
   }
 }

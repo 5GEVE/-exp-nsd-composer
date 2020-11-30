@@ -104,8 +104,6 @@ public class CtxControllerTest {
 
     // Then
     assertEquals(200, result.getResponse().getStatus());
-    HashMap<String, String> resp = JSON_OM
-        .readValue(result.getResponse().getContentAsString(), HashMap.class);
-    assertTrue(resp.containsKey("graph"));
+    assertEquals("application/octet-stream", result.getResponse().getContentType());
   }
 }

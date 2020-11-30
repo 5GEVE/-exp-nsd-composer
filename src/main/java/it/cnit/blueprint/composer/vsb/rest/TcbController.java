@@ -1,50 +1,79 @@
 package it.cnit.blueprint.composer.vsb.rest;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
-import it.nextworks.nfvmano.catalogue.blueprint.elements.TestCaseBlueprint;
+import io.swagger.v3.oas.annotations.Operation;
+import it.cnit.blueprint.composer.commons.ObjectMapperService;
+import it.nextworks.nfvmano.catalogue.blueprint.messages.OnboardTestCaseBlueprintRequest;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @Slf4j
 @AllArgsConstructor
+@RequestMapping("/tcb")
 public class TcbController {
+
+  private final ObjectMapperService omService;
+
+  private final Pattern paramPattern = Pattern.compile("\\$\\$([^\\s|^:|^;]*)");
 
   /**
    * Validate method. Serialization errors are handled by Spring
    *
-   * @param tcb object to validate
+   * @param tcbR object to validate
    * @return 200 if valid, 400 with validation errors if invalid
    */
-  @PostMapping("/tcb/validate")
-  public void validate(@RequestBody TestCaseBlueprint tcb) {
+  @PostMapping("/validate")
+  @Operation(description = "Validates a TcB")
+  public void validate(@RequestBody @Valid OnboardTestCaseBlueprintRequest tcbR) {
     try {
-      tcb.isValid();
+      tcbR.isValid();
+      // Check params
+      Matcher mConf = paramPattern.matcher(tcbR.getTestCaseBlueprint().getConfigurationScript());
+      while (mConf.find()) {
+        String gr = mConf.group();
+        if (!tcbR.getTestCaseBlueprint().getUserParameters().containsValue(mConf.group()) &&
+            !tcbR.getTestCaseBlueprint().getInfrastructureParameters().containsKey(mConf.group())) {
+          throw new MalformattedElementException(
+              "Parameter '" + mConf.group() + "' in configurationScript is not declared");
+        }
+      }
+      Matcher mExec = paramPattern.matcher(tcbR.getTestCaseBlueprint().getExecutionScript());
+      while (mExec.find()) {
+        String gr = mExec.group();
+        if (!tcbR.getTestCaseBlueprint().getUserParameters().containsValue(mExec.group()) &&
+            !tcbR.getTestCaseBlueprint().getInfrastructureParameters().containsKey(mExec.group())) {
+          throw new MalformattedElementException(
+              "Parameter '" + mExec.group() + "' in executionScript is not declared");
+        }
+      }
     } catch (MalformattedElementException e) {
-      log.debug("Invalid TestCaseBlueprint: " + e.getMessage());
+      log.warn("Invalid TestCaseBlueprint: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
-  @GetMapping("/tcb/schema")
+  @GetMapping("/schema")
+  @Operation(description = "Generates the JSON Schema for a TcB")
   public JsonSchema schema() {
-    ObjectMapper J_OBJECT_MAPPER = new ObjectMapper(new JsonFactory())
-        .enable(SerializationFeature.INDENT_OUTPUT);
     try {
-      return new JsonSchemaGenerator(J_OBJECT_MAPPER).generateSchema(TestCaseBlueprint.class);
+      return new JsonSchemaGenerator(omService.createIndentNsdWriter())
+          .generateSchema(OnboardTestCaseBlueprintRequest.class);
     } catch (JsonMappingException e) {
+      log.error("Error generating JSON Schema", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }

@@ -1,0 +1,113 @@
+# ctx_bg_traffic_nsds.yaml
+---
+nsdIdentifier: "ctx_bg_traffic_nsd"
+designer: "NSD generator"
+version: "1.0"
+nsdName: "Context Blueprint Background Traffic NSD"
+nsdInvariantId: "ctx_bg_traffic_nsd"
+vnfdId:
+  - "bg_traffic_src"
+  - "bg_traffic_dst"
+sapd:
+  - cpdId: "sap_bg_mgmt"
+    layerProtocol: "IPV4"
+    cpRole: "ROOT"
+    addressData:
+      - addressType: "IP_ADDRESS"
+        iPAddressAssignment: false
+        floatingIpActivated: false
+        management: true
+        iPAddressType: "IPv4"
+        numberOfIpAddress: 1
+    sapAddressAssignment: false
+    nsVirtualLinkDescId: "vl_bg_traffic_mgmt"
+virtualLinkDesc:
+  - virtualLinkDescId: "vl_bg_traffic_data"
+    virtualLinkDescProvider: "NSD generator"
+    virtuaLinkDescVersion: "1.0"
+    connectivityType:
+      layerProtocol: "IPV4"
+      flowPattern: ""
+    virtualLinkDf:
+      - flavourId: "vl_bg_traffic_data_df"
+        serviceAvaibilityLevel: "LEVEL_1"
+  - virtualLinkDescId: "vl_bg_traffic_mgmt"
+    virtualLinkDescProvider: "NSD generator"
+    virtuaLinkDescVersion: "1.0"
+    connectivityType:
+      layerProtocol: "IPV4"
+      flowPattern: ""
+    virtualLinkDf:
+      - flavourId: "vl_bg_traffic_mgmt_df"
+        serviceAvaibilityLevel: "LEVEL_1"
+nsDf:
+  - nsDfId: "ctx_bg_traffic_df"
+    flavourKey: "ctx_bg_traffic_df_fk"
+    vnfProfile:
+      - vnfProfileId: "bg_traffic_src_vnfp"
+        vnfdId: "bg_traffic_src"
+        flavourId: "bg_traffic_src_vnf_df"
+        instantiationLevel: "bg_traffic_src_vnf_il"
+        minNumberOfInstances: 1
+        maxNumberOfInstances: 1
+        nsVirtualLinkConnectivity:
+          - virtualLinkProfileId: "vl_bg_traffic_data_vlp"
+            cpdId:
+              - "cp_bg_src_data"
+          - virtualLinkProfileId: "vl_bg_traffic_mgmt_vlp"
+            cpdId:
+              - "cp_bg_src_mgmt"
+      - vnfProfileId: "bg_traffic_dst_vnfp"
+        vnfdId: "bg_traffic_dst"
+        flavourId: "bg_traffic_dst_vnf_df"
+        instantiationLevel: "bg_traffic_dst_vnf_il"
+        minNumberOfInstances: 1
+        maxNumberOfInstances: 1
+        nsVirtualLinkConnectivity:
+          - virtualLinkProfileId: "vl_bg_traffic_data_vlp"
+            cpdId:
+              - "cp_bg_dst_data"
+          - virtualLinkProfileId: "vl_bg_traffic_mgmt_vlp"
+            cpdId:
+              - "cp_bg_dst_mgmt"
+    virtualLinkProfile:
+      - virtualLinkProfileId: "vl_bg_traffic_data_vlp"
+        virtualLinkDescId: "vl_bg_traffic_data"
+        flavourId: "vl_bg_traffic_data_df"
+        maxBitrateRequirements:
+          root: "1"
+          leaf: "1"
+        minBitrateRequirements:
+          root: "1"
+          leaf: "1"
+      - virtualLinkProfileId: "vl_bg_traffic_mgmt_vlp"
+        virtualLinkDescId: "vl_bg_traffic_mgmt"
+        flavourId: "vl_bg_traffic_mgmt_df"
+        maxBitrateRequirements:
+          root: "1"
+          leaf: "1"
+        minBitrateRequirements:
+          root: "1"
+          leaf: "1"
+    nsInstantiationLevel:
+      - nsLevelId: "ctx_bg_traffic_il_default"
+        description: "Default Instantiation Level"
+        vnfToLevelMapping:
+          - vnfProfileId: "bg_traffic_src_vnfp"
+            numberOfInstances: 1
+          - vnfProfileId: "bg_traffic_dst_vnfp"
+            numberOfInstances: 1
+        virtualLinkToLevelMapping:
+          - virtualLinkProfileId: "vl_bg_traffic_data_vlp"
+            bitRateRequirements:
+              root: "1"
+              leaf: "1"
+          - virtualLinkProfileId: "vl_bg_traffic_mgmt_vlp"
+            bitRateRequirements:
+              root: "1"
+              leaf: "1"
+    defaultNsInstantiationLevelId: "ctx_bg_traffic_il_default"
+security:
+  signature: "FC_NSD_SIGNATURE"
+  algorithm: "FC_NSD_ALGORITHM"
+  certificate: "FC_NSD_CERTIFICATE"
