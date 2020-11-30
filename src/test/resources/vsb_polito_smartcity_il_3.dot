@@ -1,5 +1,7 @@
 strict graph G {
-  splines=false;
+  nodesep=1;
+  ranksep=3;
+  splines=true;
   overlap=false;
   mindist=0.5;
   11668654 [ label="mobility_tracker_vnfp_0" shape="box" style="filled" fillcolor="#d5e8d4" color="#82b366" ];
@@ -13,19 +15,19 @@ strict graph G {
   -1875336892 [ label="sap_tracker_m2m" shape="circle" style="filled" fillcolor="#ffe6cc" color="#d79b00" fixedsize="true" ];
   585344071 [ label="sap_vis_user" shape="circle" style="filled" fillcolor="#ffe6cc" color="#d79b00" fixedsize="true" ];
   -1138619427 [ label="sap_vsb_polito_smartcity_mgmt" shape="circle" style="filled" fillcolor="#ffe6cc" color="#d79b00" fixedsize="true" ];
-  11668654 -- -2044242552 [ label="mobility_tracker_vnfp_0_cp_tracker_ext_mobile" ];
-  11668654 -- 373603257 [ label="mobility_tracker_vnfp_0_cp_tracker_data" ];
-  11668654 -- -756779796 [ label="mobility_tracker_vnfp_0_cp_tracker_mgmt" ];
-  11668655 -- -2044242552 [ label="mobility_tracker_vnfp_1_cp_tracker_ext_mobile" ];
-  11668655 -- 373603257 [ label="mobility_tracker_vnfp_1_cp_tracker_data" ];
-  11668655 -- -756779796 [ label="mobility_tracker_vnfp_1_cp_tracker_mgmt" ];
-  11668656 -- -2044242552 [ label="mobility_tracker_vnfp_2_cp_tracker_ext_mobile" ];
-  11668656 -- 373603257 [ label="mobility_tracker_vnfp_2_cp_tracker_data" ];
-  11668656 -- -756779796 [ label="mobility_tracker_vnfp_2_cp_tracker_mgmt" ];
-  2046195359 -- 373603257 [ label="visualization_tool_vnfp_0_cp_vis_data" ];
-  2046195359 -- -756779796 [ label="visualization_tool_vnfp_0_cp_vis_mgmt" ];
-  2046195359 -- -1681932454 [ label="visualization_tool_vnfp_0_cp_vis_user" ];
-  -1875336892 -- -2044242552 [ label="" ];
-  585344071 -- -1681932454 [ label="" ];
-  -1138619427 -- -756779796 [ label="" ];
+  11668654 -- -2044242552 [ label="mobility_tracker_vnfp_0_cp_tracker_ext_mobile" color="#8f8f8f" style="bold" ];
+  11668654 -- 373603257 [ label="mobility_tracker_vnfp_0_cp_tracker_data" color="#8f8f8f" style="bold" ];
+  11668654 -- -756779796 [ label="mobility_tracker_vnfp_0_cp_tracker_mgmt" color="#8f8f8f" style="bold" ];
+  11668655 -- -2044242552 [ label="mobility_tracker_vnfp_1_cp_tracker_ext_mobile" color="#8f8f8f" style="bold" ];
+  11668655 -- 373603257 [ label="mobility_tracker_vnfp_1_cp_tracker_data" color="#8f8f8f" style="bold" ];
+  11668655 -- -756779796 [ label="mobility_tracker_vnfp_1_cp_tracker_mgmt" color="#8f8f8f" style="bold" ];
+  11668656 -- -2044242552 [ label="mobility_tracker_vnfp_2_cp_tracker_ext_mobile" color="#8f8f8f" style="bold" ];
+  11668656 -- 373603257 [ label="mobility_tracker_vnfp_2_cp_tracker_data" color="#8f8f8f" style="bold" ];
+  11668656 -- -756779796 [ label="mobility_tracker_vnfp_2_cp_tracker_mgmt" color="#8f8f8f" style="bold" ];
+  2046195359 -- 373603257 [ label="visualization_tool_vnfp_0_cp_vis_data" color="#8f8f8f" style="bold" ];
+  2046195359 -- -756779796 [ label="visualization_tool_vnfp_0_cp_vis_mgmt" color="#8f8f8f" style="bold" ];
+  2046195359 -- -1681932454 [ label="visualization_tool_vnfp_0_cp_vis_user" color="#8f8f8f" style="bold" ];
+  -1875336892 -- -2044242552 [ label="" color="#8f8f8f" style="bold" ];
+  585344071 -- -1681932454 [ label="" color="#8f8f8f" style="bold" ];
+  -1138619427 -- -756779796 [ label="" color="#8f8f8f" style="bold" ];
 }

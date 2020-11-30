@@ -60,7 +60,7 @@ public class NsdControllerTest {
 
   @Test
   @SneakyThrows
-  public void generate() {
+  public void generateFromVsb() {
     // Given
     VsBlueprint vsb;
     try (InputStream inVsb = getClass().getResourceAsStream("/vsb_polito_smartcity_nomgmt.yml")) {
@@ -75,10 +75,57 @@ public class NsdControllerTest {
         .andReturn();
 
     // Then
+    log.info(result.getResponse().getContentAsString());
     assertEquals(200, result.getResponse().getStatus());
     Nsd actualNsd = JSON_OM.readValue(result.getResponse().getContentAsString(), Nsd.class);
     Nsd expectedNsd;
     try (InputStream inNsd = getClass().getResourceAsStream("/vsb_polito_smartcity_nsd.yaml")) {
+      expectedNsd = YAML_OM.readValue(inNsd, Nsd.class);
+    }
+    assertEquals(YAML_OM.writeValueAsString(expectedNsd), YAML_OM.writeValueAsString(actualNsd));
+  }
+
+  @Test
+  @SneakyThrows
+  public void generateDetailsFromVsb() {
+    // Given
+    VsBlueprint vsb;
+    try (InputStream inVsb = getClass().getResourceAsStream("/vsb_polito_smartcity_nomgmt.yml")) {
+      vsb = YAML_OM.readValue(inVsb, VsBlueprint.class);
+    }
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/generate/details")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(vsb)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+    assertEquals("application/octet-stream", result.getResponse().getContentType());
+  }
+
+  @Test
+  @SneakyThrows
+  public void generateFromCtx() {
+    // Given
+    CtxBlueprint ctx = YAML_OM
+        .readValue(new URL(urlProp.getProperty("ctx_smartcity_traffic")), CtxBlueprint.class);
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/generate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(ctx)))
+        .andReturn();
+
+    // Then
+    log.info(result.getResponse().getContentAsString());
+    assertEquals(200, result.getResponse().getStatus());
+    Nsd actualNsd = JSON_OM.readValue(result.getResponse().getContentAsString(), Nsd.class);
+    Nsd expectedNsd;
+    try (InputStream inNsd = getClass().getResourceAsStream("/ctx_smartcity_traffic_nsd.yaml")) {
       expectedNsd = YAML_OM.readValue(inNsd, Nsd.class);
     }
     assertEquals(YAML_OM.writeValueAsString(expectedNsd), YAML_OM.writeValueAsString(actualNsd));
@@ -170,10 +217,14 @@ public class NsdControllerTest {
         Collections.singletonList(delayNsd), null);
     Context delay = new Context(delayRequest, null);
 
-    CtxBlueprint trafficCtxB = YAML_OM
-        .readValue(new URL(urlProp.getProperty("ctx_smartcity_traffic")), CtxBlueprint.class);
-    Nsd trafficNsd = YAML_OM
-        .readValue(new URL(urlProp.getProperty("ctx_smartcity_traffic_nsd")), Nsd.class);
+    CtxBlueprint trafficCtxB ;
+    try (InputStream inNsd = getClass().getResourceAsStream("/ctx_smartcity_traffic.yaml")) {
+      trafficCtxB = YAML_OM.readValue(inNsd, CtxBlueprint.class);
+    }
+    Nsd trafficNsd;
+    try (InputStream inNsd = getClass().getResourceAsStream("/ctx_smartcity_traffic_nsd.yaml")) {
+      trafficNsd = YAML_OM.readValue(inNsd, Nsd.class);
+    }
     OnboardCtxBlueprintRequest trafficRequest = new OnboardCtxBlueprintRequest(trafficCtxB,
         Collections.singletonList(trafficNsd), null);
     Context traffic = new Context(trafficRequest, null);
@@ -233,6 +284,24 @@ public class NsdControllerTest {
 
   @Test
   @SneakyThrows
+  public void composeDetailsPolito200() {
+    // Given
+    ComposeRequest request = getPolitoRequest();
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/nsd/compose/details")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(request)))
+        .andReturn();
+
+    // Then
+    assertEquals(200, result.getResponse().getStatus());
+    assertEquals("application/octet-stream", result.getResponse().getContentType());
+  }
+
+  @Test
+  @SneakyThrows
   public void compose400Wrong() {
     // Given
     ComposeRequest request = getAres2TRequest();
@@ -242,10 +311,11 @@ public class NsdControllerTest {
     MvcResult result = mvc.perform(
         MockMvcRequestBuilders.post("/nsd/compose")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(JSON_OM.writeValueAsString(request.getVsbRequest())))
+            .content(JSON_OM.writeValueAsString(request.getVsbRequest().getVsBlueprint())))
         .andReturn();
 
     // Then
+    log.info(result.getResponse().getContentAsString());
     assertEquals(400, result.getResponse().getStatus());
     if (result.getResolvedException() != null) {
       log.info("Error message: {}", result.getResolvedException().getMessage());
@@ -363,6 +433,6 @@ public class NsdControllerTest {
 
     // Then
     assertEquals(200, result.getResponse().getStatus());
-    JSON_OM.readValue(result.getResponse().getContentAsString(), GraphResponse[].class);
+    assertEquals("application/octet-stream", result.getResponse().getContentType());
   }
 }

@@ -6,7 +6,9 @@ import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import it.cnit.blueprint.composer.CompareImages;
 import it.nextworks.nfvmano.libs.ifa.descriptors.nsd.Nsd;
+import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +16,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
+import javax.imageio.ImageIO;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
@@ -35,7 +38,7 @@ public class NsdGraphServiceTest {
     InputStream input = ClassLoader.getSystemResourceAsStream("url.properties");
     prop.load(input);
     oM = new ObjectMapper(new YAMLFactory());
-    nsdGraphService = new NsdGraphService(new GraphVizExporter());
+    nsdGraphService = new NsdGraphService();
   }
 
   @Test
@@ -58,6 +61,21 @@ public class NsdGraphServiceTest {
       expected = scanner.useDelimiter("\\A").next();
     }
     assertEquals(expected, actual);
+  }
+
+  @Test
+  @SneakyThrows
+  public void writeImageFiles() {
+    // Given
+    Nsd nsd = oM.readValue(new URL(prop.getProperty("vsb_ares2t_tracker_nsds")), Nsd.class);
+    String nsLevel = "ns_ares2t_tracker_il_big";
+
+    // When
+    BufferedImage actual = ImageIO.read(nsdGraphService.writeImageFiles(nsd).get(0));
+
+    // Then
+    BufferedImage expected = ImageIO.read(getClass().getResourceAsStream("/ares2tTrackerBig.png"));
+    assertTrue(CompareImages.compare(expected, actual));
   }
 
   @Test
@@ -182,11 +200,12 @@ public class NsdGraphServiceTest {
     // Get the first vertex and remove its edges
     ProfileVertex v = g.vertexSet().iterator().next();
     Set<String> edges = new HashSet<>(g.edgesOf(v));
-    for (String e: edges){
+    for (String e : edges) {
       g.removeEdge(e);
     }
 
     // Then
     assertFalse(nsdGraphService.isConnected(g));
   }
+
 }

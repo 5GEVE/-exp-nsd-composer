@@ -1,16 +1,20 @@
 package it.cnit.blueprint.composer.vsb.graph;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import it.cnit.blueprint.composer.CompareImages;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
+import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.Scanner;
+import javax.imageio.ImageIO;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
@@ -88,4 +92,18 @@ public class VsbGraphServiceTest {
     assertEquals(expected, actual);
   }
 
+  @Test
+  @SneakyThrows
+  public void writeImageFile() {
+    // Given
+    Blueprint b = oM
+        .readValue(new URL(prop.getProperty("vsb_polito_smartcity")), VsBlueprint.class);
+
+    // When
+    BufferedImage actual = ImageIO.read(vsbGraphService.writeImageFile(b));
+
+    // Then
+    BufferedImage expected = ImageIO.read(getClass().getResourceAsStream("/vsb_polito_smartcity.png"));
+    assertTrue(CompareImages.compare(expected, actual));
+  }
 }

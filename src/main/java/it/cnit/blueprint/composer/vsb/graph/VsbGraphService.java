@@ -1,11 +1,16 @@
 package it.cnit.blueprint.composer.vsb.graph;
 
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsComponent;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
+import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -106,23 +111,31 @@ public class VsbGraphService {
       }
       return map;
     };
-    ComponentNameProvider<String> edgeProvider = new ComponentNameProvider<String>() {
-      @Override
-      public String getName(String component) {
-        if (component.toLowerCase().contains("sap")) {
-          return "";
-        } else {
-          return component;
-        }
+    ComponentNameProvider<String> edgeProvider = component -> {
+      if (component.toLowerCase().contains("sap")) {
+        return "";
+      } else {
+        return component;
       }
+    };
+    ComponentAttributeProvider<String> edgeAttributeProvider = v -> {
+      Map<String, Attribute> map = new LinkedHashMap<>();
+      map.put("color", DefaultAttribute.createAttribute("#8f8f8f"));
+      map.put("style", DefaultAttribute.createAttribute("bold"));
+      return map;
     };
     DOTExporter<VsbVertex, String> exporter = new DOTExporter<>(
         vertexIdProvider,
         vertexLabelProvider,
         edgeProvider,
         vertexAttributeProvider,
-        null);
-    exporter.putGraphAttribute("splines", "false");
+        edgeAttributeProvider);
+    // This controls width
+    exporter.putGraphAttribute("nodesep", "1");
+    // This controls height
+    exporter.putGraphAttribute("ranksep", "3");
+    // Curved edges (better space for labels)
+    exporter.putGraphAttribute("splines", "true");
     exporter.putGraphAttribute("overlap", "false");
     exporter.putGraphAttribute("mindist", "0.5");
     Writer writer = new StringWriter();
@@ -133,6 +146,13 @@ public class VsbGraphService {
   public boolean isConnected(Graph<VsbVertex, String> g) {
     ConnectivityInspector<VsbVertex, String> inspector = new ConnectivityInspector<>(g);
     return inspector.isConnected();
+  }
+
+  public File writeImageFile(Blueprint b) throws IOException {
+    File tempFile = Files.createTempFile(b.getBlueprintId() + "-", ".png").toFile();
+    String dotGraph = export(buildGraph(b));
+    Graphviz.fromString(dotGraph).width(1920).render(Format.PNG).toFile(tempFile);
+    return tempFile;
   }
 }
 
