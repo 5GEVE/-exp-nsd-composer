@@ -82,7 +82,7 @@ public class NsdController {
    * @return The generated NSD
    */
   @PostMapping("/generate")
-  @Operation(description = "Generates a NSD from a VSB",
+  @Operation(description = "Generates a NSD from a VSB or CtxB",
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "A VSB or CtxB in JSON format",
           content = @Content(schema = @Schema(implementation = Blueprint.class)),
           required = true))
