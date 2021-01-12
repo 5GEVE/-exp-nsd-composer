@@ -1,6 +1,7 @@
 package it.cnit.blueprint.composer.vsb;
 
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.SliceServiceType;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import java.util.List;
@@ -19,7 +20,9 @@ public class VsbService {
         "sap_" + b.getBlueprintId() + "_mgmt",
         true,
         true,
-        false
+        false,
+        null,
+        null
     );
     b.getEndPoints().add(mgmtSap);
     List<String> mgmtEps = b.getEndPoints().stream()

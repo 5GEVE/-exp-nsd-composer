@@ -47,7 +47,9 @@ public class TranslationRulesComposer {
         log.error(m);
         throw new TransRuleInvalidException(m);
       }
-      VsdNsdTranslationRule newTr = new VsdNsdTranslationRule(tr.getInput(),
+      VsdNsdTranslationRule newTr = new VsdNsdTranslationRule(
+          tr.getInput(),
+          null,
           expNsd.getNsdIdentifier(), expNsd.getVersion(), tr.getNsFlavourId(),
           tr.getNsInstantiationLevelId());
       try {
