@@ -1,7 +1,6 @@
 package it.cnit.blueprint.composer.vsb.rest;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +10,6 @@ import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.CtxBlueprint;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Properties;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

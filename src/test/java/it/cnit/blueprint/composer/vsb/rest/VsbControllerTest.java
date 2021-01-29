@@ -12,7 +12,6 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Properties;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

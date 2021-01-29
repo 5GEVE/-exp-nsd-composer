@@ -1,7 +1,6 @@
 package it.cnit.blueprint.composer.vsb;
 
 import it.nextworks.nfvmano.catalogue.blueprint.elements.Blueprint;
-import it.nextworks.nfvmano.catalogue.blueprint.elements.SliceServiceType;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbEndpoint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsbLink;
 import java.util.List;
