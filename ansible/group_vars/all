@@ -1,0 +1,7 @@
+---
+
+enc_home: /home/ubuntu/SoftwareInTheJAR/ENC
+enc_artifact_name: composer-1.0.5.jar
+
+enc_server_port: 8086
+enc_prefix_path: /portal/enc

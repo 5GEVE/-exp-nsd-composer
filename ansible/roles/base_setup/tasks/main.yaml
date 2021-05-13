@@ -1,0 +1,19 @@
+---
+- name: Create artifact directory if not exists
+  file:
+    path: '{{ enc_home }}'
+    recurse: yes
+    state: directory
+    owner: '{{ enc_user }}'
+    group: '{{ enc_user }}'
+    mode: "0755"
+
+- name: Upload the jar artifact
+  copy:
+    src: '{{ enc_artifact_name }}'
+    dest: '{{ enc_home }}'
+
+- name: Create application.properties
+  template:
+    src: application.properties.j2
+    dest: "{{ enc_home }}/application.properties"
