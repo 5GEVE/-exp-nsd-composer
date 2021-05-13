@@ -2,6 +2,13 @@
 .idea/
 *.iml
 
+#vscode
+.classpath
+.factorypath
+.project
+.vscode/
+.settings/
+
 # Maven
 target/
 pom.xml.tag

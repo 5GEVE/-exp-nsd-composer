@@ -78,6 +78,28 @@ public class TcbControllerTest {
 
   @Test
   @SneakyThrows
+  public void validate200WithoutConfig() {
+    // Given
+    InputStream in = getClass().getResourceAsStream("/tcb_cnit_smart_city_1_no_config_script.yaml");
+    OnboardTestCaseBlueprintRequest tcb = YAML_OM
+        .readValue(in, OnboardTestCaseBlueprintRequest.class);
+
+    // When
+    MvcResult result = mvc.perform(
+        MockMvcRequestBuilders.post("/tcb/validate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(JSON_OM.writeValueAsString(tcb)))
+        .andReturn();
+
+    // Then
+    if (result.getResponse().getErrorMessage() != null) {
+      log.error(result.getResponse().getErrorMessage());
+    }
+    assertEquals(200, result.getResponse().getStatus());
+  }
+
+  @Test
+  @SneakyThrows
   public void validate400Conf() {
     // Given
     InputStream in = getClass().getResourceAsStream("/tcb_cnit_smart_city_1_param_error_conf.yaml");
