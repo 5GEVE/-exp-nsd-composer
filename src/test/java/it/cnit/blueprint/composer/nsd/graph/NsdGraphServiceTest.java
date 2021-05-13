@@ -21,6 +21,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 @Slf4j
@@ -63,6 +64,7 @@ public class NsdGraphServiceTest {
     assertEquals(expected, actual);
   }
 
+  @Ignore
   @Test
   @SneakyThrows
   public void writeImageFiles() {
