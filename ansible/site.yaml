@@ -1,0 +1,9 @@
+---
+- name: Install ENC
+  hosts: all
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+
+  roles:
+    - base_setup
